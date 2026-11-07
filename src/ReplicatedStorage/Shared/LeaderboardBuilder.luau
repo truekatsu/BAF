@@ -467,7 +467,7 @@ function LeaderboardBuilder.buildLeaderboard(
 	headerTitle.Position = UDim2.new(0.02, 0, 0.05, 0)
 	headerTitle.BackgroundTransparency = 1
 	headerTitle.Font = Enum.Font.FredokaOne
-	headerTitle.Text = `👑  {def.title}`
+	headerTitle.Text = `{def.titleIcon or "👑"}  {def.title}`
 	headerTitle.TextColor3 = p.White
 	headerTitle.TextScaled = true
 	headerTitle.Parent = headerContainer
@@ -855,6 +855,150 @@ function LeaderboardBuilder.buildJumbotron(screenCF: CFrame, parent: Instance): 
 
 	makeFootball(jModel, "Football_JumbotronL", 3.2, screenCF * CFrame.new(-18.0, 11.85, 0.0))
 	makeFootball(jModel, "Football_JumbotronR", 3.2, screenCF * CFrame.new(18.0, 11.85, 0.0))
+
+	local sg = Instance.new("SurfaceGui")
+	sg.Name = "JumbotronGui"
+	sg.Face = Enum.NormalId.Front
+	sg.LightInfluence = 0
+	sg.AlwaysOnTop = false
+	sg.MaxDistance = 150
+	sg.SizingMode = Enum.SurfaceGuiSizingMode.PixelsPerStud
+	sg.PixelsPerStud = 50
+	sg.Parent = screen
+
+	local root = Instance.new("Frame")
+	root.Name = "Root"
+	root.Size = UDim2.fromScale(1, 1)
+	root.BackgroundColor3 = p.NavyScreen
+	root.BorderSizePixel = 0
+	root.ClipsDescendants = true
+	root.Parent = sg
+
+	local function populateSocialPanel(panel: Frame, headerText: string, nameText: string, scoreText: string, badgeText: string, badgeColor: Color3)
+		local headerFrame = Instance.new("Frame")
+		headerFrame.Name = "HeaderFrame"
+		headerFrame.Size = UDim2.new(1, 0, 0.16, 0)
+		headerFrame.BackgroundColor3 = p.RoyalBlue
+		headerFrame.BorderSizePixel = 0
+		headerFrame.Parent = panel
+		local hfc = Instance.new("UICorner")
+		hfc.CornerRadius = UDim.new(0, 14)
+		hfc.Parent = headerFrame
+
+		local headerLbl = Instance.new("TextLabel")
+		headerLbl.Name = "HeaderLabel"
+		headerLbl.Size = UDim2.new(0.96, 0, 0.84, 0)
+		headerLbl.Position = UDim2.new(0.02, 0, 0.08, 0)
+		headerLbl.BackgroundTransparency = 1
+		headerLbl.Font = Enum.Font.FredokaOne
+		headerLbl.Text = headerText
+		headerLbl.TextColor3 = p.Gold
+		headerLbl.TextStrokeColor3 = Color3.new(0, 0, 0)
+		headerLbl.TextStrokeTransparency = 0
+		headerLbl.TextScaled = true
+		headerLbl.Parent = headerFrame
+
+		local winnerContent = Instance.new("Frame")
+		winnerContent.Name = "WinnerContent"
+		winnerContent.Size = UDim2.new(0.92, 0, 0.77, 0)
+		winnerContent.Position = UDim2.new(0.04, 0, 0.19, 0)
+		winnerContent.BackgroundColor3 = p.NavyScreen
+		winnerContent.BorderSizePixel = 0
+		winnerContent.Parent = panel
+		local wcc = Instance.new("UICorner")
+		wcc.CornerRadius = UDim.new(0, 14)
+		wcc.Parent = winnerContent
+		local wcs = Instance.new("UIStroke")
+		wcs.Color = p.Gold
+		wcs.Thickness = 2
+		wcs.Parent = winnerContent
+
+		local avatarImg = Instance.new("ImageLabel")
+		avatarImg.Name = "AvatarImage"
+		avatarImg.AnchorPoint = Vector2.new(0, 0.5)
+		avatarImg.Size = UDim2.new(0.28, 0, 0.70, 0)
+		avatarImg.Position = UDim2.new(0.05, 0, 0.5, 0)
+		avatarImg.BackgroundColor3 = Color3.fromHex("#1B223C")
+		avatarImg.BorderSizePixel = 0
+		avatarImg.ScaleType = Enum.ScaleType.Fit
+		avatarImg.Image = ""
+		avatarImg.Parent = winnerContent
+		local aic = Instance.new("UICorner")
+		aic.CornerRadius = UDim.new(1, 0)
+		aic.Parent = avatarImg
+		local aar = Instance.new("UIAspectRatioConstraint")
+		aar.AspectRatio = 1
+		aar.Parent = avatarImg
+
+		local winnerName = Instance.new("TextLabel")
+		winnerName.Name = "WinnerName"
+		winnerName.Size = UDim2.new(0.60, 0, 0.32, 0)
+		winnerName.Position = UDim2.new(0.36, 0, 0.12, 0)
+		winnerName.BackgroundTransparency = 1
+		winnerName.Font = Enum.Font.FredokaOne
+		winnerName.TextColor3 = p.White
+		winnerName.TextStrokeColor3 = Color3.new(0, 0, 0)
+		winnerName.TextStrokeTransparency = 0
+		winnerName.TextXAlignment = Enum.TextXAlignment.Left
+		winnerName.TextScaled = true
+		winnerName.Text = nameText
+		winnerName.Parent = winnerContent
+
+		local wonScore = Instance.new("TextLabel")
+		wonScore.Name = "WonScore"
+		wonScore.Size = UDim2.new(0.60, 0, 0.25, 0)
+		wonScore.Position = UDim2.new(0.36, 0, 0.44, 0)
+		wonScore.BackgroundTransparency = 1
+		wonScore.Font = Enum.Font.FredokaOne
+		wonScore.TextColor3 = p.Gold
+		wonScore.TextStrokeColor3 = Color3.new(0, 0, 0)
+		wonScore.TextStrokeTransparency = 0
+		wonScore.TextXAlignment = Enum.TextXAlignment.Left
+		wonScore.TextScaled = true
+		wonScore.Text = scoreText
+		wonScore.Parent = winnerContent
+
+		local gradeBadge = Instance.new("Frame")
+		gradeBadge.Name = "GradeBadge"
+		gradeBadge.Size = UDim2.new(0.40, 0, 0.20, 0)
+		gradeBadge.Position = UDim2.new(0.36, 0, 0.72, 0)
+		gradeBadge.BackgroundColor3 = badgeColor
+		gradeBadge.BorderSizePixel = 0
+		gradeBadge.Visible = (#badgeText > 0)
+		gradeBadge.Parent = winnerContent
+		local gbc = Instance.new("UICorner")
+		gbc.CornerRadius = UDim.new(0.4, 0)
+		gbc.Parent = gradeBadge
+
+		local gradeLbl = Instance.new("TextLabel")
+		gradeLbl.Name = "GradeLabel"
+		gradeLbl.Size = UDim2.fromScale(1, 1)
+		gradeLbl.BackgroundTransparency = 1
+		gradeLbl.Font = Enum.Font.FredokaOne
+		gradeLbl.TextColor3 = Color3.fromRGB(255, 255, 255)
+		gradeLbl.TextStrokeTransparency = 0.5
+		gradeLbl.TextScaled = true
+		gradeLbl.Text = badgeText
+		gradeLbl.Parent = gradeBadge
+	end
+
+	local leftPanel = Instance.new("Frame")
+	leftPanel.Name = "LeftPanel"
+	leftPanel.Size = UDim2.new(0.31, 0, 0.78, 0)
+	leftPanel.Position = UDim2.new(0.015, 0, 0.02, 0)
+	leftPanel.BackgroundColor3 = p.NavyScreenAlt
+	leftPanel.BorderSizePixel = 0
+	leftPanel.Parent = root
+	populateSocialPanel(leftPanel, "🏆 LATEST WINNER", "EMPTY", "---", "", Color3.fromHex("#E5252A"))
+
+	local centerPanel = Instance.new("Frame")
+	centerPanel.Name = "CenterPanel"
+	centerPanel.Size = UDim2.new(0.36, 0, 0.78, 0)
+	centerPanel.Position = UDim2.new(0.335, 0, 0.02, 0)
+	centerPanel.BackgroundColor3 = p.NavyScreenAlt
+	centerPanel.BorderSizePixel = 0
+	centerPanel.Parent = root
+	populateSocialPanel(centerPanel, "👑 TOP PLAYER TODAY", "EMPTY", "---", "", Color3.fromHex("#F59E0B"))
 
 	jModel.PrimaryPart = screen
 	jModel.Parent = parent

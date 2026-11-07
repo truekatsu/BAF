@@ -71,14 +71,14 @@ local AtmosphereConfig = {
 		MASTER_VOLUME = 0.5,
 		AMBIENT_LOOP = {
 			name = "SFX_CrowdAmbient",
-			id = "rbxassetid://0",
-			volume = 0.25,
+			id = "rbxassetid://9112877416", -- Stadium Crowd 1 (ProSoundEffects)
+			volume = 0.16,
 			looped = true,
 		},
 		ONE_SHOTS = {
-			{ name = "SFX_Cheer", id = "rbxassetid://0", volume = 0.30 },
-			{ name = "SFX_Chant", id = "rbxassetid://0", volume = 0.25 },
-			{ name = "SFX_Whistle", id = "rbxassetid://0", volume = 0.20 },
+			{ name = "SFX_Cheer", id = "rbxassetid://9112766203", volume = 0.28 }, -- Crowd Cheer And Applause 2
+			{ name = "SFX_Chant", id = "rbxassetid://9119562311", volume = 0.22 }, -- Stadium Crowd 2
+			{ name = "SFX_Whistle", id = "rbxassetid://9118113825", volume = 0.18 }, -- Referee Whistle 2
 		} :: { OneShotSound },
 		ONE_SHOT_MIN_INTERVAL_SEC = 20.0,
 		ONE_SHOT_MAX_INTERVAL_SEC = 40.0,

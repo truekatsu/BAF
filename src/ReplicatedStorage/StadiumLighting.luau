@@ -36,7 +36,7 @@ StadiumLighting.CONFIG = {
 	CYCLE_MINUTES = 12,      -- Real minutes for a full 24-hour cycle
 
 	-- Light Throw Specifications (per tower)
-	SPOT_BRIGHTNESS = 7.0,   -- Raised from 5.0 to 7.0 to overcome Future quadratic distance attenuation
+	SPOT_BRIGHTNESS = 3.5,   -- Raised from 5.0 to 7.0 to overcome Future quadratic distance attenuation
 	SPOT_RANGE = 120,        -- Maximum possible in Roblox engine (clamped by engine to [0, 120]; was 110). PlazaFill covers the center (dist 165).
 	SPOT_ANGLE = 82,         -- Raised from 75 to 82 degrees to cover walkway bypasses and plaza
 	SPOT_COLOR = Color3.fromHex("#FFF4D6"), -- Warm stadium white
@@ -49,7 +49,7 @@ StadiumLighting.CONFIG = {
 
 	-- Halo, Beams & Flares
 	POINT_RANGE = 14,
-	POINT_BRIGHTNESS = 1.5,
+	POINT_BRIGHTNESS = 0.8,
 	BEAMS_ENABLED = true,
 	BEAM_TRANSPARENCY = 0.92,
 	FLARE_MAX_DIST = 250,
@@ -57,7 +57,7 @@ StadiumLighting.CONFIG = {
 
 	-- Ground Glow Pool Configuration
 	GROUND_GLOW_SIZE = 60,
-	GROUND_GLOW_TRANSPARENCY = 0.75, -- Warm additive glow at center fading smoothly outward
+	GROUND_GLOW_TRANSPARENCY = 0.9, -- Warm additive glow at center fading smoothly outward
 	PITCH_SURFACE_Y = 0.0,           -- Top of grass baseplate ground
 	WALKWAY_SURFACE_Y = 0.50,        -- Top of central walkway and plaza roundabout
 	PODIUM_TIER1_Y = 2.25,           -- Top of gold podium tier 1
@@ -76,7 +76,7 @@ StadiumLighting.CONFIG = {
 		CENTER = Vector3.new(0, 25.5, -39),    -- Central plaza hub position
 		SPOT_RANGE = 60,
 		SPOT_ANGLE = 120,
-		SPOT_BRIGHTNESS = 2.0,
+		SPOT_BRIGHTNESS = 1.0,
 		POINT_RANGE = 30,
 		POINT_BRIGHTNESS = 0.8,
 		COLOR = Color3.fromHex("#FFF4D6"),

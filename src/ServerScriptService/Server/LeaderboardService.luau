@@ -35,6 +35,7 @@ local LeaderboardService = {}
 -- In-memory state
 local pendingAdds: { [number]: { [string]: number } } = {}
 local pendingMax: { [number]: { [string]: number } } = {}
+local livePlayerStats: { [number]: { [string]: number } } = {}
 local seededPlayers: { [number]: boolean } = {}
 local playerLastActive: { [number]: number } = {}
 local playerJoinTick: { [number]: number } = {}
@@ -46,7 +47,27 @@ local globalTopCache: { [string]: { LeaderboardEntry } } = {
 	Streak = {},
 	Cash = {},
 	Playtime = {},
+	Bux = {},
 }
+
+local function getLivePlayerStat(player: Player, boardType: string): number
+	local uid = player.UserId
+	local bKey = if boardType == "Bux" then "Cash" else boardType
+	local stat = livePlayerStats[uid] and livePlayerStats[uid][bKey]
+	if stat and stat > 0 then
+		return stat
+	end
+
+	local ls = player:FindFirstChild("leaderstats")
+	if ls then
+		local lsKey = if bKey == "Cash" then "Bux" else bKey
+		local iv = (ls:FindFirstChild(lsKey) or ls:FindFirstChild(bKey)) :: IntValue?
+		if iv and iv:IsA("IntValue") and iv.Value > 0 then
+			return iv.Value
+		end
+	end
+	return 0
+end
 
 -- Rate cap tracking per player per 60s
 local intervalAccum: { [number]: { [string]: { amount: number, resetAt: number } } } = {}
@@ -111,6 +132,13 @@ local function resolveUserBatch(userIds: { number }): { [number]: { name: string
 	local now = os.time()
 
 	for _, uid in userIds do
+		local onlinePlr = Players:GetPlayerByUserId(uid)
+		if onlinePlr then
+			out[uid] = { name = onlinePlr.DisplayName, username = onlinePlr.Name }
+			nameCache[uid] = { name = onlinePlr.DisplayName, username = onlinePlr.Name, expires = now + 86400 }
+			continue
+		end
+
 		if uid <= 0 then
 			out[uid] = { name = "Guest", username = "Guest" }
 			continue
@@ -180,7 +208,7 @@ end
 
 -- PUBLIC API: Add delta to board stat
 function LeaderboardService.Add(player: Player, boardType: string, amount: number, silent: boolean?): boolean
-	if not player or player.UserId <= 0 and not RunService:IsStudio() then
+	if not player or (player.UserId <= 0 and not RunService:IsStudio()) then
 		return false
 	end
 	if typeof(amount) ~= "number" or amount <= 0 or amount ~= amount or amount == math.huge then
@@ -194,20 +222,28 @@ function LeaderboardService.Add(player: Player, boardType: string, amount: numbe
 	end
 
 	local uid = player.UserId
+	local bKey = if boardType == "Bux" then "Cash" else boardType
+
+	if not livePlayerStats[uid] then
+		livePlayerStats[uid] = {}
+	end
+	livePlayerStats[uid][bKey] = (livePlayerStats[uid][bKey] or 0) + math.floor(amount)
+	nameCache[uid] = { name = player.DisplayName, username = player.Name, expires = os.time() + 86400 }
+
 	if not pendingAdds[uid] then
 		pendingAdds[uid] = {}
 	end
-	pendingAdds[uid][boardType] = (pendingAdds[uid][boardType] or 0) + math.floor(amount)
+	pendingAdds[uid][bKey] = (pendingAdds[uid][bKey] or 0) + math.floor(amount)
 
 	if LeaderboardConfig.DEBUG_MODE then
-		print(`[LeaderboardService] Add: {player.DisplayName} -> {boardType} +{amount} (Pending: {pendingAdds[uid][boardType]})`)
+		print(`[LeaderboardService] Add: {player.DisplayName} -> {boardType} +{amount} (Live: {livePlayerStats[uid][bKey]})`)
 	end
 	return true
 end
 
 -- PUBLIC API: Set historical maximum (e.g. Best Streak)
 function LeaderboardService.SetMax(player: Player, boardType: string, val: number, silent: boolean?): boolean
-	if not player or player.UserId <= 0 and not RunService:IsStudio() then
+	if not player or (player.UserId <= 0 and not RunService:IsStudio()) then
 		return false
 	end
 	if typeof(val) ~= "number" or val < 0 or val ~= val or val == math.huge then
@@ -222,10 +258,18 @@ function LeaderboardService.SetMax(player: Player, boardType: string, val: numbe
 	end
 
 	local uid = player.UserId
+	local bKey = if boardType == "Bux" then "Cash" else boardType
+
+	if not livePlayerStats[uid] then
+		livePlayerStats[uid] = {}
+	end
+	livePlayerStats[uid][bKey] = math.max(livePlayerStats[uid][bKey] or 0, intVal)
+	nameCache[uid] = { name = player.DisplayName, username = player.Name, expires = os.time() + 86400 }
+
 	if not pendingMax[uid] then
 		pendingMax[uid] = {}
 	end
-	pendingMax[uid][boardType] = math.max(pendingMax[uid][boardType] or 0, intVal)
+	pendingMax[uid][bKey] = math.max(pendingMax[uid][bKey] or 0, intVal)
 
 	if LeaderboardConfig.DEBUG_MODE then
 		print(`[LeaderboardService] SetMax: {player.DisplayName} -> {boardType} max {intVal}`)
@@ -308,72 +352,124 @@ end
 -- Broadcast updated top 10 to clients via ReplicatedStorage StringValue
 local function replicateBoardData(boardType: string, entries: { LeaderboardEntry })
 	globalTopCache[boardType] = entries
-	local sv = dataFolder and dataFolder:FindFirstChild(boardType) :: StringValue?
-	if sv then
-		local json = HttpService:JSONEncode(entries)
-		sv.Value = json
-		sv:SetAttribute("UpdatedAt", os.time())
+	local keysToUpdate = { boardType }
+	if boardType == "Cash" then
+		table.insert(keysToUpdate, "Bux")
+		globalTopCache["Bux"] = entries
+	elseif boardType == "Bux" then
+		table.insert(keysToUpdate, "Cash")
+		globalTopCache["Cash"] = entries
 	end
 
-	-- Sync top player to Jumbotron config
+	local now = os.time()
+	local json = HttpService:JSONEncode(entries)
+
+	for _, k in keysToUpdate do
+		local sv = dataFolder and dataFolder:FindFirstChild(k) :: StringValue?
+		if sv then
+			sv.Value = json
+			sv:SetAttribute("UpdatedAt", now)
+		end
+	end
+
+	-- Sync top player to Jumbotron config (only when stat > 0; keeps previous player until surpassed)
 	local conf = ReplicatedStorage:FindFirstChild("Config")
 	if conf and #entries > 0 then
 		local top = entries[1]
-		if boardType == "Wins" then
-			conf:SetAttribute("TopPlayerName", top.name)
-			conf:SetAttribute("TopPlayerUserId", top.userId)
-			conf:SetAttribute("TopPlayerWins", top.val)
-		elseif boardType == "Cash" then
-			conf:SetAttribute("TopCashName", top.name)
-			conf:SetAttribute("TopCashUserId", top.userId)
-			conf:SetAttribute("TopCashAmount", top.val)
+		if top.val > 0 then
+			if boardType == "Wins" then
+				local prevWins = tonumber(conf:GetAttribute("TopPlayerWins")) or 0
+				if top.val >= prevWins or top.userId == conf:GetAttribute("TopPlayerUserId") then
+					conf:SetAttribute("TopPlayerName", top.name)
+					conf:SetAttribute("TopPlayerUserId", top.userId)
+					conf:SetAttribute("TopPlayerWins", top.val)
+				end
+			elseif boardType == "Cash" or boardType == "Bux" then
+				local prevCash = tonumber(conf:GetAttribute("TopCashAmount")) or 0
+				if top.val >= prevCash or top.userId == conf:GetAttribute("TopCashUserId") then
+					conf:SetAttribute("TopCashName", top.name)
+					conf:SetAttribute("TopCashUserId", top.userId)
+					conf:SetAttribute("TopCashAmount", top.val)
+				end
+			end
 		end
 	end
 end
 
 -- Refresh Top 10 for a single board
 local function refreshBoardSorted(boardType: string)
-	local store = orderedStores[boardType]
-	if not store then
-		return
-	end
+	local bKey = if boardType == "Bux" then "Cash" else boardType
+	local store = orderedStores[bKey] or orderedStores[boardType]
 
-	local okPages, pages = safeCall(function()
-		return store:GetSortedAsync(false, LeaderboardConfig.ROW_COUNT)
-	end)
-	if not okPages or not pages then
-		return
-	end
+	local byUserId: { [number]: { userId: number, name: string, username: string, val: number } } = {}
 
-	local okPage, page = pcall(function()
-		return pages:GetCurrentPage()
-	end)
-	if not okPage or typeof(page) ~= "table" then
-		return
-	end
-
-	local uids: { number } = {}
-	local rawEntries: { { userId: number, val: number } } = {}
-	for _, row in page do
-		local uid = tonumber(row.key)
-		local v = tonumber(row.value) or 0
-		if uid and uid > 0 and v > 0 then
-			table.insert(uids, uid)
-			table.insert(rawEntries, { userId = uid, val = v })
+	-- 1. Fetch OrderedDataStore records if available
+	if store then
+		local okPages, pages = safeCall(function()
+			return store:GetSortedAsync(false, LeaderboardConfig.ROW_COUNT)
+		end, 1)
+		if okPages and pages then
+			local okPage, page = pcall(function()
+				return pages:GetCurrentPage()
+			end)
+			if okPage and typeof(page) == "table" then
+				local uids: { number } = {}
+				for _, row in page do
+					local uid = tonumber(row.key)
+					local v = tonumber(row.value) or 0
+					if uid and uid > 0 and v > 0 then
+						table.insert(uids, uid)
+						byUserId[uid] = { userId = uid, name = "Player", username = "Player", val = v }
+					end
+				end
+				local names = resolveUserBatch(uids)
+				for uid, item in byUserId do
+					local info = names[uid]
+					if info then
+						item.name = info.name
+						item.username = info.username
+					end
+				end
+			end
 		end
 	end
 
-	local names = resolveUserBatch(uids)
-	local finalEntries: { LeaderboardEntry } = {}
+	-- 2. Merge with active players in this server
+	for _, player in Players:GetPlayers() do
+		local uid = player.UserId
+		local liveVal = getLivePlayerStat(player, bKey)
+		if liveVal > 0 then
+			local prev = byUserId[uid]
+			if not prev or liveVal >= prev.val then
+				byUserId[uid] = {
+					userId = uid,
+					name = player.DisplayName,
+					username = player.Name,
+					val = liveVal,
+				}
+			end
+		end
+	end
 
-	for rank, entry in ipairs(rawEntries) do
-		local info = names[entry.userId] or { name = "Player", username = "Player" }
+	-- 3. Sort entries descending
+	local rawEntries: { { userId: number, name: string, username: string, val: number } } = {}
+	for _, entry in byUserId do
+		table.insert(rawEntries, entry)
+	end
+	table.sort(rawEntries, function(a, b)
+		return a.val > b.val
+	end)
+
+	-- 4. Assign ranks
+	local finalEntries: { LeaderboardEntry } = {}
+	for rank = 1, math.min(#rawEntries, LeaderboardConfig.ROW_COUNT) do
+		local item = rawEntries[rank]
 		table.insert(finalEntries, {
 			rank = rank,
-			userId = entry.userId,
-			name = info.name,
-			username = info.username,
-			val = entry.val,
+			userId = item.userId,
+			name = item.name,
+			username = item.username,
+			val = item.val,
 		})
 	end
 
@@ -381,39 +477,41 @@ local function refreshBoardSorted(boardType: string)
 
 	-- Broadcast via MessagingService to other server instances
 	pcall(function()
-		MessagingService:PublishAsync(`LBUpdate_{boardType}`, HttpService:JSONEncode(finalEntries))
+		MessagingService:PublishAsync(`LBUpdate_{bKey}`, HttpService:JSONEncode(finalEntries))
 	end)
 end
 
--- Distributed Single-Server Refresh Loop via MemoryStore
+-- Distributed Refresh Loop (falls back to local refresh when election is unavailable)
 local function runDistributedRefresh(boardType: string)
-	local lockMap: MemoryStoreSortedMap? = nil
-	pcall(function()
-		lockMap = MemoryStoreService:GetSortedMap("LeaderboardElectMap")
-	end)
+	if RunService:IsStudio() then
+		refreshBoardSorted(boardType)
+		return
+	end
 
-	local isElected = false
-	if lockMap then
+	local isElected = true
+	pcall(function()
+		local lockMap = MemoryStoreService:GetSortedMap("LeaderboardElectMap")
 		local key = `LBLeader_{boardType}`
 		local ok, acquired = pcall(function()
 			return (lockMap :: any):SetAsync(key, game.JobId, 90)
 		end)
-		isElected = ok and (acquired ~= false)
-	else
-		isElected = true -- Fallback for Studio / single server
-	end
+		if ok and acquired == false then
+			isElected = false
+		end
+	end)
 
 	if isElected then
 		refreshBoardSorted(boardType)
 	end
 end
 
--- Estimate local player's rank (rate-limited to 1 request per 2 min per player)
+-- Estimate local player's rank (rate-limited to 1 request per 2 min per player for OrderedDataStore scans)
 function LeaderboardService.GetMyRank(player: Player, boardType: string): number?
-	if not player or player.UserId <= 0 then
+	if not player or (player.UserId <= 0 and not RunService:IsStudio()) then
 		return nil
 	end
 	local uid = player.UserId
+	local bKey = if boardType == "Bux" then "Cash" else boardType
 	local now = os.time()
 
 	if not lastRankLookup[uid] then
@@ -423,28 +521,32 @@ function LeaderboardService.GetMyRank(player: Player, boardType: string): number
 		myRankCache[uid] = {}
 	end
 
-	local cached = myRankCache[uid][boardType]
+	-- Check Top 10 in-memory cache first (free, instant, always up to date)
+	for _, entry in globalTopCache[bKey] or {} do
+		if entry.userId == uid then
+			myRankCache[uid][bKey] = { rank = entry.rank, timestamp = now }
+			return entry.rank
+		end
+	end
+
+	if getLivePlayerStat(player, bKey) <= 0 then
+		return nil
+	end
+
+	local cached = myRankCache[uid][bKey]
 	if cached and now - cached.timestamp < LeaderboardConfig.RATE_LIMIT_MY_RANK_SEC then
 		return cached.rank
 	end
 
-	local lastCall = lastRankLookup[uid][boardType] or 0
+	local lastCall = lastRankLookup[uid][bKey] or 0
 	if now - lastCall < LeaderboardConfig.RATE_LIMIT_MY_RANK_SEC then
 		return cached and cached.rank or nil
 	end
-	lastRankLookup[uid][boardType] = now
+	lastRankLookup[uid][bKey] = now
 
-	local store = orderedStores[boardType]
+	local store = orderedStores[bKey] or orderedStores[boardType]
 	if not store then
 		return nil
-	end
-
-	-- Check Top 10 first
-	for _, entry in globalTopCache[boardType] or {} do
-		if entry.userId == uid then
-			myRankCache[uid][boardType] = { rank = entry.rank, timestamp = now }
-			return entry.rank
-		end
 	end
 
 	-- Scan Sorted Pages up to MAX_RANK_SCAN (1000)
@@ -502,10 +604,19 @@ end
 -- Seed existing player profile data on first join
 function LeaderboardService.seedPlayerOnJoin(player: Player, initialWins: number?, initialStreak: number?, initialCash: number?, initialPlaytime: number?)
 	local uid = player.UserId
-	if uid <= 0 or seededPlayers[uid] then
+	if (uid <= 0 and not RunService:IsStudio()) or seededPlayers[uid] then
 		return
 	end
 	seededPlayers[uid] = true
+
+	if not livePlayerStats[uid] then
+		livePlayerStats[uid] = {}
+	end
+	livePlayerStats[uid]["Wins"] = math.max(0, math.floor(initialWins or 0))
+	livePlayerStats[uid]["Streak"] = math.max(0, math.floor(initialStreak or 0))
+	livePlayerStats[uid]["Cash"] = math.max(0, math.floor(initialCash or 0))
+	livePlayerStats[uid]["Playtime"] = math.max(0, math.floor(initialPlaytime or 0))
+	nameCache[uid] = { name = player.DisplayName, username = player.Name, expires = os.time() + 86400 }
 
 	if initialWins and initialWins > 0 then
 		LeaderboardService.Add(player, "Wins", initialWins, true)
@@ -519,6 +630,10 @@ function LeaderboardService.seedPlayerOnJoin(player: Player, initialWins: number
 	if initialPlaytime and initialPlaytime > 0 then
 		LeaderboardService.Add(player, "Playtime", initialPlaytime, true)
 	end
+
+	task.defer(function()
+		LeaderboardService.ForceRefresh()
+	end)
 end
 
 -- Spawn all 4 boards procedurally in a row
@@ -580,7 +695,7 @@ function LeaderboardService.init()
 
 			for _, player in Players:GetPlayers() do
 				local uid = player.UserId
-				if uid > 0 then
+				if uid > 0 or RunService:IsStudio() then
 					-- Ignore first tick after joining to prevent rejoin spam inflation
 					if playerJoinTick[uid] and now - playerJoinTick[uid] < 25 then
 						continue
@@ -621,6 +736,12 @@ function LeaderboardService.init()
 		end)
 	end
 
+	-- Initial fast refresh pass so boards are populated immediately upon startup
+	task.spawn(function()
+		task.wait(1.5)
+		LeaderboardService.ForceRefresh()
+	end)
+
 	-- Activity ping tracking
 	if Remotes.ActivityPing then
 		Remotes.ActivityPing.OnServerEvent:Connect(function(player: Player)
@@ -629,6 +750,12 @@ function LeaderboardService.init()
 	end
 
 	-- Player Added & Removing Lifecycle
+	for _, player in Players:GetPlayers() do
+		local uid = player.UserId
+		playerJoinTick[uid] = os.clock()
+		playerLastActive[uid] = os.clock()
+	end
+
 	Players.PlayerAdded:Connect(function(player: Player)
 		local uid = player.UserId
 		playerJoinTick[uid] = os.clock()
@@ -640,6 +767,7 @@ function LeaderboardService.init()
 		flushPlayer(uid)
 		pendingAdds[uid] = nil
 		pendingMax[uid] = nil
+		livePlayerStats[uid] = nil
 		playerJoinTick[uid] = nil
 		playerLastActive[uid] = nil
 		lastRankLookup[uid] = nil

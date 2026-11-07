@@ -200,16 +200,35 @@ local function serializeBoard(board: MatchLogic.BoardState, displayRoll: Footbal
 	}
 end
 
+local function tryUpdateRarestPull(player: Player?, card: Footballers.Footballer?)
+	if not player or not card then
+		return
+	end
+	local configFolder = ReplicatedStorage:FindFirstChild("Config")
+	if not configFolder then
+		return
+	end
+	local prevOvr = tonumber(configFolder:GetAttribute("RarestPullOvr")) or 0
+	if card.ovr >= prevOvr then
+		configFolder:SetAttribute("RarestPullName", player.DisplayName)
+		configFolder:SetAttribute("RarestPullUserId", player.UserId)
+		configFolder:SetAttribute("RarestPullCard", `{Footballers.getDisplayName(card)} ({string.upper(card.rarity)})`)
+		configFolder:SetAttribute("RarestPullOvr", card.ovr)
+	end
+end
+
 local function recordBoardDiscoveries(player: Player?, board: MatchLogic.BoardState?, roundRoll: Footballers.Footballer?)
 	if not player or not board then
 		return
 	end
 	if roundRoll then
 		ProfileService.discoverCard(player, roundRoll.id)
+		tryUpdateRarestPull(player, roundRoll)
 	end
 	for _, card in board.slots do
 		if card then
 			ProfileService.discoverCard(player, card.id)
+			tryUpdateRarestPull(player, card)
 		end
 	end
 end
@@ -389,10 +408,6 @@ local function resetSession(session: TableSession, unseat: boolean)
 				hum.Sit = false
 				hum.Jump = true
 			end
-			local root = oldA.Character:FindFirstChild("HumanoidRootPart") :: BasePart?
-			if root then
-				root.CFrame = root.CFrame + Vector3.new(0, 3, 0)
-			end
 		end
 	end
 	if oldB then
@@ -403,10 +418,6 @@ local function resetSession(session: TableSession, unseat: boolean)
 			if hum then
 				hum.Sit = false
 				hum.Jump = true
-			end
-			local root = oldB.Character:FindFirstChild("HumanoidRootPart") :: BasePart?
-			if root then
-				root.CFrame = root.CFrame + Vector3.new(0, 3, 0)
 			end
 		end
 	end
@@ -537,7 +548,7 @@ local function startShowdownPhase(session: TableSession)
 				grade = winnerEval.grade,
 			})
 			local configFolder = ReplicatedStorage:FindFirstChild("Config")
-			if configFolder then
+			if configFolder and winnerUid ~= 0 and winnerName ~= "BOT" then
 				configFolder:SetAttribute("LatestWinnerName", winnerName)
 				configFolder:SetAttribute("LatestWinnerUserId", winnerUid)
 				configFolder:SetAttribute("LatestWinnerScore", winnerEval.avgScore)
@@ -627,6 +638,12 @@ startBuildRound = function(session: TableSession, roundNum: number, frozenSec: n
 		end
 		session.subPhase = "Selecting"
 		session.roundEndsAt = Workspace:GetServerTimeNow() + GameConfig.BUILD_TIME
+		if session.playerA and session.roundRollA then
+			ProfileService.recordCardRoll(session.playerA, session.roundRollA.id)
+		end
+		if session.playerB and session.roundRollB then
+			ProfileService.recordCardRoll(session.playerB, session.roundRollB.id)
+		end
 		sendBuildState(session, session.roundEndsAt)
 
 		if session.isBot and not session.placedThisRoundB then
@@ -898,10 +915,6 @@ local function handleMatchAction(player: Player, action: unknown, arg1: unknown,
 			hum.Sit = false
 			hum.Jump = true
 		end
-		local root = if char then char:FindFirstChild("HumanoidRootPart") :: BasePart? else nil
-		if root then
-			root.CFrame = root.CFrame + Vector3.new(0, 3, 0)
-		end
 		handleDisconnectOrLeave(player)
 		return
 	end
@@ -960,6 +973,9 @@ local function handleMatchAction(player: Player, action: unknown, arg1: unknown,
 					session.roundRollA = myBoard.currentRoll
 				else
 					session.roundRollB = myBoard.currentRoll
+				end
+				if myBoard.currentRoll then
+					ProfileService.recordCardRoll(player, myBoard.currentRoll.id)
 				end
 			end
 		end
@@ -1211,42 +1227,11 @@ function MatchService.buildStarterTables()
 	return tablesFolder
 end
 
-function MatchService.trollAllMatches(_troller: Player)
-	for _, session in sessionsByTable do
-		if session.phase == "Build" and session.boardA and session.boardB then
-			MatchLogic.shuffleSlots(session.boardA)
-			MatchLogic.shuffleSlots(session.boardB)
-			sendBuildState(session, 0)
-		end
-	end
-	for _, plr in Players:GetPlayers() do
-		local char = plr.Character
-		if not char then
-			continue
-		end
-		local hum = char:FindFirstChildOfClass("Humanoid")
-		local hrp = char:FindFirstChild("HumanoidRootPart") :: BasePart?
-		if hum and not hum.Sit and hrp then
-			hrp.AssemblyLinearVelocity = Vector3.new(math.random(-28, 28), 46, math.random(-28, 28))
-		end
-		local hl = Instance.new("Highlight")
-		hl.FillColor = Color3.fromHex("#FF2E93")
-		hl.OutlineColor = Color3.fromHex("#FFD21F")
-		hl.FillTransparency = 0.35
-		hl.Parent = char
-		task.delay(1.5, function()
-			hl:Destroy()
-		end)
-	end
-end
-
 function MatchService.init()
 	local tablesFolder = MatchService.buildStarterTables()
 	if not game:GetService("RunService"):IsServer() then
 		return
 	end
-	ProfileService.setTrollCallback(MatchService.trollAllMatches)
-
 	for _, child in tablesFolder:GetChildren() do
 		if child:IsA("Model") then
 			bindTableModel(child)

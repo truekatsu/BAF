@@ -141,6 +141,24 @@ local function bindBoardUI(model: Model)
 		prevDataSignature = "",
 	}
 
+	-- Immediately populate UI if replicated data already exists
+	local dataFolder = ReplicatedStorage:FindFirstChild("LeaderboardData") :: Folder?
+	if dataFolder then
+		local sv = dataFolder:FindFirstChild(boardType) :: StringValue?
+		if not sv and (boardType == "Bux" or boardType == "Cash") then
+			sv = (dataFolder:FindFirstChild("Cash") or dataFolder:FindFirstChild("Bux")) :: StringValue?
+		end
+		if sv and sv.Value ~= "" and sv.Value ~= "[]" then
+			local ok, entries = pcall(function()
+				return HttpService:JSONDecode(sv.Value)
+			end)
+			if ok and typeof(entries) == "table" then
+				local updatedAt = sv:GetAttribute("UpdatedAt") or os.time()
+				updateBoardDisplay(activeBoards[model], entries, updatedAt)
+			end
+		end
+	end
+
 	-- Collect neon strips
 	for _, desc in model:GetDescendants() do
 		if desc:IsA("BasePart") and desc:GetAttribute("IsNeonStrip") == true then
@@ -184,7 +202,8 @@ local function updateBoardDisplay(ui: BoardUI, entries: { any }, updatedAt: numb
 				row.userLbl.Text = `@{username}`
 			end
 			row.valLbl.Text = valFormatted
-			row.avatar.Image = `rbxthumb://type=AvatarHeadShot&id={uid}&w=150&h=150`
+			local thumbUid = if uid and uid > 0 then uid elseif localPlayer.UserId > 0 then localPlayer.UserId else 1
+			row.avatar.Image = `rbxthumb://type=AvatarHeadShot&id={thumbUid}&w=150&h=150`
 			if row.onlineDot then
 				row.onlineDot.Visible = isOnline
 			end
@@ -293,24 +312,30 @@ local function initClient()
 	-- Listen to ReplicatedStorage LeaderboardData StringValues
 	local dataFolder = ReplicatedStorage:WaitForChild("LeaderboardData", 15) :: Folder?
 	if dataFolder then
-		for _, child in dataFolder:GetChildren() do
-			if child:IsA("StringValue") then
-				local boardKey = child.Name
-				child.Changed:Connect(function()
-					local ok, entries = pcall(function()
-						return HttpService:JSONDecode(child.Value)
-					end)
-					if ok and typeof(entries) == "table" then
-						local updatedAt = child:GetAttribute("UpdatedAt") or os.time()
-						for _, ui in activeBoards do
-							if ui.boardType == boardKey then
-								updateBoardDisplay(ui, entries, updatedAt)
-							end
+		local function hookValue(child: Instance)
+			if not child:IsA("StringValue") then return end
+			local boardKey = child.Name
+			child.Changed:Connect(function()
+				local ok, entries = pcall(function()
+					return HttpService:JSONDecode(child.Value)
+				end)
+				if ok and typeof(entries) == "table" then
+					local updatedAt = child:GetAttribute("UpdatedAt") or os.time()
+					for _, ui in activeBoards do
+						if ui.boardType == boardKey
+							or (boardKey == "Cash" and ui.boardType == "Bux")
+							or (boardKey == "Bux" and ui.boardType == "Cash") then
+							updateBoardDisplay(ui, entries, updatedAt)
 						end
 					end
-				end)
-			end
+				end
+			end)
 		end
+
+		for _, child in dataFolder:GetChildren() do
+			hookValue(child)
+		end
+		dataFolder.ChildAdded:Connect(hookValue)
 	end
 
 	-- Soft Neon Pulse Loop (TweenService transparency 0.1 <-> 0.3 only within 100 studs)
@@ -353,17 +378,22 @@ local function initClient()
 				-- Countdown
 				if ui.countdownLabel and dataFolder then
 					local sv = dataFolder:FindFirstChild(ui.boardType) :: StringValue?
+					if not sv and (ui.boardType == "Bux" or ui.boardType == "Cash") then
+						sv = (dataFolder:FindFirstChild("Cash") or dataFolder:FindFirstChild("Bux")) :: StringValue?
+					end
 					local updated = sv and (sv:GetAttribute("UpdatedAt") :: number?) or now
 					local elapsed = math.clamp(now - updated, 0, LeaderboardConfig.REFRESH_INTERVAL_SEC)
 					local rem = math.max(0, LeaderboardConfig.REFRESH_INTERVAL_SEC - elapsed)
-					ui.countdownLabel.Text = string.format("Next update in 0:%02d", rem)
+					local mins = math.floor(rem / 60)
+					local secs = rem % 60
+					ui.countdownLabel.Text = string.format("Next update in %d:%02d", mins, secs)
 				end
 			end
 		end
 	end)
 
 	-- Initial update pass
-	task.wait(1.0)
+	task.wait(0.5)
 	if dataFolder then
 		for _, child in dataFolder:GetChildren() do
 			if child:IsA("StringValue") then
@@ -373,7 +403,9 @@ local function initClient()
 				if ok and typeof(entries) == "table" then
 					local updatedAt = child:GetAttribute("UpdatedAt") or os.time()
 					for _, ui in activeBoards do
-						if ui.boardType == child.Name then
+						if ui.boardType == child.Name
+							or (child.Name == "Cash" and ui.boardType == "Bux")
+							or (child.Name == "Bux" and ui.boardType == "Cash") then
 							updateBoardDisplay(ui, entries, updatedAt)
 						end
 					end

@@ -98,7 +98,7 @@ local function applyMode(mode: string, prevMode: string?)
 			TweenService:Create(atmosphere, tweenInfo, { Density = 0.38 }):Play()
 		end
 		if bloom then
-			TweenService:Create(bloom, tweenInfo, { Intensity = 1.10 }):Play()
+			TweenService:Create(bloom, tweenInfo, { Intensity = 0.45 }):Play()
 		end
 		if colorCorrection then
 			TweenService:Create(colorCorrection, tweenInfo, {

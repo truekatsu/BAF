@@ -51,47 +51,53 @@ local function initJumbotronClient()
 	if not root then return end
 
 	local configFolder = ReplicatedStorage:WaitForChild("Config", 15)
-	local skinEndsAt = configFolder and configFolder:WaitForChild("SkinRotationEndsAt", 10) :: NumberValue?
+	if not configFolder then return end
 
-	-- 1. LEFT PANEL: Countdown Timer & 60s Pulse
+	-- 1. LEFT PANEL: Latest Winner (Moved from Center Panel)
 	local leftPanel = root:WaitForChild("LeftPanel", 5) :: Frame?
-	local timerBox = leftPanel and leftPanel:WaitForChild("TimerBox", 5) :: Frame?
-	local countdownLbl = timerBox and timerBox:WaitForChild("CountdownLabel", 5) :: TextLabel?
-	local timerStroke = timerBox and timerBox:FindFirstChild("Stroke") :: UIStroke?
+	local leftHeader = leftPanel and leftPanel:WaitForChild("HeaderFrame", 5) :: Frame?
+	local leftHeaderLbl = leftHeader and leftHeader:WaitForChild("HeaderLabel", 5) :: TextLabel?
+	local leftContent = leftPanel and leftPanel:WaitForChild("WinnerContent", 5) :: Frame?
+	local leftAvatar = leftContent and leftContent:WaitForChild("AvatarImage", 5) :: ImageLabel?
+	local leftName = leftContent and leftContent:WaitForChild("WinnerName", 5) :: TextLabel?
+	local leftScore = leftContent and leftContent:WaitForChild("WonScore", 5) :: TextLabel?
+	local leftBadge = leftContent and leftContent:WaitForChild("GradeBadge", 5) :: Frame?
+	local leftBadgeLbl = leftBadge and leftBadge:WaitForChild("GradeLabel", 5) :: TextLabel?
 
-	task.spawn(function()
-		local normalGold = Color3.fromHex("#FFD54A")
-		local alertRed = Color3.fromHex("#EF4444")
-		local alertYellow = Color3.fromHex("#F59E0B")
+	local function updateLeftWinner()
+		if not (leftHeaderLbl and leftName and leftScore and leftAvatar and leftBadge and leftBadgeLbl) then
+			return
+		end
+		leftHeaderLbl.Text = "🏆 LATEST WINNER"
 
-		while countdownLbl and countdownLbl.Parent do
-			local now = Workspace:GetServerTimeNow()
-			local targetTime = if skinEndsAt then skinEndsAt.Value else (now + 600)
-			local remaining = math.max(0, targetTime - now)
+		local rawName = configFolder:GetAttribute("LatestWinnerName")
+		local uid = tonumber(configFolder:GetAttribute("LatestWinnerUserId")) or 0
+		local score = tonumber(configFolder:GetAttribute("LatestWinnerScore")) or 0
+		local prize = tostring(configFolder:GetAttribute("LatestWinnerPrize") or "MYTHIC PACK")
 
-			local mins = math.floor(remaining / 60)
-			local secs = math.floor(remaining % 60)
-			countdownLbl.Text = string.format("%02d:%02d", mins, secs)
+		if typeof(rawName) == "string" and #rawName > 0 and uid ~= 0 and rawName ~= "BOT" then
+			leftName.Text = rawName
+			leftScore.Text = string.format("WON %s (%.1f)", prize, score)
+			leftBadgeLbl.Text = "MATCH WINNER"
+			leftBadge.BackgroundColor3 = Color3.fromHex("#E5252A")
+			leftBadge.Visible = true
+			leftAvatar.Image = if uid > 0 then `rbxthumb://type=AvatarHeadShot&id={uid}&w=150&h=150` else ""
+		else
+			leftName.Text = "EMPTY"
+			leftScore.Text = "---"
+			leftBadge.Visible = false
+			leftAvatar.Image = ""
+		end
+	end
 
-			-- Pulse red/yellow in last 60 seconds
-			if remaining <= 60 and remaining > 0 then
-				local isEven = (math.floor(remaining) % 2 == 0)
-				countdownLbl.TextColor3 = if isEven then alertRed else alertYellow
-				if timerStroke then
-					timerStroke.Color = if isEven then alertRed else alertYellow
-				end
-			else
-				countdownLbl.TextColor3 = normalGold
-				if timerStroke then
-					timerStroke.Color = normalGold
-				end
-			end
-
-			task.wait(JumbotronConfig.TIMER_THROTTLE_RATE_HZ)
+	updateLeftWinner()
+	configFolder.AttributeChanged:Connect(function(attr)
+		if string.sub(attr, 1, 12) == "LatestWinner" then
+			updateLeftWinner()
 		end
 	end)
 
-	-- 2. CENTER PANEL: 8s Auto-Rotation Social Proof
+	-- 2. CENTER PANEL: 8s Auto-Rotation Social Proof (Top Player Today -> Top Cash Today -> Rarest Pull)
 	local centerPanel = root:WaitForChild("CenterPanel", 5) :: Frame?
 	local centerHeader = centerPanel and centerPanel:WaitForChild("HeaderFrame", 5) :: Frame?
 	local centerHeaderLbl = centerHeader and centerHeader:WaitForChild("HeaderLabel", 5) :: TextLabel?
@@ -114,63 +120,78 @@ local function initJumbotronClient()
 	local function getSocialSlides(): { SocialSlide }
 		local slides: { SocialSlide } = {}
 
-		-- Slide 1: Latest Winner (or Top Player Today if none)
-		local winName = configFolder:GetAttribute("LatestWinnerName")
-		if typeof(winName) == "string" and #winName > 0 then
-			local uid = tonumber(configFolder:GetAttribute("LatestWinnerUserId")) or 1
-			local score = tonumber(configFolder:GetAttribute("LatestWinnerScore")) or 92.0
-			local prize = tostring(configFolder:GetAttribute("LatestWinnerPrize") or "MYTHIC PACK")
-			table.insert(slides, {
-				header = "🏆 LATEST WINNER",
-				name = winName,
-				userId = uid,
-				subtitle = string.format("WON %s (%.1f)", prize, score),
-				badgeText = "MATCH WINNER",
-				badgeColor = Color3.fromHex("#E5252A"),
-			})
-		else
-			-- Fallback: Top Player Today
-			local topName = configFolder:GetAttribute("TopPlayerName") or "Leader #1"
-			local topUid = tonumber(configFolder:GetAttribute("TopPlayerUserId")) or 1
-			local topWins = tonumber(configFolder:GetAttribute("TopPlayerWins")) or 0
-			table.insert(slides, {
-				header = "👑 TOP PLAYER TODAY",
-				name = tostring(topName),
-				userId = topUid,
-				subtitle = string.format("%d Wins Today", topWins),
-				badgeText = "RANK #1 WINS",
-				badgeColor = Color3.fromHex("#F59E0B"),
-			})
-		end
+		-- Slide 1: Top Player Today
+		local topName = configFolder:GetAttribute("TopPlayerName")
+		local topUid = tonumber(configFolder:GetAttribute("TopPlayerUserId")) or 0
+		local topWins = tonumber(configFolder:GetAttribute("TopPlayerWins")) or 0
+		local hasTopWins = typeof(topName) == "string" and #topName > 0 and topWins > 0
+		table.insert(slides, {
+			header = "👑 TOP PLAYER TODAY",
+			name = if hasTopWins then tostring(topName) else "EMPTY",
+			userId = if hasTopWins then topUid else 0,
+			subtitle = if hasTopWins then string.format("%d Wins Today", topWins) else "---",
+			badgeText = if hasTopWins then "RANK #1 WINS" else "",
+			badgeColor = Color3.fromHex("#F59E0B"),
+		})
 
 		-- Slide 2: Top Cash Today
-		local cashName = configFolder:GetAttribute("TopCashName") or "Richest Player"
-		local cashUid = tonumber(configFolder:GetAttribute("TopCashUserId")) or 1
+		local cashName = configFolder:GetAttribute("TopCashName")
+		local cashUid = tonumber(configFolder:GetAttribute("TopCashUserId")) or 0
 		local cashAmt = tonumber(configFolder:GetAttribute("TopCashAmount")) or 0
+		local hasTopCash = typeof(cashName) == "string" and #cashName > 0 and cashAmt > 0
 		table.insert(slides, {
 			header = "💵 TOP CASH TODAY",
-			name = tostring(cashName),
-			userId = cashUid,
-			subtitle = string.format("$%s Bux", tostring(cashAmt)),
-			badgeText = "RICHEST",
+			name = if hasTopCash then tostring(cashName) else "EMPTY",
+			userId = if hasTopCash then cashUid else 0,
+			subtitle = if hasTopCash then string.format("$%s Bux", tostring(cashAmt)) else "---",
+			badgeText = if hasTopCash then "RICHEST" else "",
 			badgeColor = Color3.fromHex("#22C55E"),
 		})
 
 		-- Slide 3: Rarest Pull
-		local pullName = configFolder:GetAttribute("RarestPullName") or "Lucky Striker"
-		local pullUid = tonumber(configFolder:GetAttribute("RarestPullUserId")) or 1
-		local pullCard = tostring(configFolder:GetAttribute("RarestPullCard") or "MESSI #10 (MYTHIC)")
+		local pullName = configFolder:GetAttribute("RarestPullName")
+		local pullUid = tonumber(configFolder:GetAttribute("RarestPullUserId")) or 0
+		local pullCard = configFolder:GetAttribute("RarestPullCard")
+		local hasPull = typeof(pullName) == "string" and #pullName > 0 and typeof(pullCard) == "string" and #pullCard > 0
 		table.insert(slides, {
 			header = "✨ RAREST PULL",
-			name = tostring(pullName),
-			userId = pullUid,
-			subtitle = pullCard,
-			badgeText = "MYTHIC PULL",
+			name = if hasPull then tostring(pullName) else "EMPTY",
+			userId = if hasPull then pullUid else 0,
+			subtitle = if hasPull then tostring(pullCard) else "---",
+			badgeText = if hasPull then "MYTHIC PULL" else "",
 			badgeColor = Color3.fromHex("#A855F7"),
 		})
 
 		return slides
 	end
+
+	local currentCenterIdx = 1
+	local function applyCenterSlide(slide: SocialSlide)
+		if not (centerHeaderLbl and winnerNameLbl and wonScoreLbl and avatarImg and gradeLbl and gradeBadge) then
+			return
+		end
+		centerHeaderLbl.Text = slide.header
+		winnerNameLbl.Text = slide.name
+		wonScoreLbl.Text = slide.subtitle
+		if #slide.badgeText > 0 then
+			gradeLbl.Text = slide.badgeText
+			gradeBadge.BackgroundColor3 = slide.badgeColor
+			gradeBadge.Visible = true
+		else
+			gradeBadge.Visible = false
+		end
+		avatarImg.Image = if slide.userId > 0 then `rbxthumb://type=AvatarHeadShot&id={slide.userId}&w=150&h=150` else ""
+	end
+
+	configFolder.AttributeChanged:Connect(function(attr)
+		if string.sub(attr, 1, 9) == "TopPlayer" or string.sub(attr, 1, 7) == "TopCash" or string.sub(attr, 1, 10) == "RarestPull" then
+			local slides = getSocialSlides()
+			local current = slides[((currentCenterIdx - 1) % #slides) + 1]
+			if current then
+				applyCenterSlide(current)
+			end
+		end
+	end)
 
 	-- Center auto-rotation loop (8s)
 	task.spawn(function()
@@ -178,6 +199,7 @@ local function initJumbotronClient()
 		while winnerContent and winnerContent.Parent do
 			local slides = getSocialSlides()
 			if #slides > 0 then
+				currentCenterIdx = slideIdx
 				local current = slides[((slideIdx - 1) % #slides) + 1]
 
 				-- Smooth crossfade
@@ -188,14 +210,7 @@ local function initJumbotronClient()
 					fadeOut:Play()
 					fadeOut.Completed:Wait()
 
-					centerHeaderLbl.Text = current.header
-					winnerNameLbl.Text = current.name
-					wonScoreLbl.Text = current.subtitle
-					gradeLbl.Text = current.badgeText
-					gradeBadge.BackgroundColor3 = current.badgeColor
-
-					local uid = if current.userId > 0 then current.userId else 1
-					avatarImg.Image = `rbxthumb://type=AvatarHeadShot&id={uid}&w=150&h=150`
+					applyCenterSlide(current)
 
 					local fadeIn = TweenService:Create(winnerContent, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
 						BackgroundTransparency = 0,

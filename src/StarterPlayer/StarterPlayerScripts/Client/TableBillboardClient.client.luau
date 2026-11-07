@@ -97,18 +97,18 @@ local function buildTableBillboard(tableModel: Model, anchor: Attachment): Table
 	stroke1.Parent = defaultModeLbl
 	defaultModeLbl.Parent = idleView
 
-	-- Line 2: Occupancy (Large, white, thick outline)
+	-- Line 2: Occupancy (Clean, white, balanced outline)
 	local occLbl = Instance.new("TextLabel")
 	occLbl.Name = "OccupancyLabel"
 	occLbl.LayoutOrder = 2
-	occLbl.Size = UDim2.new(1, 0, 0.52, 0)
+	occLbl.Size = UDim2.new(1, 0, 0.28, 0)
 	occLbl.BackgroundTransparency = 1
 	occLbl.Font = Enum.Font.FredokaOne
 	occLbl.Text = "0/2"
 	occLbl.TextColor3 = Config.COLORS.OccupancyWhite
 	occLbl.TextScaled = true
 	local stroke2 = Instance.new("UIStroke")
-	stroke2.Thickness = 5
+	stroke2.Thickness = 3.5
 	stroke2.Color = Config.COLORS.StrokeBlack
 	stroke2.Parent = occLbl
 	occLbl.Parent = idleView

@@ -183,10 +183,9 @@ local function buildBannersAndAds()
 		return banner
 	end
 
-	-- West Stand Main Banner (facing East, +X)
-	makeMainBanner("MainBanner_West", CFrame.new(-114.0, 16.5, -43.0), Enum.NormalId.Right)
-	-- East Stand Main Banner (facing West, -X)
-	makeMainBanner("MainBanner_East", CFrame.new(114.0, 16.5, -43.0), Enum.NormalId.Left)
+	-- 2. 2 Main Banners: disabled per user request (clipped across stands in player view)
+	-- makeMainBanner("MainBanner_West", CFrame.new(-114.0, 16.5, -43.0), Enum.NormalId.Right)
+	-- makeMainBanner("MainBanner_East", CFrame.new(114.0, 16.5, -43.0), Enum.NormalId.Left)
 
 	-- 3. Stand Rim Flags (Disabled per user request)
 	if BannersConfig.FLAGS_COUNT > 0 then

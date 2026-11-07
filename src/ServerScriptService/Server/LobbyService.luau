@@ -282,18 +282,23 @@ local function createMythicalVoteAndFeedback(parent: Instance)
 	fbPrompt.ObjectText = "Feedback"
 	fbPrompt.ActionText = "Share Your Feedback"
 	fbPrompt.HoldDuration = 0
-	fbPrompt.MaxActivationDistance = 10
+	fbPrompt.MaxActivationDistance = 14
+	fbPrompt.RequiresLineOfSight = false
 	fbPrompt.Parent = boxLower
 	fbPrompt.Triggered:Connect(function(player)
 		Remotes.FeedbackSync:FireClient(player, { kind = "Open" })
 	end)
 
-	local fbClick = Instance.new("ClickDetector")
-	fbClick.MaxActivationDistance = 16
-	fbClick.Parent = boxLower
-	fbClick.MouseClick:Connect(function(player)
-		Remotes.FeedbackSync:FireClient(player, { kind = "Open" })
-	end)
+	for _, part in fbModel:GetChildren() do
+		if part:IsA("BasePart") then
+			local fbClick = Instance.new("ClickDetector")
+			fbClick.MaxActivationDistance = 24
+			fbClick.Parent = part
+			fbClick.MouseClick:Connect(function(player)
+				Remotes.FeedbackSync:FireClient(player, { kind = "Open" })
+			end)
+		end
+	end
 
 	fbModel.PrimaryPart = boxLower
 	fbModel.Parent = targetParent
@@ -1657,10 +1662,17 @@ local function buildStadiumLobby()
 	createGoalPost(lobby, -1)
 	createGoalPost(lobby, 1)
 
-	createLeaderboardBoard(lobby, "Bux")
-	createLeaderboardBoard(lobby, "Wins")
-	createLeaderboardBoard(lobby, "Streak")
-	createLeaderboardBoard(lobby, "Playtime")
+	local lbFolder = lobby:FindFirstChild("Leaderboards")
+	if not lbFolder then
+		lbFolder = Instance.new("Folder")
+		lbFolder.Name = "Leaderboards"
+		lbFolder.Parent = lobby
+	end
+
+	createLeaderboardBoard(lbFolder, "Cash")
+	createLeaderboardBoard(lbFolder, "Wins")
+	createLeaderboardBoard(lbFolder, "Streak")
+	createLeaderboardBoard(lbFolder, "Playtime")
 
 	createMythicalVoteAndFeedback(lobby)
 	createSlapPadAndObby(lobby)
@@ -1773,7 +1785,8 @@ local function attachOverheadTag(player: Player, character: Model)
 	local bb = Instance.new("BillboardGui")
 	bb.Name = "BAF_Overhead"
 	bb.Size = UDim2.fromOffset(260, 104)
-	bb.StudsOffset = Vector3.new(0, 3.85, 0)
+	bb.StudsOffset = Vector3.new(0, 2.2, 0)
+	bb.SizeOffset = Vector2.new(0, 0.5) -- pixel-sized gui: anchor its bottom above the head so zoom-out can't sink text into the avatar
 	bb.MaxDistance = 85
 	bb.Adornee = head
 	bb.Parent = head
@@ -1866,15 +1879,39 @@ local function resolveUserName(userId: number): string
 	return resolved
 end
 
+-- Toggle for 3D champion avatar statue beside leaderboard
+local ENABLE_CHAMPION_STATUE = false
+
 local function updatePodiumStatue(refs: BoardRefs, topUserId: number?)
-	local uid = if typeof(topUserId) == "number" and topUserId > 0 then topUserId else nil
-	if not uid then
+	-- Always clean up any existing legacy or orphaned statues
+	for _, c in refs.model:GetChildren() do
+		if c.Name == "Rank1Statue" or c.Name == "CrownStatue" or c.Name == "ChampionStatue" then
+			c:Destroy()
+		end
+	end
+
+	if not ENABLE_CHAMPION_STATUE then
+		if refs.statueModel then
+			refs.statueModel:Destroy()
+			refs.statueModel = nil
+		end
 		return
 	end
+
+	local uid = if typeof(topUserId) == "number" and topUserId > 0 then topUserId else nil
+	if not uid then
+		if refs.statueModel then
+			refs.statueModel:Destroy()
+			refs.statueModel = nil
+		end
+		return
+	end
+
 	if refs.currentStatueUserId == uid and refs.statueModel and refs.statueModel.Parent then
 		return
 	end
 	refs.currentStatueUserId = uid
+
 	task.spawn(function()
 		local ok, rig = pcall(function()
 			return Players:CreateHumanoidModelFromUserId(uid)
@@ -1885,6 +1922,7 @@ local function updatePodiumStatue(refs: BoardRefs, topUserId: number?)
 			end
 			return
 		end
+
 		rig.Name = "ChampionStatue"
 		local hrp = rig:FindFirstChild("HumanoidRootPart") :: BasePart?
 		local hum = rig:FindFirstChildOfClass("Humanoid")
@@ -1895,7 +1933,18 @@ local function updatePodiumStatue(refs: BoardRefs, topUserId: number?)
 			hum.EvaluateStateMachine = false
 		end
 
-		-- Clean up scripts and animators, preserving original skin, clothes, and accessories
+		-- Resolve stand position beside leaderboard (podium or podiumCF)
+		local podiumsFolder = refs.model:FindFirstChild("Podiums")
+		local pod = (podiumsFolder and podiumsFolder:FindFirstChild("Podium_L"))
+			or refs.model:FindFirstChild("Podium") :: BasePart?
+		local podCF = if pod then pod.CFrame else refs.podiumCF
+		local standCF = CFrame.new(podCF.Position.X, podCF.Position.Y + 2.85, podCF.Position.Z) * (podCF - podCF.Position)
+
+		-- Use rig:PivotTo BEFORE anchoring so all limbs and accessories move intact together
+		rig.PrimaryPart = hrp or rig:FindFirstChild("UpperTorso") or rig:FindFirstChild("Torso")
+		rig:PivotTo(standCF)
+
+		-- Anchor parts at destination and strip unnecessary scripts/animators
 		for _, desc in rig:GetDescendants() do
 			if desc:IsA("BasePart") then
 				desc.Anchored = true
@@ -1908,32 +1957,7 @@ local function updatePodiumStatue(refs: BoardRefs, topUserId: number?)
 			end
 		end
 
-		local pod = refs.model:FindFirstChild("Podium") :: BasePart?
-		local cap = refs.model:FindFirstChild("PodiumCap") :: BasePart?
-		local podCF = if pod then pod.CFrame else refs.podiumCF
-		local capTopY = if cap then cap.Position.Y + (cap.Size.Y / 2) elseif pod then pod.Position.Y + (pod.Size.Y / 2) else refs.podiumCF.Position.Y + 2.3
-
-		local standCF = CFrame.new(podCF.Position.X, capTopY + 2.85, podCF.Position.Z) * (podCF - podCF.Position)
 		rig.Parent = refs.model
-		if hrp then
-			hrp.CFrame = standCF
-		else
-			rig:PivotTo(standCF)
-		end
-
-		for _, desc in rig:GetDescendants() do
-			if desc:IsA("BasePart") then
-				desc.Anchored = true
-			end
-		end
-
-		-- Remove all old placeholder and fallback dummies
-		for _, c in refs.model:GetChildren() do
-			if c ~= rig and (c.Name == "Rank1Statue" or c.Name == "CrownStatue" or c.Name == "ChampionStatue") then
-				c:Destroy()
-			end
-		end
-
 		refs.statueModel = rig
 	end)
 end
@@ -2060,20 +2084,26 @@ local function refreshLeaderboards()
 		refs.podiumLabel.Text = if top1 then `👑 {top1.name}` else "👑 Waiting..."
 		updatePodiumStatue(refs, if top1 then top1.userId else nil)
 
-		-- Sync top stats to Jumbotron config
+		-- Sync top stats to Jumbotron config (only when stat > 0; keeps previous player until replaced)
 		local conf = ReplicatedStorage:FindFirstChild("Config")
 		if conf then
-			local topWins = globalTopCache.Wins and globalTopCache.Wins[1]
-			local topCash = globalTopCache.Bux and globalTopCache.Bux[1]
-			if topWins then
-				conf:SetAttribute("TopPlayerName", topWins.name)
-				conf:SetAttribute("TopPlayerUserId", topWins.userId)
-				conf:SetAttribute("TopPlayerWins", topWins.val)
+			local topWins = if statKey == "Wins" then entries[1] else (globalTopCache.Wins and globalTopCache.Wins[1])
+			local topCash = if statKey == "Bux" then entries[1] else (globalTopCache.Bux and globalTopCache.Bux[1])
+			if topWins and topWins.val > 0 then
+				local prevWins = tonumber(conf:GetAttribute("TopPlayerWins")) or 0
+				if topWins.val >= prevWins or topWins.userId == conf:GetAttribute("TopPlayerUserId") then
+					conf:SetAttribute("TopPlayerName", topWins.name)
+					conf:SetAttribute("TopPlayerUserId", topWins.userId)
+					conf:SetAttribute("TopPlayerWins", topWins.val)
+				end
 			end
-			if topCash then
-				conf:SetAttribute("TopCashName", topCash.name)
-				conf:SetAttribute("TopCashUserId", topCash.userId)
-				conf:SetAttribute("TopCashAmount", topCash.val)
+			if topCash and topCash.val > 0 then
+				local prevCash = tonumber(conf:GetAttribute("TopCashAmount")) or 0
+				if topCash.val >= prevCash or topCash.userId == conf:GetAttribute("TopCashUserId") then
+					conf:SetAttribute("TopCashName", topCash.name)
+					conf:SetAttribute("TopCashUserId", topCash.userId)
+					conf:SetAttribute("TopCashAmount", topCash.val)
+				end
 			end
 		end
 	end
@@ -2134,10 +2164,6 @@ end
 function LobbyService.init()
 	buildStadiumLobby()
 	local lobby = Workspace:FindFirstChild("Lobby")
-	local lbFolder = lobby and lobby:FindFirstChild("Leaderboards")
-	if lbFolder then
-		bindExistingLeaderboards(lbFolder)
-	end
 	if lobby then
 		createMythicalVoteAndFeedback(lobby)
 		createSlapPadAndObby(lobby)
@@ -2177,13 +2203,6 @@ function LobbyService.init()
 	for _, player in Players:GetPlayers() do
 		bindPlayer(player)
 	end
-
-	task.spawn(function()
-		while true do
-			refreshLeaderboards()
-			task.wait(5)
-		end
-	end)
 end
 
 return table.freeze(LobbyService)

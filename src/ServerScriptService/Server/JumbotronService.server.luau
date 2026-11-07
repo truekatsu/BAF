@@ -26,15 +26,6 @@ if not configFolder then
 	configFolder = newFolder
 end
 
-local skinEndsAt = configFolder:FindFirstChild("SkinRotationEndsAt") :: NumberValue?
-if not skinEndsAt then
-	local val = Instance.new("NumberValue")
-	val.Name = "SkinRotationEndsAt"
-	val.Value = Workspace:GetServerTimeNow() + JumbotronConfig.SKIN_ROTATION_INTERVAL_SEC
-	val.Parent = configFolder
-	skinEndsAt = val
-end
-
 -- Default event attributes (2X WINS WEEKEND ending in ~1d 04h)
 if not configFolder:GetAttribute("EventEndsAt") then
 	configFolder:SetAttribute("EventName", "2X WINS WEEKEND")
@@ -42,18 +33,6 @@ if not configFolder:GetAttribute("EventEndsAt") then
 	configFolder:SetAttribute("EventEndsAt", Workspace:GetServerTimeNow() + 100800) -- ~1d 04h
 	configFolder:SetAttribute("EventActive", true)
 end
-
--- 10-minute skin rotation timer loop using workspace:GetServerTimeNow()
-task.spawn(function()
-	local endsAtVal = skinEndsAt :: NumberValue
-	while true do
-		local now = Workspace:GetServerTimeNow()
-		if now >= endsAtVal.Value then
-			endsAtVal.Value = now + JumbotronConfig.SKIN_ROTATION_INTERVAL_SEC
-		end
-		task.wait(1)
-	end
-end)
 
 -- 2. Jumbotron 3D & SurfaceGui Builder
 local function buildJumbotron(parent: Instance): Model?

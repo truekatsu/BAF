@@ -101,13 +101,13 @@ function TableRigBuilder.buildPrefab(): Model
 	local occLbl = Instance.new("TextLabel")
 	occLbl.Name = "OccupancyLabel"
 	occLbl.LayoutOrder = 2
-	occLbl.Size = UDim2.new(1, 0, 0.52, 0)
+	occLbl.Size = UDim2.new(1, 0, 0.28, 0)
 	occLbl.BackgroundTransparency = 1
 	occLbl.Font = Enum.Font.FredokaOne
 	occLbl.Text = "0/2"
 	occLbl.TextColor3 = Color3.fromRGB(255, 255, 255)
 	occLbl.TextScaled = true
-	addStroke(occLbl, Color3.fromRGB(0, 0, 0), 5)
+	addStroke(occLbl, Color3.fromRGB(0, 0, 0), 3.5)
 	occLbl.Parent = idleView
 
 	local priceLbl = Instance.new("TextLabel")

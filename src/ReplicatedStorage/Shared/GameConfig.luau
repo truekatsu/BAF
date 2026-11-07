@@ -146,7 +146,6 @@ local GameConfig = {
 		["2x_streak"] = { id = 0, kind = "GamePass" },
 		inf_rerolls = { id = 0, kind = "GamePass" },
 		starter_pack = { id = 0, kind = "Product" },
-		troll_all = { id = 0, kind = "Product" },
 		bux_300 = { id = 0, kind = "Product" },
 		bux_1000 = { id = 0, kind = "Product" },
 		bux_4000 = { id = 0, kind = "Product" },

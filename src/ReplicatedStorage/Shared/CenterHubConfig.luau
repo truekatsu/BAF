@@ -65,7 +65,7 @@ local CenterHubConfig = {
 	BILLBOARD = {
 		MaxDistance = 120,
 		Size = Vector2.new(12, 3),
-		StudsOffset = Vector3.new(0, 5.0, 0),
+		StudsOffset = Vector3.new(0, 2.6, 0),
 		StrokeThickness = 4,
 	},
 }

@@ -46,6 +46,19 @@ export type Profile = {
 	QuestProgress: { [string]: number },
 	QuestClaimed: { [string]: boolean },
 	DiscoveredCards: { [string]: boolean },
+	FirstJoinedAt: number,
+	BestStreak: number,
+	TotalCashEarned: number,
+	WinsDayKey: number,
+	WinsToday: number,
+	WinsWeekKey: number,
+	WinsThisWeek: number,
+	TotalCardSpins: number,
+	MythicsPulled: number,
+	SpinsSinceMythic: number,
+	MaxSpinsWithoutMythic: number,
+	RarestCardId: string,
+	LatestCardId: string,
 }
 
 export type MatchRewardSummary = {
@@ -61,10 +74,56 @@ local STORE_NAME = "BAF_Profiles_v1"
 local FEEDBACK_STORE_NAME = "BAF_PlayerFeedback_v1"
 local DAILY_COOLDOWN_SEC = 86400
 local FEEDBACK_COOLDOWN_SEC = 10
+local AUTOSAVE_INTERVAL_SEC = 120
 local profiles: { [Player]: Profile } = {}
+local dirtyProfiles: { [Player]: boolean } = {}
 local feedbackCooldowns: { [Player]: number } = {}
 local feedbackEntries: { string } = {}
-local onTrollCallback: ((Player) -> ())? = nil
+
+local RARITY_RANK: { [string]: number } = {
+	Common = 1,
+	Rare = 2,
+	Epic = 3,
+	Legendary = 4,
+	Mythic = 5,
+}
+
+local function isRarerCard(cand: Footballers.Footballer, cur: Footballers.Footballer?): boolean
+	if not cur then
+		return true
+	end
+	local rA = RARITY_RANK[cand.rarity] or 0
+	local rB = RARITY_RANK[cur.rarity] or 0
+	if rA ~= rB then
+		return rA > rB
+	end
+	return cand.ovr >= cur.ovr
+end
+
+local function refreshWinBuckets(profile: Profile)
+	local now = os.time()
+	local dayKey = math.floor(now / 86400)
+	local weekKey = math.floor((now + 345600) / 604800)
+	if profile.WinsDayKey ~= dayKey then
+		profile.WinsDayKey = dayKey
+		profile.WinsToday = 0
+	end
+	if profile.WinsWeekKey ~= weekKey then
+		profile.WinsWeekKey = weekKey
+		profile.WinsThisWeek = 0
+	end
+end
+
+local function grantBux(player: Player, profile: Profile, amount: number)
+	local amt = math.round(amount)
+	if amt <= 0 then
+		return
+	end
+	profile.Bux += amt
+	profile.TotalCashEarned = (profile.TotalCashEarned or 0) + amt
+	dirtyProfiles[player] = true
+	LeaderboardService.Add(player, "Cash", amt)
+end
 
 -- shortcut: plain DataStore GetAsync/SetAsync without session locking, upgrade to ProfileStore if trading is added in v2.0
 local store: DataStore? = nil
@@ -72,6 +131,22 @@ local feedbackStore: DataStore? = nil
 pcall(function()
 	store = DataStoreService:GetDataStore(STORE_NAME)
 	feedbackStore = DataStoreService:GetDataStore(FEEDBACK_STORE_NAME)
+end)
+
+task.spawn(function()
+	if feedbackStore then
+		local ok, saved = pcall(function()
+			return (feedbackStore :: DataStore):GetAsync("Entries_v1")
+		end)
+		if ok and typeof(saved) == "table" then
+			for _, entry in saved do
+				if typeof(entry) == "string" then
+					table.insert(feedbackEntries, entry)
+				end
+			end
+			syncFeedbackStorage()
+		end
+	end
 end)
 
 local function isOwner(player: Player): boolean
@@ -120,10 +195,6 @@ end
 
 local ProfileService = {}
 
-function ProfileService.setTrollCallback(fn: (Player) -> ())
-	onTrollCallback = fn
-end
-
 local function defaultProfile(): Profile
 	return {
 		Bux = 0,
@@ -155,6 +226,19 @@ local function defaultProfile(): Profile
 		},
 		QuestClaimed = {},
 		DiscoveredCards = {},
+		FirstJoinedAt = 0,
+		BestStreak = 0,
+		TotalCashEarned = 0,
+		WinsDayKey = math.floor(os.time() / 86400),
+		WinsToday = 0,
+		WinsWeekKey = math.floor((os.time() + 345600) / 604800),
+		WinsThisWeek = 0,
+		TotalCardSpins = 0,
+		MythicsPulled = 0,
+		SpinsSinceMythic = 0,
+		MaxSpinsWithoutMythic = 0,
+		RarestCardId = "",
+		LatestCardId = "",
 	}
 end
 
@@ -210,6 +294,10 @@ local function syncLeaderstats(player: Player, profile: Profile, toast: string?)
 
 	local title = resolveActiveTitle(profile)
 	profile.EquippedTitle = title
+	refreshWinBuckets(profile)
+	if profile.Streak > (profile.BestStreak or 0) then
+		profile.BestStreak = profile.Streak
+	end
 	player:SetAttribute("Title", title)
 	player:SetAttribute("EquippedChair", profile.EquippedChair)
 	player:SetAttribute("LikedGame", profile.LikedGame == true)
@@ -255,9 +343,7 @@ function ProfileService.addBux(player: Player, amount: number): boolean
 	if not profile or amount <= 0 then
 		return false
 	end
-	local amt = math.round(amount)
-	profile.Bux += amt
-	LeaderboardService.Add(player, "Cash", amt)
+	grantBux(player, profile, amount)
 	syncLeaderstats(player, profile)
 	return true
 end
@@ -268,6 +354,7 @@ function ProfileService.recordQuestProgress(player: Player, questId: string, amo
 		return
 	end
 	profile.QuestProgress[questId] = (profile.QuestProgress[questId] or 0) + amount
+	dirtyProfiles[player] = true
 	syncLeaderstats(player, profile)
 end
 
@@ -286,8 +373,7 @@ function ProfileService.claimObby(player: Player): boolean
 		return false
 	end
 	profile.LastObbyClaim = now
-	profile.Bux += GameConfig.OBBY_REWARD_BUX
-	LeaderboardService.Add(player, "Cash", GameConfig.OBBY_REWARD_BUX)
+	grantBux(player, profile, GameConfig.OBBY_REWARD_BUX)
 	profile.QuestProgress.complete_obby = (profile.QuestProgress.complete_obby or 0) + 1
 	syncLeaderstats(player, profile, `🎁 Obby Claimed: +${GameConfig.OBBY_REWARD_BUX} Bux! (Cooldown 4 Jam)`)
 	return true
@@ -300,15 +386,47 @@ function ProfileService.discoverCard(player: Player, cardId: string): boolean
 		return false
 	end
 	profile.DiscoveredCards[cardId] = true
+	local curRarest = if profile.RarestCardId ~= "" then Footballers.ById[profile.RarestCardId] else nil
+	if isRarerCard(card, curRarest) then
+		profile.RarestCardId = card.id
+	end
 	local bonus = if card.rarity == "Mythic"
 		then 250
 		elseif card.rarity == "Legendary" then 100
 		elseif card.rarity == "Epic" then 50
 		else 25
-	profile.Bux += bonus
-	LeaderboardService.Add(player, "Cash", bonus)
+	grantBux(player, profile, bonus)
 	syncLeaderstats(player, profile, `📖 NEW {string.upper(card.rarity)}: {Footballers.getDisplayName(card)} (+${bonus} Bux!)`)
 	return true
+end
+
+function ProfileService.recordCardRoll(player: Player, cardId: string)
+	local profile = profiles[player]
+	local card = Footballers.ById[cardId]
+	if not profile or not card then
+		return
+	end
+	profile.TotalCardSpins = (profile.TotalCardSpins or 0) + 1
+	profile.LatestCardId = card.id
+	local curRarest = if profile.RarestCardId ~= "" then Footballers.ById[profile.RarestCardId] else nil
+	if isRarerCard(card, curRarest) then
+		profile.RarestCardId = card.id
+	end
+	if card.rarity == "Mythic" then
+		profile.MythicsPulled = (profile.MythicsPulled or 0) + 1
+		profile.SpinsSinceMythic = 0
+	else
+		profile.SpinsSinceMythic = (profile.SpinsSinceMythic or 0) + 1
+		if profile.SpinsSinceMythic > (profile.MaxSpinsWithoutMythic or 0) then
+			profile.MaxSpinsWithoutMythic = profile.SpinsSinceMythic
+		end
+	end
+	dirtyProfiles[player] = true
+	if not profile.DiscoveredCards[cardId] then
+		ProfileService.discoverCard(player, cardId)
+	else
+		syncLeaderstats(player, profile)
+	end
 end
 
 function ProfileService.getFriendsInServerCount(player: Player): number
@@ -341,20 +459,25 @@ function ProfileService.awardMatchResult(player: Player, won: boolean): MatchRew
 	local baseBux = if won then GameConfig.WIN_BUX else GameConfig.LOSS_BUX
 	local buxMult = if profile.DoubleBux then 2 else 1
 	local buxEarned = math.round(baseBux * buxMult * friendMult)
-	profile.Bux += buxEarned
-	LeaderboardService.Add(player, "Cash", buxEarned)
+	grantBux(player, profile, buxEarned)
 
+	refreshWinBuckets(profile)
 	local winsEarned = 0
 	if won then
 		winsEarned = if profile.DoubleWins then 2 else 1
 		local streakGain = if profile.DoubleStreak then 2 else 1
 		profile.Wins += winsEarned
+		profile.WinsToday = (profile.WinsToday or 0) + winsEarned
+		profile.WinsThisWeek = (profile.WinsThisWeek or 0) + winsEarned
 		profile.Streak += streakGain
+		if profile.Streak > (profile.BestStreak or 0) then
+			profile.BestStreak = profile.Streak
+		end
 		LeaderboardService.Add(player, "Wins", winsEarned)
-		LeaderboardService.SetMax(player, "Streak", profile.Streak)
+		LeaderboardService.SetMax(player, "Streak", profile.BestStreak)
 	else
 		profile.Streak = 0
-		LeaderboardService.SetMax(player, "Streak", 0)
+		LeaderboardService.SetMax(player, "Streak", profile.BestStreak or 0)
 	end
 
 	-- Auto-promote title when reaching a new milestone
@@ -377,18 +500,8 @@ local function grantShopItem(player: Player, itemKey: string): boolean
 	if not profile then
 		return false
 	end
-	if itemKey == "troll_all" then
-		if onTrollCallback then
-			onTrollCallback(player)
-		end
-		local msg = `😈 {player.DisplayName} TROLLED THE ENTIRE SERVER!`
-		for otherPlayer, otherProfile in profiles do
-			syncLeaderstats(otherPlayer, otherProfile, msg)
-		end
-		return true
-	elseif itemKey == "starter_pack" then
-		profile.Bux += 500
-		LeaderboardService.Add(player, "Cash", 500)
+	if itemKey == "starter_pack" then
+		grantBux(player, profile, 500)
 		profile.OwnedChairs["crimson"] = true
 		profile.EquippedChair = "crimson"
 		syncLeaderstats(player, profile, "Starter Pack Unlocked: +$500 Bux & Crimson Chair!")
@@ -397,42 +510,43 @@ local function grantShopItem(player: Player, itemKey: string): boolean
 		profile.DoubleBux = true
 		profile.OwnedChairs["golden"] = true
 		profile.EquippedChair = "golden"
+		dirtyProfiles[player] = true
 		syncLeaderstats(player, profile, "VIP Activated: Golden Chair + 2x Bux!")
 		return true
 	elseif itemKey == "2x_bux" then
 		profile.DoubleBux = true
+		dirtyProfiles[player] = true
 		syncLeaderstats(player, profile, "2x Bux Gamepass Activated!")
 		return true
 	elseif itemKey == "2x_wins" then
 		profile.DoubleWins = true
+		dirtyProfiles[player] = true
 		syncLeaderstats(player, profile, "2x Wins Gamepass Activated!")
 		return true
 	elseif itemKey == "2x_streak" then
 		profile.DoubleStreak = true
+		dirtyProfiles[player] = true
 		syncLeaderstats(player, profile, "2x Streak Gamepass Activated!")
 		return true
 	elseif itemKey == "inf_rerolls" then
 		profile.InfRerolls = true
+		dirtyProfiles[player] = true
 		syncLeaderstats(player, profile, "Infinite Rerolls Activated!")
 		return true
 	elseif itemKey == "bux_300" then
-		profile.Bux += 300
-		LeaderboardService.Add(player, "Cash", 300)
+		grantBux(player, profile, 300)
 		syncLeaderstats(player, profile, "+$300 Bux Added!")
 		return true
 	elseif itemKey == "bux_1000" then
-		profile.Bux += 1000
-		LeaderboardService.Add(player, "Cash", 1000)
+		grantBux(player, profile, 1000)
 		syncLeaderstats(player, profile, "+$1,000 Bux Added!")
 		return true
 	elseif itemKey == "bux_4000" then
-		profile.Bux += 4000
-		LeaderboardService.Add(player, "Cash", 4000)
+		grantBux(player, profile, 4000)
 		syncLeaderstats(player, profile, "+$4,000 Bux Added!")
 		return true
 	elseif itemKey == "bux_15000" then
-		profile.Bux += 15000
-		LeaderboardService.Add(player, "Cash", 15000)
+		grantBux(player, profile, 15000)
 		syncLeaderstats(player, profile, "+$15,000 Bux Added!")
 		return true
 	end
@@ -477,8 +591,7 @@ function ProfileService.handleMetaAction(player: Player, action: unknown, arg: u
 		profile.LastDailyClaim = now
 		profile.DailyDay = if dayIdx >= #GameConfig.DAILY_REWARDS then 1 else dayIdx + 1
 		if reward.bux > 0 then
-			profile.Bux += reward.bux
-			LeaderboardService.Add(player, "Cash", reward.bux)
+			grantBux(player, profile, reward.bux)
 		end
 		if reward.spins > 0 then
 			profile.WheelSpins += reward.spins
@@ -487,6 +600,7 @@ function ProfileService.handleMetaAction(player: Player, action: unknown, arg: u
 			profile.OwnedChairs[reward.chair] = true
 			profile.EquippedChair = reward.chair
 		end
+		dirtyProfiles[player] = true
 		syncLeaderstats(player, profile, `Claimed Day {dayIdx}: {reward.label}!`)
 		return
 	end
@@ -496,8 +610,7 @@ function ProfileService.handleMetaAction(player: Player, action: unknown, arg: u
 			return
 		end
 		profile.GroupClaimed = true
-		profile.Bux += GameConfig.GROUP_REWARD_BUX
-		LeaderboardService.Add(player, "Cash", GameConfig.GROUP_REWARD_BUX)
+		grantBux(player, profile, GameConfig.GROUP_REWARD_BUX)
 		syncLeaderstats(player, profile, `Claimed Group Reward: +${GameConfig.GROUP_REWARD_BUX} Bux!`)
 		return
 	end
@@ -510,13 +623,13 @@ function ProfileService.handleMetaAction(player: Player, action: unknown, arg: u
 		for _, entry in GameConfig.PLAYTIME_REWARDS do
 			if entry.id == arg and elapsed >= entry.seconds then
 				profile.PlaytimeClaimed[arg] = true
-				profile.Bux += entry.bux
-				LeaderboardService.Add(player, "Cash", entry.bux)
+				grantBux(player, profile, entry.bux)
 				profile.WheelSpins += entry.spins
 				if entry.chair then
 					profile.OwnedChairs[entry.chair] = true
 					profile.EquippedChair = entry.chair
 				end
+				dirtyProfiles[player] = true
 				syncLeaderstats(player, profile, `Claimed Playtime ({entry.timeLabel}): {entry.rewardLabel}!`)
 				return
 			end
@@ -531,9 +644,9 @@ function ProfileService.handleMetaAction(player: Player, action: unknown, arg: u
 		for _, q in GameConfig.QUESTS do
 			if q.id == arg and (profile.QuestProgress[arg] or 0) >= q.target then
 				profile.QuestClaimed[arg] = true
-				profile.Bux += q.bux
-				LeaderboardService.Add(player, "Cash", q.bux)
+				grantBux(player, profile, q.bux)
 				profile.WheelSpins += q.spins
+				dirtyProfiles[player] = true
 				syncLeaderstats(player, profile, `Quest Complete: {q.rewardLabel}!`)
 				return
 			end
@@ -591,13 +704,13 @@ function ProfileService.handleMetaAction(player: Player, action: unknown, arg: u
 			end
 		end
 		if chosen.bux > 0 then
-			profile.Bux += chosen.bux
-			LeaderboardService.Add(player, "Cash", chosen.bux)
+			grantBux(player, profile, chosen.bux)
 		end
 		if chosen.chair then
 			profile.OwnedChairs[chosen.chair] = true
 			profile.EquippedChair = chosen.chair
 		end
+		dirtyProfiles[player] = true
 		local nextSeq = ((player:GetAttribute("WheelSpinSeq") :: number?) or 0) + 1
 		player:SetAttribute("LastWheelSlice", chosen.id)
 		player:SetAttribute("WheelSpinSeq", nextSeq)
@@ -673,18 +786,63 @@ function ProfileService.handleMetaAction(player: Player, action: unknown, arg: u
 	end
 end
 
+local function flushPlayerProfile(player: Player, removeAfter: boolean)
+	local profile = profiles[player]
+	if removeAfter then
+		profiles[player] = nil
+		dirtyProfiles[player] = nil
+		feedbackCooldowns[player] = nil
+		updateStreakKing()
+	end
+	if profile then
+		local now = Workspace:GetServerTimeNow()
+		local elapsed = math.max(0, math.floor(now - profile.SessionJoinTime))
+		profile.PlaytimeSeconds = math.max(0, math.floor(profile.PlaytimeSeconds or 0)) + elapsed
+		profile.SessionJoinTime = now
+		if not removeAfter then
+			player:SetAttribute("SessionStart", now)
+		end
+		dirtyProfiles[player] = nil
+		if store and player.UserId > 0 then
+			pcall(function()
+				(store :: DataStore):SetAsync(`Player_{player.UserId}`, profile)
+			end)
+		end
+	end
+end
+
 local function loadPlayer(player: Player)
 	local data = defaultProfile()
+	local hadSavedData = false
 	if store and player.UserId > 0 then
 		local ok, saved = pcall(function()
 			return (store :: DataStore):GetAsync(`Player_{player.UserId}`)
 		end)
 		if ok and typeof(saved) == "table" then
+			hadSavedData = true
 			for k, v in saved do
 				if data[k] ~= nil and typeof(v) == typeof(data[k]) then
 					(data :: any)[k] = v
 				end
 			end
+		end
+	end
+	if not hadSavedData and data.FirstJoinedAt == 0 then
+		data.FirstJoinedAt = os.time()
+	end
+	data.BestStreak = math.max(data.BestStreak or 0, data.Streak or 0)
+	data.TotalCashEarned = math.max(data.TotalCashEarned or 0, data.Bux or 0)
+	refreshWinBuckets(data)
+	if data.RarestCardId == "" then
+		local bestCard: Footballers.Footballer? = nil
+		for cardId, owned in data.DiscoveredCards do
+			local c = if owned then Footballers.ById[cardId] else nil
+			if c and isRarerCard(c, bestCard) then
+				bestCard = c
+			end
+		end
+		if bestCard then
+			data.RarestCardId = bestCard.id
 		end
 	end
 	data.SessionJoinTime = Workspace:GetServerTimeNow()
@@ -695,25 +853,11 @@ local function loadPlayer(player: Player)
 	end
 	profiles[player] = data
 	syncLeaderstats(player, data)
-	LeaderboardService.seedPlayerOnJoin(player, data.Wins, data.Streak, data.Bux, data.PlaytimeSeconds)
+	LeaderboardService.seedPlayerOnJoin(player, data.Wins, data.BestStreak, data.TotalCashEarned, data.PlaytimeSeconds)
 end
 
 local function saveAndRemovePlayer(player: Player)
-	local profile = profiles[player]
-	profiles[player] = nil
-	feedbackCooldowns[player] = nil
-	updateStreakKing()
-	if profile then
-		local now = Workspace:GetServerTimeNow()
-		local elapsed = math.max(0, math.floor(now - profile.SessionJoinTime))
-		profile.PlaytimeSeconds = math.max(0, math.floor(profile.PlaytimeSeconds or 0)) + elapsed
-		profile.SessionJoinTime = now
-		if store and player.UserId > 0 then
-			pcall(function()
-				(store :: DataStore):SetAsync(`Player_{player.UserId}`, profile)
-			end)
-		end
-	end
+	flushPlayerProfile(player, true)
 end
 
 function ProfileService.init()
@@ -770,6 +914,21 @@ function ProfileService.init()
 	for _, player in Players:GetPlayers() do
 		task.spawn(loadPlayer, player)
 	end
+	task.spawn(function()
+		while true do
+			task.wait(AUTOSAVE_INTERVAL_SEC)
+			for player in dirtyProfiles do
+				if profiles[player] then
+					local okBudget, budget = pcall(function()
+						return DataStoreService:GetRequestBudgetForRequestType(Enum.DataStoreRequestType.SetIncrementAsync)
+					end)
+					if not okBudget or (budget and budget >= 2) then
+						flushPlayerProfile(player, false)
+					end
+				end
+			end
+		end
+	end)
 	game:BindToClose(function()
 		for _, player in Players:GetPlayers() do
 			saveAndRemovePlayer(player)

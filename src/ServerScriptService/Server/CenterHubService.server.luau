@@ -354,7 +354,7 @@ local function createStreakBillboard(adornee: BasePart, playerName: string, stre
 	line3.Size = UDim2.new(1, 0, 0.30, 0)
 	line3.BackgroundTransparency = 1
 	line3.Font = Enum.Font.FredokaOne
-	line3.Text = `{streakCount} WIN STREAK`
+	line3.Text = if streakCount > 0 then `{streakCount} WIN STREAK` else "CHAMPION"
 	line3.TextColor3 = Color3.fromHex("#FFA500")
 	line3.TextScaled = true
 	local stroke3 = Instance.new("UIStroke")
@@ -367,117 +367,121 @@ local function createStreakBillboard(adornee: BasePart, playerName: string, stre
 	return bbg
 end
 
--- Build fallback gold "?" statue when DataStore is empty or offline
-local function buildFallbackStatue(standCF: CFrame): Model
-	local statue = Instance.new("Model")
-	statue.Name = "Rank1Statue"
+-- Align avatar limbs and accessories cleanly so heads, hats, and hair never detach
+local function assembleAvatarRig(model: Model)
+	for _, desc in ipairs(model:GetDescendants()) do
+		if desc:IsA("Constraint") and desc.Attachment0 and desc.Attachment1 then
+			local att0 = desc.Attachment0
+			local att1 = desc.Attachment1
+			local part0 = att0.Parent :: BasePart?
+			local part1 = att1.Parent :: BasePart?
+			if part0 and part1 and part0:IsA("BasePart") and part1:IsA("BasePart") then
+				part1.CFrame = part0.CFrame * att0.CFrame * att1.CFrame:Inverse()
+			end
+		end
+	end
 
-	local goldCol = Color3.fromHex("#F5B800")
-	local darkGold = Color3.fromHex("#B58000")
-	local mat = Enum.Material.SmoothPlastic
+	for _, acc in ipairs(model:GetChildren()) do
+		if acc:IsA("Accessory") then
+			local handle = acc:FindFirstChild("Handle") :: BasePart?
+			if handle then
+				local handleAtt = handle:FindFirstChildOfClass("Attachment")
+				if handleAtt then
+					for _, desc in ipairs(model:GetDescendants()) do
+						if desc:IsA("Attachment") and desc.Name == handleAtt.Name and desc.Parent ~= handle then
+							local bodyPart = desc.Parent :: BasePart?
+							if bodyPart and bodyPart:IsA("BasePart") then
+								handle.CFrame = bodyPart.CFrame * desc.CFrame * handleAtt.CFrame:Inverse()
+								break
+							end
+						end
+					end
+				end
+			end
+		end
+	end
+end
 
-	-- Golden Blocky Torso & Head
-	local root = makePart(statue, "HumanoidRootPart", Vector3.new(2, 2, 1), standCF * CFrame.new(0, 3, 0), goldCol, mat, false)
-	local head = makePart(statue, "Head", Vector3.new(1.25, 1.25, 1.25), standCF * CFrame.new(0, 4.6, 0), goldCol, mat, false)
-	makePart(statue, "LeftArm", Vector3.new(1, 2, 1), standCF * CFrame.new(-1.5, 3, 0), goldCol, mat, false)
-	makePart(statue, "RightArm", Vector3.new(1, 2, 1), standCF * CFrame.new(1.5, 3.5, 0) * CFrame.Angles(0, 0, math.rad(-25)), goldCol, mat, false)
-	makePart(statue, "LeftLeg", Vector3.new(1, 2, 1), standCF * CFrame.new(-0.55, 1, 0), goldCol, mat, false)
-	makePart(statue, "RightLeg", Vector3.new(1, 2, 1), standCF * CFrame.new(0.55, 1, 0), goldCol, mat, false)
+-- Resolve champion from active players in the server (streak first, then wins)
+local function getTopServerChampion(): (Player?, number)
+	local bestPlayer: Player? = nil
+	local bestStreak = -1
 
-	-- 3D Gold "?" Block Question Symbol
-	local qMark = makePart(statue, "QuestionMarkSymbol", Vector3.new(1.8, 2.2, 0.4), standCF * CFrame.new(0, 6.2, 0), darkGold, mat, false)
-	local qGui = Instance.new("SurfaceGui")
-	qGui.Face = Enum.NormalId.Front
-	local qLbl = Instance.new("TextLabel")
-	qLbl.Size = UDim2.fromScale(1, 1)
-	qLbl.BackgroundTransparency = 1
-	qLbl.Font = Enum.Font.FredokaOne
-	qLbl.Text = "?"
-	qLbl.TextColor3 = Color3.fromRGB(255, 255, 255)
-	qLbl.TextScaled = true
-	local qStroke = Instance.new("UIStroke")
-	qStroke.Thickness = 4
-	qStroke.Color = Color3.fromRGB(0, 0, 0)
-	qStroke.Parent = qLbl
-	qLbl.Parent = qGui
-	qGui.Parent = qMark
+	for _, player in ipairs(Players:GetPlayers()) do
+		local streak = 0
+		local ls = player:FindFirstChild("leaderstats")
+		local sVal = ls and ls:FindFirstChild("Streak")
+		if sVal and sVal:IsA("IntValue") then
+			streak = sVal.Value
+		end
 
-	statue.PrimaryPart = root
-	createStreakBillboard(head, "Nobody Yet", 0)
-	return statue
+		if streak == 0 then
+			local ok, prof = pcall(function()
+				return require(game.ServerScriptService.Server.ProfileService).Get(player)
+			end)
+			if ok and prof and prof.Streak then
+				streak = prof.Streak
+			end
+		end
+
+		if streak > bestStreak then
+			bestStreak = streak
+			bestPlayer = player
+		end
+	end
+
+	return bestPlayer, math.max(0, bestStreak)
 end
 
 -- Refresh the Rank 1 Statue with the top player
 local function updateRank1Statue(pedestal: Model, pedestalBase: Part)
-	-- Read Rank #1 from TOP WINS DataStore
-	local topWinsUserId: number? = nil
-	local topStreakUserId: number? = nil
+	local serverPlayer, serverStreak = getTopServerChampion()
+	local targetUserId: number? = nil
 	local topStreakVal = 0
+	local playerName = "Nobody Yet"
 
-	if winsStore then
-		local ok, pages = pcall(function()
-			return winsStore:GetSortedAsync(false, 1)
-		end)
-		if ok and pages then
-			local pageOk, page = pcall(function()
-				return pages:GetCurrentPage()
+	if serverPlayer then
+		targetUserId = serverPlayer.UserId
+		topStreakVal = serverStreak
+		playerName = serverPlayer.DisplayName
+	else
+		-- Fallback to global DataStore if no active player in server
+		if streakStore then
+			local ok, pages = pcall(function()
+				return streakStore:GetSortedAsync(false, 1)
 			end)
-			if pageOk and typeof(page) == "table" and page[1] then
-				local uid = tonumber(page[1].key)
-				if uid and uid > 0 then
-					topWinsUserId = uid
+			if ok and pages then
+				local pageOk, page = pcall(function()
+					return pages:GetCurrentPage()
+				end)
+				if pageOk and typeof(page) == "table" and page[1] then
+					local uid = tonumber(page[1].key)
+					local val = tonumber(page[1].value) or 0
+					if uid and uid > 0 and val > 0 then
+						targetUserId = uid
+						topStreakVal = val
+						playerName = resolveUserName(uid)
+					end
 				end
 			end
 		end
 	end
 
-	-- Read Rank #1 Streak & Player
-	if streakStore then
-		local ok, pages = pcall(function()
-			return streakStore:GetSortedAsync(false, 1)
-		end)
-		if ok and pages then
-			local pageOk, page = pcall(function()
-				return pages:GetCurrentPage()
-			end)
-			if pageOk and typeof(page) == "table" and page[1] then
-				local uid = tonumber(page[1].key)
-				local val = tonumber(page[1].value) or 0
-				if uid and uid > 0 then
-					topStreakUserId = uid
-					topStreakVal = val
-				end
-			end
-		end
-	end
-
-	local targetUserId = topWinsUserId or topStreakUserId
-	local streakDisplayUser = topStreakUserId or targetUserId
-	local playerName = if streakDisplayUser then resolveUserName(streakDisplayUser) else "Nobody Yet"
-
-	local standPos = pedestalBase.Position + Vector3.new(0, Config.PEDESTAL.Height / 2, 0)
-	local standCF = CFrame.lookAt(standPos, standPos + Vector3.new(0, 0, 1))
-
-	-- Clean up existing statue
 	local oldStatue = pedestal:FindFirstChild("Rank1Statue")
 
 	if not targetUserId or targetUserId <= 0 then
-		if oldStatue and currentStatueUserId == -1 then
-			return -- Already displaying fallback
-		end
 		currentStatueUserId = -1
 		if oldStatue then
 			oldStatue:Destroy()
 		end
-		local fallback = buildFallbackStatue(standCF)
-		fallback.Parent = pedestal
+		createStreakBillboard(pedestalBase, "Nobody Yet", 0)
 		return
 	end
 
+	-- If already displaying the same user, just refresh billboard numbers
 	if currentStatueUserId == targetUserId and oldStatue then
-		-- Update billboard numbers if userId hasn't changed
-		local head = oldStatue:FindFirstChild("Head") :: BasePart?
-		if head then
+		local head = oldStatue:FindFirstChild("Head") or oldStatue:FindFirstChild("HumanoidRootPart") or pedestalBase
+		if head and head:IsA("BasePart") then
 			createStreakBillboard(head, playerName, topStreakVal)
 		end
 		return
@@ -494,61 +498,57 @@ local function updateRank1Statue(pedestal: Model, pedestalBase: Part)
 			if rig then
 				rig:Destroy()
 			end
-			if not oldStatue then
-				local fallback = buildFallbackStatue(standCF)
-				fallback.Parent = pedestal
-			end
 			return
 		end
 
 		rig.Name = "Rank1Statue"
 
-		-- Clean up animations, scripts, shirts, pants to let gold body shine
+		-- 1. Assemble body joints and accessories intact at raw origin
+		assembleAvatarRig(rig)
+
 		local hrp = rig:FindFirstChild("HumanoidRootPart") :: BasePart?
 		local head = rig:FindFirstChild("Head") :: BasePart?
 
-		for _, desc in rig:GetDescendants() do
+		-- 2. Position standing cleanly on the golden pedestal platform
+		local standPos = pedestalBase.Position + Vector3.new(0, (pedestalBase.Size.X / 2) + 3.0, 0)
+		local standCF = CFrame.lookAt(standPos, standPos + Vector3.new(0, 0, 1))
+
+		-- 3. Pivot the entire assembled avatar rig to pedestal BEFORE anchoring parts
+		rig.PrimaryPart = hrp or head
+		rig:PivotTo(standCF)
+
+		-- 4. Anchor all parts, preserve clothing/hair/face, prevent humanoid death
+		for _, desc in ipairs(rig:GetDescendants()) do
 			if desc:IsA("BaseScript") or desc:IsA("Animator") or desc:IsA("Animation") then
-				desc:Destroy()
-			elseif desc:IsA("Clothing") or desc:IsA("ShirtGraphic") then
 				desc:Destroy()
 			elseif desc:IsA("Humanoid") then
 				desc.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.None
 				desc.EvaluateStateMachine = false
+				desc.NameDisplayDistance = 0
+				desc.HealthDisplayDistance = 0
+				desc.RequiresNeck = false
 			elseif desc:IsA("BasePart") then
 				desc.Anchored = true
 				desc.CanCollide = false
 				desc.CanQuery = false
 				desc.CanTouch = false
-				desc.CastShadow = false
-				desc.Material = Enum.Material.SmoothPlastic
-				desc.Color = Config.TIER_1.Color -- Gold tint
+				desc.CastShadow = true
 			end
 		end
 
-		-- Pose avatar in a generic victory pose (Right arm raised)
-		local rightArm = rig:FindFirstChild("Right Arm") or rig:FindFirstChild("RightUpperArm")
-		if rightArm and rightArm:IsA("BasePart") and hrp then
-			rightArm.CFrame = hrp.CFrame * CFrame.new(1.3, 0.5, -0.3) * CFrame.Angles(math.rad(130), 0, math.rad(-20))
+		-- 5. Attach 👑 STREAK KING Billboard to head
+		local adornee = head or hrp or pedestalBase
+		if adornee and adornee:IsA("BasePart") then
+			createStreakBillboard(adornee, playerName, topStreakVal)
 		end
 
-		-- Align to pedestal
-		if hrp then
-			hrp.CFrame = standCF * CFrame.new(0, 3.0, 0)
-		else
-			rig:PivotTo(standCF * CFrame.new(0, 3.0, 0))
+		-- Remove idle billboard from pedestalBase if placed there previously
+		local idleBb = pedestalBase:FindFirstChild("StreakKingBillboard")
+		if idleBb and idleBb.Parent ~= adornee then
+			idleBb:Destroy()
 		end
 
-		rig.PrimaryPart = hrp or head
-
-		-- Attach Streak King Billboard
-		if head then
-			createStreakBillboard(head, playerName, topStreakVal)
-		elseif hrp then
-			createStreakBillboard(hrp, playerName, topStreakVal)
-		end
-
-		if oldStatue then
+		if oldStatue and oldStatue.Parent then
 			oldStatue:Destroy()
 		end
 		rig.Parent = pedestal
@@ -557,45 +557,61 @@ end
 
 -- Initialize Service
 local function init()
-	local function ensureHub()
-		local lobby = Workspace:WaitForChild("Lobby")
-		local rogue = lobby:FindFirstChild("CenterHub")
-		if rogue then
-			rogue:Destroy()
-		end
-		local currentHub = lobby:FindFirstChild("Hub")
-		if not currentHub then
-			local hub, rotatingPedestal, pedestalBase = buildCenterHubGeometry()
-			updateRank1Statue(rotatingPedestal, pedestalBase)
-		else
-			local ped = currentHub:FindFirstChild("RotatingPedestal") :: Model?
-			local base = if ped then ped:FindFirstChild("PedestalBase") :: Part? else nil
-			if ped and base then
-				updateRank1Statue(ped, base)
-			end
+	local function getPedestalComponents(): (Model?, Part?)
+		local lobby = Workspace:FindFirstChild("Lobby")
+		local currentHub = lobby and (lobby:FindFirstChild("Hub") or lobby:FindFirstChild("CenterHub"))
+		local ped = currentHub and currentHub:FindFirstChild("RotatingPedestal") :: Model?
+		local base = ped and ped:FindFirstChild("PedestalBase") :: Part?
+		return ped, base
+	end
+
+	local function refresh()
+		local ped, base = getPedestalComponents()
+		if ped and base then
+			updateRank1Statue(ped, base)
 		end
 	end
 
-	ensureHub()
+	refresh()
 
-	-- Re-attach if Lobby is ever rebuilt at runtime
-	Workspace.ChildAdded:Connect(function(child)
-		if child.Name == "Lobby" then
-			task.defer(ensureHub)
+	-- Hook into players joining, leaving, and updating streaks in real-time
+	local function hookPlayer(player: Player)
+		local function onStreakChanged()
+			refresh()
 		end
+
+		local function checkLeaderstats()
+			local ls = player:FindFirstChild("leaderstats")
+			if ls then
+				local sVal = ls:FindFirstChild("Streak")
+				if sVal and sVal:IsA("IntValue") then
+					sVal.Changed:Connect(onStreakChanged)
+				end
+			end
+		end
+
+		player.ChildAdded:Connect(function(c)
+			if c.Name == "leaderstats" then
+				checkLeaderstats()
+			end
+		end)
+		checkLeaderstats()
+		refresh()
+	end
+
+	for _, p in ipairs(Players:GetPlayers()) do
+		hookPlayer(p)
+	end
+	Players.PlayerAdded:Connect(hookPlayer)
+	Players.PlayerRemoving:Connect(function()
+		task.defer(refresh)
 	end)
 
-	-- 60 second update loop
+	-- 60 second periodic refresh
 	task.spawn(function()
 		while true do
-			task.wait(Config.REFRESH_INTERVAL_SECONDS)
-			local lobby = Workspace:FindFirstChild("Lobby")
-			local hub = if lobby then (lobby:FindFirstChild("Hub") or lobby:FindFirstChild("CenterHub")) else nil
-			local ped = if hub then hub:FindFirstChild("RotatingPedestal") :: Model? else nil
-			local base = if ped then ped:FindFirstChild("PedestalBase") :: Part? else nil
-			if ped and base then
-				updateRank1Statue(ped, base)
-			end
+			task.wait(Config.REFRESH_INTERVAL_SECONDS or 60)
+			refresh()
 		end
 	end)
 end
