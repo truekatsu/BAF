@@ -1,0 +1,312 @@
+#001 L   9: Lighting                  | local Lighting = game:GetService("Lighting")
+#002 L  10: Players                   | local Players = game:GetService("Players")
+#003 L  11: ReplicatedStorage         | local ReplicatedStorage = game:GetService("ReplicatedStorage")
+#004 L  12: RunService                | local RunService = game:GetService("RunService")
+#005 L  13: SocialService             | local SocialService = game:GetService("SocialService")
+#006 L  14: SoundService              | local SoundService = game:GetService("SoundService")
+#007 L  15: TweenService              | local TweenService = game:GetService("TweenService")
+#008 L  16: UserInputService          | local UserInputService = game:GetService("UserInputService")
+#009 L  17: Workspace                 | local Workspace = game:GetService("Workspace")
+#010 L  19: localPlayer               | local localPlayer = Players.LocalPlayer
+#011 L  20: playerGui                 | local playerGui = localPlayer:WaitForChild("PlayerGui")
+#012 L  22: Shared                    | local Shared = ReplicatedStorage:WaitForChild("Shared")
+#013 L  23: GameConfig                | local GameConfig = require(Shared:WaitForChild("GameConfig"))
+#014 L  24: Footballers               | local Footballers = require(Shared:WaitForChild("Footballers"))
+#015 L  25: FootballerModelBuilder    | local FootballerModelBuilder = require(Shared:WaitForChild("FootballerModelBuild
+#016 L  26: Remotes                   | local Remotes = require(Shared:WaitForChild("Remotes"))
+#017 L  27: UITheme                   | local UITheme = require(Shared:WaitForChild("UITheme"))
+#018 L  28: VoteConfig                | local VoteConfig = require(Shared:WaitForChild("VoteConfig"))
+#019 L  29: ShopDailyUI               | local ShopDailyUI = require(script.Parent:WaitForChild("ShopDailyUI"))
+#020 L  31: DAILY_COOLDOWN_SEC        | local DAILY_COOLDOWN_SEC = 86400
+#021 L  34: sfxFolder                 | local sfxFolder = Instance.new("Folder")
+#022 L  38: createSound               | local function createSound(name: string, soundId: string, speed: number, vol: nu
+#023 L  48: sfxMap:                   | local sfxMap: { [string]: Sound } = {
+#024 L  57: playSfx                   | local function playSfx(kind: string)
+#025 L  65: createBgm                 | local function createBgm(name: string, soundId: string): Sound
+#026 L  75: bgmTracks:                | local bgmTracks: { [string]: { sound: Sound, targetVol: number } } = {
+#027 L  80: activeBgmKey              | local activeBgmKey = ""
+#028 L  82: setBgmPhase               | local function setBgmPhase(phase: string)
+#029 L 117: popGui                    | local function popGui(guiObj: GuiObject, startScale: number?)
+#030 L 129: matchBlur                 | local matchBlur = Lighting:FindFirstChild("BAF_MatchBlur") :: BlurEffect?
+#031 L 138: setMatchBlur              | local function setMatchBlur(enabled: boolean)
+#032 L 146: lastCamTableCF:           | local lastCamTableCF: CFrame? = nil
+#033 L 147: focusTableCamera          | local function focusTableCamera(tablePos: Vector3?, mode: "Idle" | "Build" | "Sh
+#034 L 191: addCorner                 | local function addCorner(parent: Instance, radius: number)
+#035 L 197: addStroke                 | local function addStroke(parent: Instance, color: Color3, thickness: number)
+#036 L 205: makeLabel                 | local function makeLabel(parent: Instance, text: string, size: UDim2, pos: UDim2
+#037 L 224: makeButton                | local function makeButton(parent: Instance, text: string, size: UDim2, pos: UDim
+#038 L 252: formatMMSS                | local function formatMMSS(totalSec: number): string
+#039 L 259: formatHHMMSS              | local function formatHHMMSS(totalSec: number): string
+#040 L 275: screenGui                 | local screenGui = Instance.new("ScreenGui")
+#041 L 285: lobbyHud                  | local lobbyHud = Instance.new("Frame")
+#042 L 292: toastBanner               | local toastBanner = makeLabel(screenGui, "", UDim2.new(0.44, 0, 0, 38), UDim2.ne
+#043 L 299: toastToken                | local toastToken = 0
+#044 L 301: showToast                 | local function showToast(msg: string)
+#045 L 317: topRightBar               | local topRightBar = Instance.new("Frame")
+#046 L 326: topRightLayout            | local topRightLayout = Instance.new("UIListLayout")
+#047 L 334: makeTopButton             | local function makeTopButton(name: string, imageId: string, size: UDim2, layoutO
+#048 L 354: btnTopDaily               | local btnTopDaily = makeTopButton("BtnTopDaily", UITheme.Assets.BtnDaily, UDim2.
+#049 L 355: btnTopQuests              | local btnTopQuests = makeTopButton("BtnTopQuests", UITheme.Assets.BtnQuests, UDi
+#050 L 357: questBadge                | local questBadge = makeLabel(btnTopQuests, "0", UDim2.fromOffset(22, 22), UDim2.
+#051 L 367: NAV_BTN_SIZE              | local NAV_BTN_SIZE = 84
+#052 L 368: NAV_BTN_STEP              | local NAV_BTN_STEP = 90
+#053 L 370: makeNavButton             | local function makeNavButton(name: string, imageId: string, index: number, scale
+#054 L 394: btnNavFree                | local btnNavFree = makeNavButton("BtnNavFree", UITheme.Assets.NavFreeIcon, 1, 55
+#055 L 395: btnNavShop                | local btnNavShop = makeNavButton("BtnNavShop", UITheme.Assets.NavShopIcon, 2, 55
+#056 L 396: btnNavSkins               | local btnNavSkins = makeNavButton("BtnNavSkins", UITheme.Assets.NavSkinsIcon, 3,
+#057 L 397: btnNavTitles              | local btnNavTitles = makeNavButton("BtnNavTitles", UITheme.Assets.NavTitlesIcon,
+#058 L 398: btnNavIndex               | local btnNavIndex = makeNavButton("BtnNavIndex", UITheme.Assets.NavIndexIcon, 5,
+#059 L 399: btnNavProfile             | local btnNavProfile = makeNavButton("BtnNavProfile", UITheme.Assets.NavProfileIc
+#060 L 413: freeBadge                 | local freeBadge = makeLabel(btnNavFree, "1", UDim2.fromOffset(26, 26), UDim2.new
+#061 L 421: btnPromoStarter:          | local btnPromoStarter: TextButton
+#062 L 422: btnPromoStreak:           | local btnPromoStreak: TextButton
+#063 L 488: friendsLabel              | local friendsLabel = makeLabel(lobbyHud, "FRIENDS BOOST: +0%", UDim2.fromOffset(
+#064 L 490: btnAddFriend              | local btnAddFriend = makeButton(lobbyHud, "+", UDim2.fromOffset(28, 28), UDim2.n
+#065 L 498: cashPill                  | local cashPill = Instance.new("Frame")
+#066 L 509: cashIconImg               | local cashIconImg = Instance.new("ImageLabel")
+#067 L 519: cashLabel                 | local cashLabel = makeLabel(cashPill, "$0", UDim2.new(1, -90, 1, 0), UDim2.new(0
+#068 L 522: btnAddCash                | local btnAddCash = makeButton(cashPill, "+", UDim2.fromOffset(36, 36), UDim2.new
+#069 L 526: activeAlertTableId:       | local activeAlertTableId: string? = nil
+#070 L 527: opponentAlertBanner       | local opponentAlertBanner = Instance.new("Frame")
+#071 L 542: alertAvatarImg            | local alertAvatarImg = Instance.new("ImageLabel")
+#072 L 550: alertTitleLbl             | local alertTitleLbl = makeLabel(opponentAlertBanner, "Player needs an opponent..
+#073 L 554: btnAlertJoin              | local btnAlertJoin = Instance.new("TextButton")
+#074 L 568: btnAlertDismiss           | local btnAlertDismiss = Instance.new("TextButton")
+#075 L 599: modalBackdrop             | local modalBackdrop = Instance.new("TextButton")
+#076 L 612: modalWrap                 | local modalWrap = Instance.new("Frame")
+#077 L 622: modalBox                  | local modalBox = Instance.new("Frame")
+#078 L 632: modalBoxScale             | local modalBoxScale = Instance.new("UIScale")
+#079 L 637: modalHeader               | local modalHeader = Instance.new("Frame")
+#080 L 645: modalHeaderBorder         | local modalHeaderBorder = Instance.new("Frame")
+#081 L 654: modalTitle                | local modalTitle = Instance.new("TextLabel")
+#082 L 671: btnCloseModal             | local btnCloseModal = Instance.new("TextButton")
+#083 L 685: modalBody                 | local modalBody = Instance.new("Frame")
+#084 L 693: freeTabsBar               | local freeTabsBar = Instance.new("Frame")
+#085 L 702: setTabActive              | local function setTabActive(btn: TextButton, isActive: boolean, text: string)
+#086 L 747: btnTabDaily               | local btnTabDaily = makeButton(freeTabsBar, "", UDim2.new(0.31, 0, 1, 0), UDim2.
+#087 L 748: btnTabGroup               | local btnTabGroup = makeButton(freeTabsBar, "", UDim2.new(0.31, 0, 1, 0), UDim2.
+#088 L 749: btnTabPlaytime            | local btnTabPlaytime = makeButton(freeTabsBar, "", UDim2.new(0.31, 0, 1, 0), UDi
+#089 L 754: dailyTabBadge             | local dailyTabBadge = makeLabel(btnTabDaily, "0", UDim2.fromOffset(24, 24), UDim
+#090 L 761: groupTabBadge             | local groupTabBadge = makeLabel(btnTabGroup, "0", UDim2.fromOffset(24, 24), UDim
+#091 L 768: playtimeTabBadge          | local playtimeTabBadge = makeLabel(btnTabPlaytime, "0", UDim2.fromOffset(24, 24)
+#092 L 776: pageFreeDaily             | local pageFreeDaily = Instance.new("Frame")
+#093 L 781: pageFreeGroup             | local pageFreeGroup = Instance.new("Frame")
+#094 L 787: pageFreePlaytime          | local pageFreePlaytime = Instance.new("Frame")
+#095 L 793: pageQuests                | local pageQuests = Instance.new("Frame")
+#096 L 799: pageSkins                 | local pageSkins = Instance.new("Frame")
+#097 L 805: pageTitles                | local pageTitles = Instance.new("Frame")
+#098 L 811: shopHandler               | local shopHandler = ShopDailyUI.initShop(screenGui, modalBackdrop, Remotes, UITh
+#099 L 812: shopWindow                | local shopWindow = shopHandler.window
+#100 L 813: pageIndex                 | local pageIndex = Instance.new("Frame")
+#101 L 819: pageWheel                 | local pageWheel = Instance.new("Frame")
+#102 L 826: pageProfile               | local pageProfile = Instance.new("Frame")
+#103 L 836: dailyHandler              | local dailyHandler = ShopDailyUI.initDaily(pageFreeDaily, Remotes, UITheme, Game
+#104 L 839: btnClaimGroup:            | local btnClaimGroup: TextButton
+#105 L 841: groupSunburst             | local groupSunburst = Instance.new("Frame")
+#106 L 850: groupSub                  | local groupSub = makeLabel(groupSunburst, "Like the game & join the group!", UDi
+#107 L 853: likeCard                  | local likeCard = Instance.new("Frame")
+#108 L 863: likeIcon                  | local likeIcon = makeLabel(likeCard, "👍", UDim2.fromScale(0.85, 0.55), UDim2.new
+#109 L 867: likeLbl                   | local likeLbl = makeLabel(likeCard, "LIKE", UDim2.new(0.88, 0, 0.26, 0), UDim2.n
+#110 L 870: plusLbl                   | local plusLbl = makeLabel(groupSunburst, "+", UDim2.new(0.06, 0, 0.20, 0), UDim2
+#111 L 873: joinCard                  | local joinCard = Instance.new("Frame")
+#112 L 882: joinIcon                  | local joinIcon = makeLabel(joinCard, "👥", UDim2.fromScale(0.85, 0.55), UDim2.new
+#113 L 886: joinLbl                   | local joinLbl = makeLabel(joinCard, "JOIN", UDim2.new(0.88, 0, 0.26, 0), UDim2.n
+#114 L 889: equalsLbl                 | local equalsLbl = makeLabel(groupSunburst, "=", UDim2.new(0.06, 0, 0.20, 0), UDi
+#115 L 892: rewardChestCard           | local rewardChestCard = Instance.new("Frame")
+#116 L 898: groupCashIcon             | local groupCashIcon = Instance.new("ImageLabel")
+#117 L 908: rewardValLbl              | local rewardValLbl = makeLabel(rewardChestCard, "$250", UDim2.new(0.96, 0, 0.32,
+#118 L 913: claimGrpLbl               | local claimGrpLbl = Instance.new("TextLabel")
+#119 L 936: ptRailFill:               | local ptRailFill: Frame
+#120 L 937: playtimeNodes:            | local playtimeNodes: { [string]: Frame } = {}
+#121 L 938: playtimeNodeIcons:        | local playtimeNodeIcons: { [string]: TextLabel } = {}
+#122 L 939: playtimeButtons:          | local playtimeButtons: { [string]: TextButton } = {}
+#123 L 940: playtimeCardFrames:       | local playtimeCardFrames: { [string]: Frame } = {}
+#124 L 941: playtimeInsetFrames:      | local playtimeInsetFrames: { [string]: Frame } = {}
+#125 L 942: playtimeLockBadges:       | local playtimeLockBadges: { [string]: ImageLabel } = {}
+#126 L 943: playedElapsedLabel:       | local playedElapsedLabel: TextLabel
+#127 L 945: ptRail                    | local ptRail = Instance.new("Frame")
+#128 L 963: cardWidths                | local cardWidths = { 0.142, 0.142, 0.142, 0.142, 0.142, 0.185 }
+#129 L 964: cardHeights               | local cardHeights = { 0.69, 0.69, 0.69, 0.69, 0.69, 0.72 }
+#130 L 965: cardXPos                  | local cardXPos = { 0.02, 0.174, 0.328, 0.482, 0.636, 0.790 }
+#131 L1105: btnSkipAllPlaytime        | local btnSkipAllPlaytime = makeButton(pageFreePlaytime, "", UDim2.new(0.28, 0, 0
+#132 L1109: skipAllLbl                | local skipAllLbl = Instance.new("TextLabel")
+#133 L1132: questProgLabels:          | local questProgLabels: { [string]: TextLabel } = {}
+#134 L1133: questClaimBtns:           | local questClaimBtns: { [string]: TextButton } = {}
+#135 L1171: wheelSpinBtn:             | local wheelSpinBtn: TextButton
+#136 L1172: luckUpgradeBtn:           | local luckUpgradeBtn: TextButton
+#137 L1173: skinActionBtns:           | local skinActionBtns: { [string]: TextButton } = {}
+#138 L1174: skinNameLabels:           | local skinNameLabels: { [string]: TextLabel } = {}
+#139 L1393: titlesWinsHeader:         | local titlesWinsHeader: TextLabel
+#140 L1394: titleActionBtns:          | local titleActionBtns: { [string]: TextButton } = {}
+#141 L1396: winsHeaderFrame           | local winsHeaderFrame = Instance.new("Frame")
+#142 L1407: trophyImg                 | local trophyImg = Instance.new("ImageLabel")
+#143 L1461: indexProgressHeader:      | local indexProgressHeader: TextLabel
+#144 L1462: indexCardCells:           | local indexCardCells: { [string]: { frame: Frame, label: TextLabel, card: Footba
+#145 L1465: indexScroll               | local indexScroll = Instance.new("ScrollingFrame")
+#146 L1475: indexGrid                 | local indexGrid = Instance.new("UIGridLayout")
+#147 L1481: orderIdx                  | local orderIdx = 0
+#148 L1503: wheelSpinning             | local wheelSpinning = false
+#149 L1504: wheelCurrentRot           | local wheelCurrentRot = 0
+#150 L1505: lastHandledWheelSeq       | local lastHandledWheelSeq = (localPlayer:GetAttribute("WheelSpinSeq") :: number?
+#151 L1507: wheelRotVal               | local wheelRotVal = Instance.new("NumberValue")
+#152 L1508: wheelSpinsCountLbl:       | local wheelSpinsCountLbl: TextLabel
+#153 L1509: spinBtnLabel:             | local spinBtnLabel: TextLabel
+#154 L1510: refreshProfileGlobalRanks: | local refreshProfileGlobalRanks: () -> ()
+#155 L1511: updateProfilePage:        | local updateProfilePage: (p: any, elapsed: number, disc: { [string]: boolean }, 
+#156 L1523: wheelDiscGui              | local wheelDiscGui = Instance.new("Frame")
+#157 L1533: wheelVp                   | local wheelVp = Instance.new("ViewportFrame")
+#158 L1543: wheelVpCam                | local wheelVpCam = Instance.new("Camera")
+#159 L1549: wheel3DModel              | local wheel3DModel = Instance.new("Model")
+#160 L1551: wheelPivot                | local wheelPivot = Instance.new("Part")
+#161 L1561: wheelLabelsLayer          | local wheelLabelsLayer = Instance.new("Frame")
+#162 L2110: hideAllModalPages         | local function hideAllModalPages()
+#163 L2124: openShop                  | local function openShop()
+#164 L2132: closeShop                 | local function closeShop()
+#165 L2137: openFreeTab               | local function openFreeTab(tab: "DAILY" | "GROUP" | "PLAYTIME")
+#166 L2170: openModal                 | local function openModal(kind: "FREE" | "QUESTS" | "SKINS" | "TITLES" | "SHOP" |
+#167 L2266: ATTR_ICONS:               | local ATTR_ICONS: { [string]: string } = {
+#168 L2275: avatarCache:              | local avatarCache: { [number]: string } = {}
+#169 L2276: getAvatarThumb            | local function getAvatarThumb(userId: number?): string
+#170 L2289: makeLine                  | local function makeLine(parent: Instance, color: Color3, thickness: number): Fra
+#171 L2299: setLine                   | local function setLine(line: Frame, p1: Vector2, p2: Vector2, thickness: number)
+#172 L2307: activeEndsAt              | local activeEndsAt = 0
+#173 L2308: currentPhase              | local currentPhase = "Idle"
+#174 L2309: currentSubPhase           | local currentSubPhase = ""
+#175 L2310: currentPlacedThisRound    | local currentPlacedThisRound = false
+#176 L2311: rollingToken              | local rollingToken = 0
+#177 L2312: showdownToken             | local showdownToken = 0
+#178 L2313: cachedProfile:            | local cachedProfile: any = nil
+#179 L2315: overlay                   | local overlay = Instance.new("Frame")
+#180 L2322: modeSubLabel              | local modeSubLabel = makeLabel(overlay, "DEFAULT MODE", UDim2.new(0.4, 0, 0, 20)
+#181 L2323: headerLabel               | local headerLabel = makeLabel(overlay, "BUILD A FOOTBALLER", UDim2.new(0.6, 0, 0
+#182 L2324: winnerNameLabel           | local winnerNameLabel = makeLabel(overlay, "", UDim2.new(0.5, 0, 0, 42), UDim2.n
+#183 L2326: timerLabel                | local timerLabel = makeLabel(overlay, "15", UDim2.new(0.2, 0, 0, 42), UDim2.new(
+#184 L2331: waitingWrap               | local waitingWrap = Instance.new("Frame")
+#185 L2338: btnWaitInvite             | local btnWaitInvite = makeButton(waitingWrap, "", UDim2.fromOffset(232, 48), UDi
+#186 L2409: btnWaitLeave              | local btnWaitLeave = makeButton(waitingWrap, "LEAVE", UDim2.fromOffset(232, 46),
+#187 L2414: aiBox                     | local aiBox = Instance.new("Frame")
+#188 L2422: btnPlayBotNow             | local btnPlayBotNow = makeButton(aiBox, "PLAY!", UDim2.new(0.86, 0, 0, 52), UDim
+#189 L2430: introWrap                 | local introWrap = Instance.new("Frame")
+#190 L2437: introMyName               | local introMyName = makeLabel(introWrap, "Player", UDim2.new(0.6, 0, 0, 54), UDi
+#191 L2438: introVs                   | local introVs = makeLabel(introWrap, "VS", UDim2.new(0.3, 0, 0, 48), UDim2.new(0
+#192 L2439: introOppName              | local introOppName = makeLabel(introWrap, "BOT", UDim2.new(0.6, 0, 0, 56), UDim2
+#193 L2440: introMode                 | local introMode = makeLabel(introWrap, "DEFAULT MODE", UDim2.new(0.4, 0, 0, 32),
+#194 L2442: countdownWrap             | local countdownWrap = Instance.new("Frame")
+#195 L2449: countdownBigLabel         | local countdownBigLabel = makeLabel(countdownWrap, "3", UDim2.fromOffset(220, 14
+#196 L2459: mountViewportModel        | local function mountViewportModel(viewport: ViewportFrame, mount: ViewportMount,
+#197 L2477: createFaceViewport        | local function createFaceViewport(parent: Instance): ViewportFrame
+#198 L2495: createBuildCard           | local function createBuildCard(parent: Instance, posScale: UDim2)
+#199 L2577: setCardSilhouette         | local function setCardSilhouette(widget: any, randomCard: any)
+#200 L2592: populateBuildCard         | local function populateBuildCard(widget: any, card: any, isMine: boolean?, isDim
+#201 L2619: buildCenterWrap           | local buildCenterWrap = Instance.new("Frame")
+#202 L2624: createMiniAvatarBox       | local function createMiniAvatarBox(parent: Instance, pos: UDim2, _borderCol: Col
+#203 L2635: buildMyAvatar             | local buildMyAvatar = createMiniAvatarBox(buildCenterWrap, UDim2.fromScale(0.415
+#204 L2636: buildOppAvatar            | local buildOppAvatar = createMiniAvatarBox(buildCenterWrap, UDim2.fromScale(0.58
+#205 L2638: myCardWidget              | local myCardWidget = createBuildCard(buildCenterWrap, UDim2.fromScale(0.415, 0.4
+#206 L2639: oppCardWidget             | local oppCardWidget = createBuildCard(buildCenterWrap, UDim2.fromScale(0.585, 0.
+#207 L2640: vsCenterLabel             | local vsCenterLabel = makeLabel(buildCenterWrap, "VS", UDim2.fromOffset(52, 40),
+#208 L2642: rolledInfoLabel           | local rolledInfoLabel = makeLabel(overlay, "ROLLING...", UDim2.new(0.46, 0, 0, 3
+#209 L2643: luckBtn                   | local luckBtn = makeButton(buildCenterWrap, "      LUCK: 1x [→1.5x $750]", UDim2
+#210 L2675: mySlotRows:               | local mySlotRows: { [string]: SlotRow } = {}
+#211 L2676: oppSlotRows:              | local oppSlotRows: { [string]: SlotRow } = {}
+#212 L2678: leftHeader                | local leftHeader = makeLabel(overlay, "YOU", UDim2.new(0.26, 0, 0, 26), UDim2.ne
+#213 L2680: rightHeader               | local rightHeader = makeLabel(overlay, "OPPONENT", UDim2.new(0.26, 0, 0, 26), UD
+#214 L2683: animateCardFlyToSlot      | local function animateCardFlyToSlot(targetSquare: GuiObject)
+#215 L2853: actionBar                 | local actionBar = Instance.new("Frame")
+#216 L2859: btnRevealAll              | local btnRevealAll = makeButton(actionBar, "👁️ REVEAL ALL\nR$29", UDim2.new(0.18
+#217 L2860: btnSeeBest                | local btnSeeBest = makeButton(actionBar, "🔍 SEE BEST\nR$9", UDim2.new(0.18, 0, 1
+#218 L2861: btnReroll                 | local btnReroll = makeButton(actionBar, "🎲 REROLL (2)\nR$19", UDim2.new(0.18, 0,
+#219 L2862: btnSteal                  | local btnSteal = makeButton(actionBar, "😈 STEAL (1)\nR$39", UDim2.new(0.18, 0, 1
+#220 L2863: btnShuffle                | local btnShuffle = makeButton(actionBar, "🔀 SHUFFLE\nFREE", UDim2.new(0.18, 0, 1
+#221 L2890: showdownWrap              | local showdownWrap = Instance.new("Frame")
+#222 L2896: createPortraitCard        | local function createPortraitCard(parent: Instance, pos: UDim2, _bgCol: Color3)
+#223 L2915: sdMyCard,                 | local sdMyCard, sdMyImg, sdMyName = createPortraitCard(showdownWrap, UDim2.fromS
+#224 L2916: sdOppCard,                | local sdOppCard, sdOppImg, sdOppName = createPortraitCard(showdownWrap, UDim2.fr
+#225 L2917: sdVsLabel                 | local sdVsLabel = makeLabel(showdownWrap, "VS", UDim2.fromOffset(64, 48), UDim2.
+#226 L2918: sdCountdownLbl            | local sdCountdownLbl = makeLabel(showdownWrap, "5", UDim2.fromOffset(180, 74), U
+#227 L2919: sdClashSpark              | local sdClashSpark = makeLabel(showdownWrap, "⚽", UDim2.fromOffset(72, 72), UDim
+#228 L2922: createAvgScoreBox         | local function createAvgScoreBox(parent: Instance, pos: UDim2, bgCol: Color3)
+#229 L2937: sdMyAvgBox,               | local sdMyAvgBox, sdMyAvgLbl = createAvgScoreBox(showdownWrap, UDim2.fromScale(0
+#230 L2938: sdOppAvgBox,              | local sdOppAvgBox, sdOppAvgLbl = createAvgScoreBox(showdownWrap, UDim2.fromScale
+#231 L2943: winnerWrap                | local winnerWrap = Instance.new("Frame")
+#232 L2949: winPortraitCard,          | local winPortraitCard, winPortraitImg, winPortraitName = createPortraitCard(winn
+#233 L2950: winCrownLabel             | local winCrownLabel = Instance.new("ImageLabel")
+#234 L2960: winGradeBadge             | local winGradeBadge = makeLabel(winPortraitCard, "B", UDim2.fromOffset(42, 42), 
+#235 L2967: winAvgBox,                | local winAvgBox, winAvgValLbl = createAvgScoreBox(winnerWrap, UDim2.fromScale(0.
+#236 L2969: btnFlipBoard              | local btnFlipBoard = makeButton(winnerWrap, "", UDim2.fromOffset(70, 58), UDim2.
+#237 L3040: badgeToast                | local badgeToast = Instance.new("Frame")
+#238 L3049: badgeToastTitle           | local badgeToastTitle = makeLabel(badgeToast, "Badge Awarded!", UDim2.new(1, -58
+#239 L3051: badgeToastSub             | local badgeToastSub = makeLabel(badgeToast, "First Match Complete!", UDim2.new(1
+#240 L3055: RADAR_SIZE                | local RADAR_SIZE = 246
+#241 L3056: RADAR_CENTER              | local RADAR_CENTER = Vector2.new(RADAR_SIZE * 0.5, RADAR_SIZE * 0.5)
+#242 L3057: RADAR_RADIUS              | local RADAR_RADIUS = 86
+#243 L3059: radarPanel                | local radarPanel = Instance.new("Frame")
+#244 L3069: getRadarPoint             | local function getRadarPoint(idx: number, ratio: number): Vector2
+#245 L3095: radarPolyEdges:           | local radarPolyEdges: { Frame } = {}
+#246 L3096: radarSpokeLines:          | local radarSpokeLines: { Frame } = {}
+#247 L3097: radarVertexDots:          | local radarVertexDots: { Frame } = {}
+#248 L3117: radarAnimToken            | local radarAnimToken = 0
+#249 L3118: updateRadarChart          | local function updateRadarChart(slotScores: { [string]: number }?, isSelf: boole
+#250 L3150: rematchStatusLbl          | local rematchStatusLbl = makeLabel(winnerWrap, "0/1 - 30s", UDim2.fromOffset(180
+#251 L3151: bottomRematchBtn          | local bottomRematchBtn = makeButton(winnerWrap, "REMATCH", UDim2.fromOffset(180,
+#252 L3152: rematchVoted              | local rematchVoted = false
+#253 L3158: bottomLeaveBtn            | local bottomLeaveBtn = makeButton(winnerWrap, "LEAVE", UDim2.fromOffset(140, 48)
+#254 L3164: resultPopup               | local resultPopup = Instance.new("Frame")
+#255 L3175: resultHeader              | local resultHeader = Instance.new("Frame")
+#256 L3183: resultTitle               | local resultTitle = makeLabel(resultHeader, "VICTORY! (3s)", UDim2.new(0.8, 0, 0
+#257 L3187: btnCloseResultPopup       | local btnCloseResultPopup = makeButton(resultHeader, "X", UDim2.fromOffset(40, 4
+#258 L3193: makeSummaryCard           | local function makeSummaryCard(pos: UDim2, size: UDim2, titleText: string, bg: C
+#259 L3210: _,                        | local _, sumBuxVal = makeSummaryCard(UDim2.new(0.025, 0, 0, 66), UDim2.new(0.225
+#260 L3212: sumWinsCard,              | local sumWinsCard, sumWinsVal = makeSummaryCard(UDim2.new(0.266, 0, 0, 66), UDim
+#261 L3224: _,                        | local _, sumStreakVal = makeSummaryCard(UDim2.new(0.507, 0, 0, 66), UDim2.new(0.
+#262 L3225: sumQuestCard,             | local sumQuestCard, sumQuestVal = makeSummaryCard(UDim2.new(0.748, 0, 0, 66), UD
+#263 L3229: btnSumClaimQuest          | local btnSumClaimQuest = makeButton(sumQuestCard, "CLAIM!", UDim2.new(0.84, 0, 0
+#264 L3237: _,                        | local _, sumPlay30Val = makeSummaryCard(UDim2.new(0.025, 0, 0, 196), UDim2.new(0
+#265 L3238: _,                        | local _, sumNextPtVal = makeSummaryCard(UDim2.new(0.347, 0, 0, 196), UDim2.new(0
+#266 L3239: _,                        | local _, sumNextSkinVal = makeSummaryCard(UDim2.new(0.669, 0, 0, 196), UDim2.new
+#267 L3241: sumFooterLabel            | local sumFooterLabel = makeLabel(resultPopup, "1 MATCH PLAYED • 1 WON", UDim2.ne
+#268 L3244: popupCountdownToken       | local popupCountdownToken = 0
+#269 L3245: lastDidWin                | local lastDidWin = true
+#270 L3246: pendingSummaryPopup       | local pendingSummaryPopup = false
+#271 L3248: showSummaryPopupWithCountdown | local function showSummaryPopupWithCountdown(didWin: boolean)
+#272 L3270: populateSlotRow           | local function populateSlotRow(row: SlotRow, card: any, defaultSub: string, show
+#273 L3294: lastResultState:          | local lastResultState: any = nil
+#274 L3295: inspectingSelf            | local inspectingSelf = true
+#275 L3297: refreshWinnerInspection   | local function refreshWinnerInspection(animateSlam: boolean?)
+#276 L3368: setMyColumnVisible        | local function setMyColumnVisible(vis: boolean)
+#277 L3374: setOppColumnVisible       | local function setOppColumnVisible(vis: boolean)
+#278 L3383: refreshObbyPrompt         | local function refreshObbyPrompt(now: number)
+#279 L3418: refreshMetaUI             | local function refreshMetaUI()
+#280 L3668: refreshMythicalVoteUI:    | local refreshMythicalVoteUI: () -> ()
+#281 L3671: setupMythicalVoteUI       | local function setupMythicalVoteUI()
+#282 L3990: lastTick                  | local lastTick = 0
+#283 L3991: lastCountdownText         | local lastCountdownText = ""
+#284 L3994: setupWheelZone            | local function setupWheelZone()
+#285 L4132: refreshAllSpectateBillboards: | local refreshAllSpectateBillboards: () -> () = function() end
+#286 L4133: closeFeedbackModal:       | local closeFeedbackModal: () -> () = function() end
+#287 L4134: openFeedbackModal:        | local openFeedbackModal: () -> () = function() end
+#288 L4589: setupSpectatorDisplay     | local function setupSpectatorDisplay()
+#289 L4598: spectateRefreshers:       | local spectateRefreshers: { [Instance]: () -> () } = {}
+#290 L4600: escapeRichText            | local function escapeRichText(raw: string): string
+#291 L4608: buildClashBolt            | local function buildClashBolt(parent: Instance)
+#292 L4657: createSpectateSideSlots   | local function createSpectateSideSlots(parent: Instance, sideName: string, posX:
+#293 L4745: updateSpectateSlot        | local function updateSpectateSlot(slot: SpectateSlotWidget, cardId: string)
+#294 L4770: bindSpectateTable         | local function bindSpectateTable(tableModel: Instance)
+#295 L4892: setupFeedbackModal        | local function setupFeedbackModal()
+#296 L4893: feedbackModal             | local feedbackModal = Instance.new("Frame")
+#297 L4906: fbCloseBtn                | local fbCloseBtn = Instance.new("TextButton")
+#298 L4928: fbTitle                   | local fbTitle = Instance.new("TextLabel")
+#299 L4940: isLikelyOwner             | local isLikelyOwner = RunService:IsStudio()
+#300 L4942: fbOwnerBtn                | local fbOwnerBtn = Instance.new("TextButton")
+#301 L4957: fbDivider                 | local fbDivider = Instance.new("Frame")
+#302 L4967: fbComposePane             | local fbComposePane = Instance.new("Frame")
+#303 L4975: fbPromptLbl               | local fbPromptLbl = Instance.new("TextLabel")
+#304 L4988: fbInputWrap               | local fbInputWrap = Instance.new("Frame")
+#305 L4998: fbInput                   | local fbInput = Instance.new("TextBox")
+#306 L5017: fbSubmitBtn               | local fbSubmitBtn = Instance.new("TextButton")
+#307 L5031: fbFooter                  | local fbFooter = Instance.new("TextLabel")
+#308 L5048: fbOwnerPane               | local fbOwnerPane = Instance.new("Frame")
+#309 L5057: fbOwnerHint               | local fbOwnerHint = Instance.new("TextLabel")
+#310 L5069: fbOwnerScroll             | local fbOwnerScroll = Instance.new("ScrollingFrame")
+#311 L5083: fbOwnerTxtBox             | local fbOwnerTxtBox = Instance.new("TextBox")
+#312 L5101: updateSubmitButtonVisual  | local function updateSubmitButtonVisual()

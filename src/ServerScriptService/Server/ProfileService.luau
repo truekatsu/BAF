@@ -32,6 +32,7 @@ export type Profile = {
 	DoubleBux: boolean,
 	DoubleWins: boolean,
 	DoubleStreak: boolean,
+	DoubleLuck: boolean,
 	EquippedTitle: string,
 	EquippedChair: string,
 	OwnedChairs: { [string]: boolean },
@@ -208,6 +209,7 @@ local function defaultProfile(): Profile
 		DoubleBux = false,
 		DoubleWins = false,
 		DoubleStreak = false,
+		DoubleLuck = false,
 		EquippedTitle = "Benchwarmer",
 		EquippedChair = "wood",
 		OwnedChairs = { wood = true },
@@ -505,6 +507,35 @@ local function grantShopItem(player: Player, itemKey: string): boolean
 		profile.OwnedChairs["crimson"] = true
 		profile.EquippedChair = "crimson"
 		syncLeaderstats(player, profile, "Starter Pack Unlocked: +$500 Bux & Crimson Chair!")
+		return true
+	elseif itemKey == "skip_daily" then
+		profile.LastDailyClaim = 0
+		dirtyProfiles[player] = true
+		syncLeaderstats(player, profile, "Daily Cooldown Skipped! Ready to claim.")
+		return true
+	elseif itemKey == "claim_all_daily" then
+		for dayIdx = 1, #GameConfig.DAILY_REWARDS do
+			local reward = GameConfig.DAILY_REWARDS[dayIdx]
+			if reward.bux > 0 then
+				grantBux(player, profile, reward.bux)
+			end
+			if reward.spins > 0 then
+				profile.WheelSpins += reward.spins
+			end
+			if reward.chair then
+				profile.OwnedChairs[reward.chair] = true
+				profile.EquippedChair = reward.chair
+			end
+		end
+		profile.DailyDay = 1
+		profile.LastDailyClaim = Workspace:GetServerTimeNow()
+		dirtyProfiles[player] = true
+		syncLeaderstats(player, profile, "All 7 Daily Rewards Claimed Instantly!")
+		return true
+	elseif itemKey == "2x_luck" then
+		profile.DoubleLuck = true
+		dirtyProfiles[player] = true
+		syncLeaderstats(player, profile, "2x Luck Gamepass Activated: 2x Legendary Player Luck!")
 		return true
 	elseif itemKey == "vip" then
 		profile.DoubleBux = true

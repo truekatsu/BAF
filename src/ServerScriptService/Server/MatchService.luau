@@ -290,7 +290,7 @@ local function makeBoardForPlayer(player: Player?): MatchLogic.BoardState
 	local profile = if player then ProfileService.get(player) else nil
 	local rerolls = GameConfig.DEFAULT_REROLLS
 	local steals = GameConfig.DEFAULT_STEALS + (if profile then profile.ExtraSteals else 0)
-	local luck = if profile then profile.Luck else 1
+	local luck = (if profile then profile.Luck else 1) * (if profile and profile.DoubleLuck then 2 else 1)
 	local infRerolls = if profile then profile.InfRerolls else false
 	return MatchLogic.createBoard(rerolls, steals, luck, infRerolls)
 end

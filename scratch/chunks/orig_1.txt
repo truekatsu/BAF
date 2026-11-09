@@ -1,0 +1,1047 @@
+ == 5 then "🎡" else "💵"
+		local iconLbl = makeLabel(card, icon, UDim2.fromScale(0.85, 0.44), UDim2.new(0.075, 0, 0.06, 0), UITheme.Colors.White)
+		iconLbl.Name = if pt.chair then "Icon_Chair" else "Icon_Wheel"
+		iconLbl.TextScaled = true
+	end
+
+	local rewLbl = makeLabel(card, pt.rewardLabel, UDim2.new(0.94, 0, 0.16, 0), UDim2.new(0.03, 0, 0.50, 0), UITheme.Colors.MoneyGreen)
+	UITheme.styleText(rewLbl, 18, 10, 3, UITheme.Colors.MoneyGreen)
+
+	local timeLbl = makeLabel(card, pt.timeLabel, UDim2.new(0.94, 0, 0.12, 0), UDim2.new(0.03, 0, 0.65, 0), UITheme.Colors.White)
+	UITheme.styleText(timeLbl, 14, 9, 2.5, UITheme.Colors.White)
+
+	local cBtn = makeButton(card, "🔒 5:00", UDim2.new(0.90, 0, 0.16, 0), UDim2.new(0.05, 0, 0.79, 0), UITheme.Colors.CardDark)
+	UITheme.styleButton(cBtn, "Dark", 6)
+	cBtn.TextWrapped = false
+
+	-- Inner progress fill bar inside timer pill
+	local progFill = Instance.new("Frame")
+	progFill.Name = "ProgressFill"
+	progFill.Size = UDim2.fromScale(0, 1)
+	progFill.BackgroundColor3 = UITheme.Colors.NoticeYellow
+	progFill.BackgroundTransparency = 0.4
+	progFill.BorderSizePixel = 0
+	progFill.ZIndex = cBtn.ZIndex - 1
+	UITheme.addCorner(progFill, 6)
+	progFill.Parent = cBtn
+
+	cBtn.Activated:Connect(function()
+		Remotes.MetaAction:FireServer("ClaimPlaytime", pt.id)
+	end)
+	playtimeButtons[pt.id] = cBtn
+end
+
+local playedElapsedLabel = makeLabel(pageFreePlaytime, "⏱️ 0:00 played", UDim2.new(0.40, 0, 0.14, 0), UDim2.new(0.02, 0, 0.83, 0), UITheme.Colors.White)
+playedElapsedLabel.TextXAlignment = Enum.TextXAlignment.Left
+UITheme.styleText(playedElapsedLabel, 20, 11, 2.5)
+
+local btnSkipAllPlaytime = makeButton(pageFreePlaytime, "", UDim2.new(0.32, 0, 0.14, 0), UDim2.new(0.66, 0, 0.83, 0), UITheme.Colors.GoldTop)
+UITheme.styleButton(btnSkipAllPlaytime, "Gold", 8)
+UITheme.createRobuxBadge(btnSkipAllPlaytime, 49, UDim2.fromOffset(56, 24), UDim2.new(1, -48, 0, -10))
+local skipAllLbl = Instance.new("TextLabel")
+skipAllLbl.Name = "BtnLabel"
+skipAllLbl.Size = UDim2.new(1, -50, 1, 0)
+skipAllLbl.Position = UDim2.new(0, 8, 0, 0)
+skipAllLbl.BackgroundTransparency = 1
+skipAllLbl.Font = UITheme.Fonts.Primary
+skipAllLbl.Text = "⏩ SKIP ALL"
+skipAllLbl.TextColor3 = UITheme.Colors.White
+skipAllLbl.TextScaled = true
+skipAllLbl.ZIndex = btnSkipAllPlaytime.ZIndex + 3
+UITheme.styleText(skipAllLbl, 18, 10, 2.5)
+skipAllLbl.Parent = btnSkipAllPlaytime
+
+btnSkipAllPlaytime.Activated:Connect(function()
+	Remotes.MetaAction:FireServer("BuyShopItem", "skip_all_playtime")
+end)
+
+-- ============================================================
+-- Build Page 2: DAILY QUESTS (3 Rows)
+-- ============================================================
+local questProgLabels: { [string]: TextLabel } = {}
+local questClaimBtns: { [string]: TextButton } = {}
+do
+for i, q in GameConfig.QUESTS do
+	local row = Instance.new("Frame")
+	row.Size = UDim2.new(0.98, 0, 0.30, 0)
+	row.Position = UDim2.new(0.01, 0, (i - 1) * 0.33, 0)
+	row.BackgroundColor3 = UITheme.Colors.CardBg
+	UITheme.addCorner(row, 10)
+	UITheme.applyStroke(row, 3, UITheme.Colors.Black)
+	UITheme.addStuds(row, 0.90, 20)
+	UITheme.addBevel(row, 10)
+	UITheme.addShadow(row, 10, 3)
+	row.Parent = pageQuests
+
+	makeLabel(row, q.title, UDim2.new(0.60, 0, 0.46, 0), UDim2.new(0.03, 0, 0.06, 0), UITheme.Colors.White)
+	makeLabel(row, `REWARD: {q.rewardLabel}`, UDim2.new(0.34, 0, 0.40, 0), UDim2.new(0.64, 0, 0.08, 0), UITheme.Colors.NoticeYellow)
+
+	local progLbl = makeLabel(row, `0/{q.target}`, UDim2.new(0.56, 0, 0.36, 0), UDim2.new(0.03, 0, 0.56, 0), UITheme.Colors.White)
+	progLbl.BackgroundTransparency = 0
+	progLbl.BackgroundColor3 = UITheme.Colors.CardDark
+	UITheme.addCorner(progLbl, 8)
+	UITheme.applyStroke(progLbl, 2, UITheme.Colors.Black)
+	questProgLabels[q.id] = progLbl
+
+	local cBtn = makeButton(row, "CLAIM", UDim2.new(0.30, 0, 0.38, 0), UDim2.new(0.66, 0, 0.54, 0), UITheme.Colors.GrayTop)
+	UITheme.styleButton(cBtn, "Gray", 6)
+	cBtn.Activated:Connect(function()
+		Remotes.MetaAction:FireServer("ClaimQuest", q.id)
+	end)
+	questClaimBtns[q.id] = cBtn
+end
+end -- Page 2 Quests block
+
+-- ============================================================
+-- Build Page 3: CHAIR SKINS + LUCKY WHEEL SPIN + LUCK UPGRADE
+-- ============================================================
+pageSkins.Name = "PageSkins"
+local wheelSpinBtn: TextButton
+local luckUpgradeBtn: TextButton
+local skinActionBtns: { [string]: TextButton } = {}
+do
+	local wSpin = Instance.new("TextButton")
+	wSpin.Name = "BtnSpinWheel"
+	wSpin.Size = UDim2.new(0.485, 0, 0.12, 0)
+	wSpin.Position = UDim2.new(0.005, 0, 0.015, 0)
+	wSpin.Text = ""
+	UITheme.styleButton(wSpin, "Purple", 8)
+	UITheme.addStuds(wSpin, 0.88, 20)
+	UITheme.addPulse(wSpin, 1.0, 1.04, 1.2)
+	UITheme.addShineSweep(wSpin, 3.0)
+
+	local spinBtnLbl = Instance.new("TextLabel")
+	spinBtnLbl.Name = "BtnLabel"
+	spinBtnLbl.Size = UDim2.new(0.92, 0, 0.8, 0)
+	spinBtnLbl.Position = UDim2.new(0.04, 0, 0.1, 0)
+	spinBtnLbl.BackgroundTransparency = 1
+	spinBtnLbl.Font = UITheme.Fonts.Primary
+	spinBtnLbl.TextColor3 = UITheme.Colors.White
+	spinBtnLbl.Text = "🎡 SPIN WHEEL (1)"
+	spinBtnLbl.TextScaled = true
+	UITheme.addTextConstraint(spinBtnLbl, 12, 18)
+	UITheme.applyTextStroke(spinBtnLbl, 2.5, UITheme.Colors.Black)
+	spinBtnLbl.ZIndex = wSpin.ZIndex + 3
+	spinBtnLbl.Parent = wSpin
+	wSpin.Parent = pageSkins
+
+	wSpin.Activated:Connect(function()
+		openModal("WHEEL")
+	end)
+	wheelSpinBtn = wSpin
+
+	local lUp = Instance.new("TextButton")
+	lUp.Name = "BtnLuckUpgrade"
+	lUp.Size = UDim2.new(0.485, 0, 0.12, 0)
+	lUp.Position = UDim2.new(0.51, 0, 0.015, 0)
+	lUp.Text = ""
+	UITheme.styleButton(lUp, "Lime", 8)
+	UITheme.addStuds(lUp, 0.88, 20)
+
+	local cloverIcon = Instance.new("ImageLabel")
+	cloverIcon.Name = "Icon_Clover"
+	cloverIcon.Size = UDim2.new(0.18, 0, 0.78, 0)
+	cloverIcon.Position = UDim2.new(0.02, 0, 0.11, 0)
+	cloverIcon.BackgroundTransparency = 1
+	cloverIcon.Image = UITheme.Assets.CloverIcon
+	cloverIcon.ScaleType = Enum.ScaleType.Fit
+	cloverIcon.ZIndex = lUp.ZIndex + 3
+	cloverIcon.Parent = lUp
+
+	local luckBtnLbl = Instance.new("TextLabel")
+	luckBtnLbl.Name = "BtnLabel"
+	luckBtnLbl.Size = UDim2.new(0.78, 0, 0.8, 0)
+	luckBtnLbl.Position = UDim2.new(0.20, 0, 0.1, 0)
+	luckBtnLbl.BackgroundTransparency = 1
+	luckBtnLbl.Font = UITheme.Fonts.Primary
+	luckBtnLbl.TextColor3 = UITheme.Colors.White
+	luckBtnLbl.Text = "LUCK: 1x → 1.5x ($750)"
+	luckBtnLbl.TextScaled = true
+	luckBtnLbl.TextXAlignment = Enum.TextXAlignment.Center
+	UITheme.addTextConstraint(luckBtnLbl, 12, 18)
+	UITheme.applyTextStroke(luckBtnLbl, 2.5, UITheme.Colors.Black)
+	luckBtnLbl.ZIndex = lUp.ZIndex + 3
+	luckBtnLbl.Parent = lUp
+	lUp.Parent = pageSkins
+
+	lUp.Activated:Connect(function()
+		Remotes.MetaAction:FireServer("UpgradeLuck")
+	end)
+	luckUpgradeBtn = lUp
+for i, skin in GameConfig.CHAIR_SKINS do
+	local col = (i - 1) % 3
+	local r = math.floor((i - 1) / 3)
+	local card = Instance.new("Frame")
+	card.Name = `ChairCard_{skin.id}`
+	card.Size = UDim2.new(0.315, 0, 0.40, 0)
+	card.Position = UDim2.new(0.005 + col * 0.34, 0, 0.155 + r * 0.42, 0)
+	card.BackgroundColor3 = UITheme.Colors.CardBg
+	UITheme.addCorner(card, 12)
+	UITheme.applyStroke(card, 3.5, skin.color)
+	UITheme.addStuds(card, 0.90, 20)
+	UITheme.addBevel(card, 12)
+	UITheme.addShadow(card, 12, 4)
+	card.Parent = pageSkins
+
+	-- Chair Name at top (wrapped cleanly in 1-2 lines, never touching borders)
+	local nameLbl = Instance.new("TextLabel")
+	nameLbl.Name = "SkinName"
+	nameLbl.Size = UDim2.new(0.92, 0, 0.22, 0)
+	nameLbl.Position = UDim2.new(0.04, 0, 0.03, 0)
+	nameLbl.BackgroundTransparency = 1
+	nameLbl.Font = UITheme.Fonts.Titles
+	nameLbl.TextColor3 = UITheme.Colors.NoticeYellow
+	nameLbl.Text = skin.name
+	nameLbl.TextScaled = true
+	nameLbl.TextWrapped = true
+	nameLbl.ZIndex = card.ZIndex + 3
+	UITheme.addTextConstraint(nameLbl, 10, 15)
+	UITheme.applyTextStroke(nameLbl, 2.5, UITheme.Colors.Black)
+	nameLbl.Parent = card
+
+	-- 3D Chair Viewport (~50% card height)
+	local chairVp = Instance.new("ViewportFrame")
+	chairVp.Name = "Icon_Chair"
+	chairVp.Size = UDim2.new(0.88, 0, 0.46, 0)
+	chairVp.Position = UDim2.new(0.06, 0, 0.25, 0)
+	chairVp.BackgroundTransparency = 1
+	chairVp.BorderSizePixel = 0
+	chairVp.ZIndex = card.ZIndex + 2
+	chairVp.Parent = card
+
+	local cam = Instance.new("Camera")
+	cam.FieldOfView = 24
+	cam.CFrame = CFrame.new(Vector3.new(2.8, 2.3, 3.2), Vector3.new(0, 0.75, 0))
+	cam.Parent = chairVp
+	chairVp.CurrentCamera = cam
+	chairVp.LightColor = Color3.fromRGB(255, 255, 255)
+	chairVp.Ambient = Color3.fromRGB(240, 240, 250)
+	chairVp.LightDirection = Vector3.new(-0.35, -0.60, 0.72)
+
+	local chairModel = Instance.new("Model")
+	chairModel.Name = "MiniChair"
+
+	local seat = Instance.new("Part")
+	seat.Name = "Seat"
+	seat.Size = Vector3.new(1.4, 0.2, 1.4)
+	seat.CFrame = CFrame.new(0, 0.8, 0)
+	seat.Color = skin.color
+	seat.Material = skin.mat
+	seat.Anchored = true
+	seat.Parent = chairModel
+
+	local back = Instance.new("Part")
+	back.Name = "Back"
+	back.Size = Vector3.new(1.4, 1.3, 0.2)
+	back.CFrame = CFrame.new(0, 1.5, -0.6)
+	back.Color = skin.color
+	back.Material = skin.mat
+	back.Anchored = true
+	back.Parent = chairModel
+
+	for _, lx in { -0.55, 0.55 } do
+		for _, lz in { -0.55, 0.55 } do
+			local leg = Instance.new("Part")
+			leg.Name = "Leg"
+			leg.Size = Vector3.new(0.18, 0.8, 0.18)
+			leg.CFrame = CFrame.new(lx, 0.4, lz)
+			leg.Color = skin.color
+			leg.Material = skin.mat
+			leg.Anchored = true
+			leg.Parent = chairModel
+		end
+	end
+	chairModel.Parent = chairVp
+
+	-- Action Button (EQUIPPED / EQUIP / $Price)
+	local sBtn = Instance.new("TextButton")
+	sBtn.Name = `BtnSkin_{skin.id}`
+	sBtn.Size = UDim2.new(0.88, 0, 0.23, 0)
+	sBtn.Position = UDim2.new(0.06, 0, 0.73, 0)
+	sBtn.Parent = card
+
+	UITheme.skinButton(sBtn, if skin.cost == 0 then "EQUIPPED" else "BUY", skin.cost, false)
+
+	sBtn.Activated:Connect(function()
+		Remotes.MetaAction:FireServer("BuyOrEquipChair", skin.id)
+	end)
+	skinActionBtns[skin.id] = sBtn
+end
+
+end -- Page 3 Skins block
+
+-- ============================================================
+-- Build Page 4: TITLES (Wins Header + Rows + Robux Unlock Button)
+-- ============================================================
+local titlesWinsHeader: TextLabel
+local titleActionBtns: { [string]: TextButton } = {}
+do
+local winsHeaderFrame = Instance.new("Frame")
+winsHeaderFrame.Name = "WinsHeaderFrame"
+winsHeaderFrame.Size = UDim2.new(0.5, 0, 0.10, 0)
+winsHeaderFrame.Position = UDim2.new(0.25, 0, 0.015, 0)
+winsHeaderFrame.BackgroundColor3 = UITheme.Colors.CardDark
+UITheme.addCorner(winsHeaderFrame, 8)
+UITheme.applyStroke(winsHeaderFrame, 2.5, UITheme.Colors.Black)
+UITheme.addStuds(winsHeaderFrame, 0.88, 18)
+UITheme.addBevel(winsHeaderFrame, 8)
+winsHeaderFrame.Parent = pageTitles
+
+local trophyImg = Instance.new("ImageLabel")
+trophyImg.Name = "Icon_Trophy"
+trophyImg.Size = UDim2.fromScale(0.75, 0.75)
+trophyImg.AnchorPoint = Vector2.new(0, 0.5)
+trophyImg.Position = UDim2.new(0.08, 0, 0.5, 0)
+trophyImg.BackgroundTransparency = 1
+trophyImg.Image = UITheme.Assets.TrophyIcon
+trophyImg.ScaleType = Enum.ScaleType.Fit
+trophyImg.ZIndex = winsHeaderFrame.ZIndex + 2
+trophyImg.Parent = winsHeaderFrame
+
+titlesWinsHeader = makeLabel(winsHeaderFrame, "WINS: 0", UDim2.new(0.70, 0, 0.80, 0), UDim2.new(0.25, 0, 0.10, 0), UITheme.Colors.NoticeYellow)
+titlesWinsHeader.TextXAlignment = Enum.TextXAlignment.Center
+titlesWinsHeader.ZIndex = winsHeaderFrame.ZIndex + 2
+UITheme.styleText(titlesWinsHeader, 24, 16, 3, UITheme.Colors.NoticeYellow)
+for i = #GameConfig.TITLES, 1, -1 do
+	local rowIdx = (#GameConfig.TITLES - i) + 1
+	local entry = GameConfig.TITLES[i]
+	local row = Instance.new("Frame")
+	row.Size = UDim2.new(0.96, 0, 0.16, 0)
+	row.Position = UDim2.new(0.02, 0, 0.13 + (rowIdx - 1) * 0.172, 0)
+	row.BackgroundColor3 = UITheme.Colors.CardBg
+	UITheme.addCorner(row, 8)
+	UITheme.applyStroke(row, 3, UITheme.Colors.Black)
+	UITheme.addStuds(row, 0.90, 20)
+	UITheme.addBevel(row, 8)
+	UITheme.addShadow(row, 8, 3)
+	row.Parent = pageTitles
+
+	local nameLbl = makeLabel(row, entry.name, UDim2.new(0.50, 0, 0.8, 0), UDim2.new(0.04, 0, 0.1, 0), entry.color)
+	nameLbl.TextXAlignment = Enum.TextXAlignment.Left
+
+	local tBtn = makeButton(row, "LOCKED", UDim2.new(0.28, 0, 0.76, 0), UDim2.new(0.56, 0, 0.12, 0), UITheme.Colors.GrayTop)
+	UITheme.styleButton(tBtn, "Gray", 6)
+	tBtn.Activated:Connect(function()
+		Remotes.MetaAction:FireServer("EquipTitle", entry.name)
+	end)
+	titleActionBtns[entry.name] = tBtn
+
+	-- Purple Robux Instant Unlock Button
+	local robuxUnlockBtn = makeButton(row, "⬡", UDim2.new(0.12, 0, 0.76, 0), UDim2.new(0.86, 0, 0.12, 0), UITheme.Colors.PurpleTop)
+	UITheme.styleButton(robuxUnlockBtn, "Purple", 6)
+	robuxUnlockBtn.Activated:Connect(function()
+		Remotes.MetaAction:FireServer("BuyShopItem", "unlock_title_" .. string.lower(entry.name))
+	end)
+end
+end -- Page 4 Titles block
+
+-- ============================================================
+-- Build Page 5: SHOP (Packs, Gamepasses, BUX Packs)
+-- ============================================================
+do
+makeLabel(pageShop, "- PACKS -", UDim2.new(0.96, 0, 0, 30), UDim2.new(0.02, 0, 0, 6), UITheme.Colors.White)
+
+local starterCard = Instance.new("Frame")
+starterCard.Name = "StarterPackCard"
+starterCard.Size = UDim2.new(0.96, 0, 0, 96)
+starterCard.Position = UDim2.new(0.02, 0, 0, 38)
+starterCard.BackgroundColor3 = UITheme.Colors.CardBg
+UITheme.addCorner(starterCard, 10)
+UITheme.applyStroke(starterCard, 3.5, UITheme.Colors.GoldTop)
+UITheme.addStuds(starterCard, 0.88, 22)
+UITheme.addBevel(starterCard, 10)
+UITheme.addShadow(starterCard, 10, 4)
+starterCard.Parent = pageShop
+
+local starterTitle = makeLabel(starterCard, "STARTER PACK", UDim2.new(0.42, 0, 0.32, 0), UDim2.new(0.03, 0, 0.10, 0), UITheme.Colors.NoticeYellow)
+starterTitle.TextXAlignment = Enum.TextXAlignment.Left
+UITheme.applyGradient(starterTitle, Color3.fromHex("#FF007A"), Color3.fromHex("#FFD21F"), 0)
+UITheme.styleText(starterTitle, 22, 14, 2.5)
+
+-- Items row: [CashIcon] 500 BUX  +  [ChairIcon] CRIMSON CHAIR
+local starterItemsRow = Instance.new("Frame")
+starterItemsRow.Name = "ItemsRow"
+starterItemsRow.Size = UDim2.new(0.66, 0, 0.44, 0)
+starterItemsRow.Position = UDim2.new(0.03, 0, 0.48, 0)
+starterItemsRow.BackgroundTransparency = 1
+starterItemsRow.Parent = starterCard
+
+local itemsLayout = Instance.new("UIListLayout")
+itemsLayout.FillDirection = Enum.FillDirection.Horizontal
+itemsLayout.HorizontalAlignment = Enum.HorizontalAlignment.Left
+itemsLayout.VerticalAlignment = Enum.VerticalAlignment.Center
+itemsLayout.Padding = UDim.new(0, 6)
+itemsLayout.SortOrder = Enum.SortOrder.LayoutOrder
+itemsLayout.Parent = starterItemsRow
+
+local cashImg = Instance.new("ImageLabel")
+cashImg.Name = "Icon_Cash"
+cashImg.Size = UDim2.fromOffset(26, 26)
+cashImg.BackgroundTransparency = 1
+cashImg.Image = UITheme.Assets.CashStack
+cashImg.ScaleType = Enum.ScaleType.Fit
+cashImg.LayoutOrder = 1
+cashImg.Parent = starterItemsRow
+
+local buxLbl = Instance.new("TextLabel")
+buxLbl.Name = "BuxLabel"
+buxLbl.Size = UDim2.new(0, 0, 1, 0)
+buxLbl.AutomaticSize = Enum.AutomaticSize.X
+buxLbl.BackgroundTransparency = 1
+buxLbl.Font = UITheme.Fonts.Primary
+buxLbl.TextColor3 = UITheme.Colors.MoneyGreen
+buxLbl.Text = "$500"
+buxLbl.LayoutOrder = 2
+UITheme.styleText(buxLbl, 18, 12, 2)
+buxLbl.Parent = starterItemsRow
+
+local plusLbl = Instance.new("TextLabel")
+plusLbl.Name = "PlusLabel"
+plusLbl.Size = UDim2.new(0, 0, 1, 0)
+plusLbl.AutomaticSize = Enum.AutomaticSize.X
+plusLbl.BackgroundTransparency = 1
+plusLbl.Font = UITheme.Fonts.Primary
+plusLbl.TextColor3 = UITheme.Colors.White
+plusLbl.Text = "+"
+plusLbl.LayoutOrder = 3
+UITheme.styleText(plusLbl, 18, 12, 2)
+plusLbl.Parent = starterItemsRow
+
+local chairImg = Instance.new("ImageLabel")
+chairImg.Name = "Icon_Chair"
+chairImg.Size = UDim2.fromOffset(26, 26)
+chairImg.BackgroundTransparency = 1
+chairImg.Image = "rbxassetid://13589994500"
+chairImg.ScaleType = Enum.ScaleType.Fit
+chairImg.LayoutOrder = 4
+chairImg.Parent = starterItemsRow
+
+local chairLbl = Instance.new("TextLabel")
+chairLbl.Name = "ChairLabel"
+chairLbl.Size = UDim2.new(0, 0, 1, 0)
+chairLbl.AutomaticSize = Enum.AutomaticSize.X
+chairLbl.BackgroundTransparency = 1
+chairLbl.Font = UITheme.Fonts.Primary
+chairLbl.TextColor3 = UITheme.Colors.White
+chairLbl.Text = "CRIMSON CHAIR"
+chairLbl.LayoutOrder = 5
+UITheme.styleText(chairLbl, 18, 11, 2)
+chairLbl.Parent = starterItemsRow
+
+local valueTag = makeLabel(starterCard, "149 VALUE", UDim2.fromOffset(90, 22), UDim2.new(1, -104, 0.12, 0), UITheme.Colors.NoticeYellow)
+UITheme.styleText(valueTag, 14, 10, 2)
+local strikeLine = Instance.new("Frame")
+strikeLine.Size = UDim2.new(1.1, 0, 0, 2)
+strikeLine.Position = UDim2.new(-0.05, 0, 0.5, -1)
+strikeLine.BackgroundColor3 = UITheme.Colors.RedTop
+strikeLine.BorderSizePixel = 0
+strikeLine.Parent = valueTag
+
+local btnBuyStarter = makeButton(starterCard, "", UDim2.fromOffset(84, 42), UDim2.new(1, -12, 0.68, 0), UITheme.Colors.LimeTop)
+btnBuyStarter.AnchorPoint = Vector2.new(1, 0.5)
+UITheme.priceButton(btnBuyStarter, 4, "Robux", "Lime")
+btnBuyStarter.Activated:Connect(function()
+	Remotes.MetaAction:FireServer("BuyShopItem", "starter_pack")
+end)
+
+makeLabel(pageShop, "- GAMEPASSES -", UDim2.new(0.96, 0, 0, 30), UDim2.new(0.02, 0, 0, 144), UITheme.Colors.White)
+local shopPasses = {
+	{ id = "vip", label = "VIP", desc = "2 VIP CHAIRS +\nGOLDEN [VIP] TAG", iconName = "Icon_VIP", asset = UITheme.Assets.VipIcon, colTop = UITheme.Colors.PurpleTop, colBot = UITheme.Colors.PurpleBottom, price = 19 },
+	{ id = "2x_bux", label = "2X CASH", desc = "DOUBLE CASH\nFROM GAMES", iconName = "Icon_Cash", asset = UITheme.Assets.CashStack, colTop = UITheme.Colors.BlueTop, colBot = UITheme.Colors.BlueBottom, price = 30 },
+	{ id = "2x_wins", label = "2X WIN", desc = "DOUBLE\nWINS", iconName = "Icon_Trophy", asset = UITheme.Assets.TrophyIcon, colTop = UITheme.Colors.OrangeTop, colBot = UITheme.Colors.OrangeBottom, price = 30 },
+	{ id = "2x_streak", label = "2X STREAK", desc = "DOUBLE WIN\nSTREAK", iconName = "Icon_Flame", asset = UITheme.Assets.FlameIcon, colTop = UITheme.Colors.RedTop, colBot = UITheme.Colors.RedBottom, price = 30 },
+}
+for i, gp in shopPasses do
+	local c = (i - 1) % 2
+	local r = math.floor((i - 1) / 2)
+	local card = Instance.new("Frame")
+	card.Name = "PassCard_" .. gp.id
+	card.Size = UDim2.new(0.47, 0, 0, 96)
+	card.Position = UDim2.new(0.02 + c * 0.49, 0, 0, 178 + r * 104)
+	card.BackgroundColor3 = gp.colTop
+	UITheme.addCorner(card, 10)
+	UITheme.applyStroke(card, 3, UITheme.Colors.Black)
+	UITheme.applyGradient(card, gp.colTop, gp.colBot, 90)
+	UITheme.addStuds(card, 0.88, 20)
+	UITheme.addBevel(card, 10)
+	UITheme.addShadow(card, 10, 4)
+	card.Parent = pageShop
+
+	-- 1. Left Icon Container (~28% width, ~60% height)
+	local iconBox = Instance.new("Frame")
+	iconBox.Name = "IconBox"
+	iconBox.Size = UDim2.new(0.28, 0, 1, 0)
+	iconBox.Position = UDim2.fromScale(0, 0)
+	iconBox.BackgroundTransparency = 1
+	iconBox.Parent = card
+
+	local sunburst = Instance.new("ImageLabel")
+	sunburst.Name = "Sunburst"
+	sunburst.Size = UDim2.fromScale(1.1, 1.1)
+	sunburst.AnchorPoint = Vector2.new(0.5, 0.5)
+	sunburst.Position = UDim2.fromScale(0.5, 0.5)
+	sunburst.BackgroundTransparency = 1
+	sunburst.Image = UITheme.Assets.SunburstBg
+	sunburst.ImageTransparency = 0.82
+	sunburst.ScaleType = Enum.ScaleType.Fit
+	sunburst.Parent = iconBox
+
+	local iconImg = Instance.new("ImageLabel")
+	iconImg.Name = gp.iconName
+	iconImg.Size = UDim2.fromOffset(56, 56)
+	iconImg.AnchorPoint = Vector2.new(0.5, 0.5)
+	iconImg.Position = UDim2.fromScale(0.5, 0.5)
+	iconImg.BackgroundTransparency = 1
+	iconImg.Image = gp.asset
+	iconImg.ScaleType = Enum.ScaleType.Fit
+	iconImg.ZIndex = card.ZIndex + 1
+	iconImg.Parent = iconBox
+
+	-- 2. Middle Text Block (never extends under the price button!)
+	local textBlock = Instance.new("Frame")
+	textBlock.Name = "TextBlock"
+	textBlock.Size = UDim2.new(0.44, -4, 1, -12)
+	textBlock.Position = UDim2.new(0.28, 4, 0, 6)
+	textBlock.BackgroundTransparency = 1
+	textBlock.Parent = card
+
+	local tLbl = Instance.new("TextLabel")
+	tLbl.Name = "TitleLabel"
+	tLbl.Size = UDim2.new(1, 0, 0.44, 0)
+	tLbl.Position = UDim2.new(0, 0, 0, 0)
+	tLbl.BackgroundTransparency = 1
+	tLbl.Font = UITheme.Fonts.Primary
+	tLbl.TextColor3 = UITheme.Colors.White
+	tLbl.Text = gp.label
+	tLbl.TextXAlignment = Enum.TextXAlignment.Left
+	UITheme.styleText(tLbl, 20, 12, 2.5)
+	tLbl.Parent = textBlock
+
+	local dLbl = Instance.new("TextLabel")
+	dLbl.Name = "DescLabel"
+	dLbl.Size = UDim2.new(1, 0, 0.54, 0)
+	dLbl.Position = UDim2.new(0, 0, 0.44, 2)
+	dLbl.BackgroundTransparency = 1
+	dLbl.Font = UITheme.Fonts.Body
+	dLbl.TextColor3 = UITheme.Colors.NoticeYellow
+	dLbl.Text = gp.desc
+	dLbl.TextXAlignment = Enum.TextXAlignment.Left
+	dLbl.TextWrapped = true
+	UITheme.styleText(dLbl, 12, 9, 2)
+	dLbl.Parent = textBlock
+
+	-- 3. Right Price Button (anchored bottom-right, fixed 80x42)
+	local b = makeButton(card, "", UDim2.fromOffset(80, 42), UDim2.new(1, -8, 1, -8), UITheme.Colors.LimeTop)
+	b.AnchorPoint = Vector2.new(1, 1)
+	UITheme.priceButton(b, gp.price, "Robux", "Lime")
+	b.Activated:Connect(function()
+		Remotes.MetaAction:FireServer("BuyShopItem", gp.id)
+	end)
+end
+
+makeLabel(pageShop, "- CASH PACKS -", UDim2.new(0.96, 0, 0, 30), UDim2.new(0.02, 0, 0, 396), UITheme.Colors.White)
+local buxPacks = {
+	{ id = "bux_300", label = "$300", tag = nil, price = 20, iconName = "Icon_Cash", asset = UITheme.Assets.CashStack },
+	{ id = "bux_1000", label = "$1,000", tag = nil, price = 35, iconName = "Icon_Cash", asset = UITheme.Assets.CashStack },
+	{ id = "bux_4000", label = "$4,000", tag = "POPULAR", price = 99, iconName = "Icon_Gift", asset = UITheme.Assets.TreasureChest },
+	{ id = "bux_15000", label = "$15,000", tag = "BEST", price = 249, iconName = "Icon_Crown", asset = UITheme.Assets.CrownIcon },
+}
+for i, bp in buxPacks do
+	local c = (i - 1) % 2
+	local r = math.floor((i - 1) / 2)
+	local card = Instance.new("Frame")
+	card.Name = "BuxCard_" .. bp.id
+	card.Size = UDim2.new(0.47, 0, 0, 96)
+	card.Position = UDim2.new(0.02 + c * 0.49, 0, 0, 430 + r * 104)
+	card.BackgroundColor3 = Color3.fromHex("#15803D")
+	UITheme.addCorner(card, 10)
+	UITheme.applyStroke(card, 3, UITheme.Colors.Black)
+	UITheme.applyGradient(card, Color3.fromHex("#22C55E"), Color3.fromHex("#15803D"), 90)
+	UITheme.addStuds(card, 0.88, 20)
+	UITheme.addBevel(card, 10)
+	UITheme.addShadow(card, 10, 4)
+	card.Parent = pageShop
+
+	-- 1. Left Icon Container (~28% width, ~60% height)
+	local iconBox = Instance.new("Frame")
+	iconBox.Name = "IconBox"
+	iconBox.Size = UDim2.new(0.28, 0, 1, 0)
+	iconBox.Position = UDim2.fromScale(0, 0)
+	iconBox.BackgroundTransparency = 1
+	iconBox.Parent = card
+
+	local iconImg = Instance.new("ImageLabel")
+	iconImg.Name = bp.iconName
+	iconImg.Size = UDim2.fromOffset(56, 56)
+	iconImg.AnchorPoint = Vector2.new(0.5, 0.5)
+	iconImg.Position = UDim2.fromScale(0.5, 0.5)
+	iconImg.BackgroundTransparency = 1
+	iconImg.Image = bp.asset
+	iconImg.ScaleType = Enum.ScaleType.Fit
+	iconImg.ZIndex = card.ZIndex + 1
+	iconImg.Parent = iconBox
+
+	-- 2. Middle Text Area (never extends under the price button!)
+	local textBlock = Instance.new("Frame")
+	textBlock.Name = "TextBlock"
+	textBlock.Size = UDim2.new(0.44, -4, 1, -12)
+	textBlock.Position = UDim2.new(0.28, 4, 0, 6)
+	textBlock.BackgroundTransparency = 1
+	textBlock.Parent = card
+
+	if bp.tag then
+		local tagLbl = Instance.new("TextLabel")
+		tagLbl.Name = "TagLabel"
+		tagLbl.Size = UDim2.new(1, 0, 0.32, 0)
+		tagLbl.Position = UDim2.new(0, 0, 0, 0)
+		tagLbl.BackgroundTransparency = 1
+		tagLbl.Font = UITheme.Fonts.Primary
+		tagLbl.TextColor3 = UITheme.Colors.NoticeYellow
+		tagLbl.Text = bp.tag
+		tagLbl.TextXAlignment = Enum.TextXAlignment.Left
+		UITheme.styleText(tagLbl, 13, 9, 2)
+		tagLbl.Parent = textBlock
+
+		local tLbl = Instance.new("TextLabel")
+		tLbl.Name = "TitleLabel"
+		tLbl.Size = UDim2.new(1, 0, 0.60, 0)
+		tLbl.Position = UDim2.new(0, 0, 0.34, 0)
+		tLbl.BackgroundTransparency = 1
+		tLbl.Font = UITheme.Fonts.Primary
+		tLbl.TextColor3 = UITheme.Colors.White
+		tLbl.Text = bp.label
+		tLbl.TextXAlignment = Enum.TextXAlignment.Left
+		UITheme.styleText(tLbl, 20, 12, 2.5)
+		tLbl.Parent = textBlock
+	else
+		local tLbl = Instance.new("TextLabel")
+		tLbl.Name = "TitleLabel"
+		tLbl.Size = UDim2.new(1, 0, 0.70, 0)
+		tLbl.Position = UDim2.new(0, 0, 0.15, 0)
+		tLbl.BackgroundTransparency = 1
+		tLbl.Font = UITheme.Fonts.Primary
+		tLbl.TextColor3 = UITheme.Colors.White
+		tLbl.Text = bp.label
+		tLbl.TextXAlignment = Enum.TextXAlignment.Left
+		UITheme.styleText(tLbl, 20, 12, 2.5)
+		tLbl.Parent = textBlock
+	end
+
+	-- 3. Right Price Button (anchored bottom-right, fixed 80x42)
+	local b = makeButton(card, "", UDim2.fromOffset(80, 42), UDim2.new(1, -8, 1, -8), UITheme.Colors.LimeTop)
+	b.AnchorPoint = Vector2.new(1, 1)
+	UITheme.priceButton(b, bp.price, "Robux", "Lime")
+	b.Activated:Connect(function()
+		Remotes.MetaAction:FireServer("BuyShopItem", bp.id)
+	end)
+end
+
+end -- Page 5 Shop block
+
+-- Build Page 6: CARD INDEX / POKEDEX (152 Footballers sorted Mythic -> Common)
+-- ============================================================
+local indexProgressHeader = makeLabel(pageIndex, "DISCOVERED: 0 / 152 (0%) • +$25–$250 PER NEW CARD!", UDim2.new(0.96, 0, 0.11, 0), UDim2.new(0.02, 0, 0, 0), UITheme.Colors.NoticeYellow)
+local indexCardCells: { [string]: { frame: Frame, label: TextLabel, card: Footballers.Footballer } } = {}
+do
+local indexScroll = Instance.new("ScrollingFrame")
+indexScroll.Size = UDim2.new(0.98, 0, 0.87, 0)
+indexScroll.Position = UDim2.new(0.01, 0, 0.12, 0)
+indexScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
+indexScroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
+indexScroll.ScrollBarThickness = 8
+indexScroll.ScrollBarImageColor3 = UITheme.Colors.LimeTop
+indexScroll.BackgroundTransparency = 1
+indexScroll.Parent = pageIndex
+
+local indexGrid = Instance.new("UIGridLayout")
+indexGrid.CellSize = UDim2.new(0.235, 0, 0, 74)
+indexGrid.CellPadding = UDim2.new(0.015, 0, 0, 8)
+indexGrid.SortOrder = Enum.SortOrder.LayoutOrder
+indexGrid.Parent = indexScroll
+
+local orderIdx = 0
+for rIdx = #GameConfig.RARITY_ORDER, 1, -1 do
+	local rarity = GameConfig.RARITY_ORDER[rIdx]
+	local rCol = GameConfig.RARITY_COLORS[rarity]
+	for _, card in Footballers.ByRarity[rarity] do
+		orderIdx += 1
+		local cell = Instance.new("Frame")
+		cell.LayoutOrder = orderIdx
+		cell.BackgroundColor3 = UITheme.Colors.CardBg
+		UITheme.addCorner(cell, 8)
+		UITheme.applyStroke(cell, 3, rCol)
+		UITheme.addStuds(cell, 0.90, 18)
+		UITheme.addBevel(cell, 8)
+		cell.Parent = indexScroll
+
+		local lbl = makeLabel(cell, `??? {card.pos}\nLOCKED\n{string.upper(rarity)}`, UDim2.new(0.92, 0, 0.88, 0), UDim2.new(0.04, 0, 0.06, 0), Color3.fromRGB(150, 155, 170))
+		indexCardCells[card.id] = { frame = cell, label = lbl, card = card }
+	end
+end
+end -- Page 6 Index block
+
+-- Build Page 7: SPIN WHEEL VIEW (Auto-opened by stepping into Lobby SpinWheelStation ring)
+local wheelSpinning = false
+local wheelCurrentRot = 0
+local lastHandledWheelSeq = (localPlayer:GetAttribute("WheelSpinSeq") :: number?) or 0
+
+local wheelRotVal = Instance.new("NumberValue")
+local wheelSpinsCountLbl: TextLabel
+local spinBtnLabel: TextLabel
+local refreshProfileGlobalRanks: () -> ()
+local updateProfilePage: (p: any, elapsed: number, disc: { [string]: boolean }, discCount: number, pct: number) -> ()
+
+do
+	local wheelOuterRim = Instance.new("Frame")
+wheelOuterRim.Name = "WheelOuterRim"
+wheelOuterRim.Size = UDim2.fromOffset(258, 258)
+wheelOuterRim.Position = UDim2.new(0.03, 0, 0.5, -129)
+wheelOuterRim.BackgroundColor3 = Color3.fromRGB(36, 41, 54)
+addCorner(wheelOuterRim, 129)
+addStroke(wheelOuterRim, Color3.new(0, 0, 0), 4)
+wheelOuterRim.Parent = pageWheel
+
+local wheelDiscGui = Instance.new("Frame")
+wheelDiscGui.Name = "WheelDisc"
+wheelDiscGui.Size = UDim2.fromOffset(230, 230)
+wheelDiscGui.AnchorPoint = Vector2.new(0.5, 0.5)
+wheelDiscGui.Position = UDim2.fromScale(0.5, 0.5)
+wheelDiscGui.BackgroundColor3 = Color3.fromRGB(24, 28, 38)
+wheelDiscGui.ClipsDescendants = true
+addCorner(wheelDiscGui, 115)
+wheelDiscGui.Parent = wheelOuterRim
+
+local wheelVp = Instance.new("ViewportFrame")
+wheelVp.Name = "WheelViewport"
+wheelVp.Size = UDim2.fromScale(1, 1)
+wheelVp.BackgroundTransparency = 1
+wheelVp.Ambient = Color3.new(1, 1, 1)
+wheelVp.LightColor = Color3.new(0, 0, 0)
+wheelVp.ZIndex = 26
+addCorner(wheelVp, 115)
+wheelVp.Parent = wheelDiscGui
+
+local wheelVpCam = Instance.new("Camera")
+wheelVpCam.FieldOfView = 18
+wheelVpCam.CFrame = CFrame.new(0, 0, 36.8)
+wheelVpCam.Parent = wheelVp
+wheelVp.CurrentCamera = wheelVpCam
+
+local wheel3DModel = Instance.new("Model")
+wheel3DModel.Name = "Wheel3D"
+local wheelPivot = Instance.new("Part")
+wheelPivot.Name = "Pivot"
+wheelPivot.Size = Vector3.new(0.2, 0.2, 0.2)
+wheelPivot.Transparency = 1
+wheelPivot.Anchored = true
+wheelPivot.CFrame = CFrame.new(0, 0, 0)
+wheelPivot.Parent = wheel3DModel
+wheel3DModel.PrimaryPart = wheelPivot
+wheel3DModel.Parent = wheelVp
+
+local wheelLabelsLayer = Instance.new("Frame")
+wheelLabelsLayer.Name = "WheelLabelsLayer"
+wheelLabelsLayer.Size = UDim2.fromOffset(230, 230)
+wheelLabelsLayer.AnchorPoint = Vector2.new(0.5, 0.5)
+wheelLabelsLayer.Position = UDim2.fromScale(0.5, 0.5)
+wheelLabelsLayer.BackgroundTransparency = 1
+wheelLabelsLayer.ZIndex = 27
+wheelLabelsLayer.Parent = wheelOuterRim
+
+do
+	local vpRadius = 6.2
+	local halfA = math.rad(22.5)
+	local wH = vpRadius * math.cos(halfA)
+	local wW = vpRadius * math.sin(halfA)
+	for i, seg in GameConfig.WHEEL_SEGMENTS do
+		local deg = (i - 1) * 45
+		local sliceCF = CFrame.Angles(0, 0, -math.rad(deg))
+		local segCol = Color3.fromHex(seg.color)
+		for _, side in { -1, 1 } do
+			local wp = Instance.new("WedgePart")
+			wp.Size = Vector3.new(0.2, wH, wW)
+			wp.CFrame = sliceCF
+				* CFrame.fromMatrix(
+					Vector3.new(side * wW * 0.5, wH * 0.5, 0),
+					Vector3.new(0, 0, -side),
+					Vector3.new(0, -1, 0),
+					Vector3.new(-side, 0, 0)
+				)
+			wp.Anchored = true
+			wp.Color = segCol
+			wp.Material = Enum.Material.SmoothPlastic
+			wp.Parent = wheel3DModel
+		end
+		local spoke = Instance.new("Part")
+		spoke.Size = Vector3.new(0.14, vpRadius, 0.26)
+		spoke.CFrame = CFrame.Angles(0, 0, -math.rad(deg + 22.5)) * CFrame.new(0, vpRadius * 0.5, 0.06)
+		spoke.Anchored = true
+		spoke.Color = Color3.fromRGB(22, 25, 34)
+		spoke.Material = Enum.Material.SmoothPlastic
+		spoke.Parent = wheel3DModel
+
+		local lRad = math.rad(deg)
+		local lx = 115 + math.sin(lRad) * 69
+		local ly = 115 - math.cos(lRad) * 69
+		local lblBox = Instance.new("Frame")
+		lblBox.Name = `SliceLabel_{i}`
+		lblBox.Size = UDim2.fromOffset(58, 52)
+		lblBox.AnchorPoint = Vector2.new(0.5, 0.5)
+		lblBox.Position = UDim2.fromOffset(lx, ly)
+		lblBox.Rotation = deg
+		lblBox.BackgroundTransparency = 1
+		lblBox.ZIndex = 28
+		lblBox.Parent = wheelLabelsLayer
+
+		local pIcon = Instance.new("ImageLabel")
+		pIcon.Name = "SliceIcon"
+		pIcon.Size = UDim2.fromOffset(20, 20)
+		pIcon.Position = UDim2.new(0.5, -10, 0, 2)
+		pIcon.BackgroundTransparency = 1
+		pIcon.Image = if seg.id == 4 then UITheme.Assets.CrownIcon else UITheme.Assets.CashStack
+		pIcon.ScaleType = Enum.ScaleType.Fit
+		pIcon.ZIndex = 29
+		pIcon.Parent = lblBox
+
+		local pTxt = Instance.new("TextLabel")
+		pTxt.Name = "SliceText"
+		pTxt.Size = UDim2.new(1, 0, 0, 26)
+		pTxt.Position = UDim2.new(0, 0, 0, 24)
+		pTxt.BackgroundTransparency = 1
+		pTxt.Font = UITheme.Fonts.Primary
+		pTxt.TextColor3 = if seg.id == 4 then UITheme.Colors.NoticeYellow else UITheme.Colors.White
+		pTxt.Text = seg.label
+		pTxt.TextScaled = true
+		UITheme.addTextConstraint(pTxt, 10, 14)
+		UITheme.applyTextStroke(pTxt, 2, UITheme.Colors.Black)
+		pTxt.ZIndex = 29
+		pTxt.Parent = lblBox
+
+		local bulbRad = math.rad(deg + 22.5 - 90)
+		local bx = 129 + math.cos(bulbRad) * 121
+		local by = 129 + math.sin(bulbRad) * 121
+		local bulb = Instance.new("Frame")
+		bulb.Size = UDim2.fromOffset(10, 10)
+		bulb.AnchorPoint = Vector2.new(0.5, 0.5)
+		bulb.Position = UDim2.fromOffset(bx, by)
+		bulb.BackgroundColor3 = Color3.fromRGB(255, 214, 58)
+		bulb.BorderSizePixel = 0
+		bulb.ZIndex = 30
+		addCorner(bulb, 5)
+		bulb.Parent = wheelOuterRim
+	end
+end
+
+	wheelRotVal.Changed:Connect(function(v)
+		wheelLabelsLayer.Rotation = v
+		wheel3DModel:PivotTo(CFrame.Angles(0, 0, -math.rad(v)))
+	end)
+
+	local wheelHubCap = Instance.new("Frame")
+	wheelHubCap.Size = UDim2.fromOffset(48, 48)
+	wheelHubCap.AnchorPoint = Vector2.new(0.5, 0.5)
+	wheelHubCap.Position = UDim2.fromScale(0.5, 0.5)
+	wheelHubCap.BackgroundColor3 = Color3.fromHex("#C81E2B")
+	wheelHubCap.ZIndex = 31
+	addCorner(wheelHubCap, 24)
+	addStroke(wheelHubCap, Color3.fromRGB(32, 36, 48), 5)
+	wheelHubCap.Parent = wheelOuterRim
+
+	local pointerClip = Instance.new("Frame")
+	pointerClip.Size = UDim2.fromOffset(38, 24)
+	pointerClip.AnchorPoint = Vector2.new(0.5, 0)
+	pointerClip.Position = UDim2.new(0.5, 0, 0, -6)
+	pointerClip.BackgroundTransparency = 1
+	pointerClip.ClipsDescendants = true
+	pointerClip.ZIndex = 32
+	pointerClip.Parent = wheelOuterRim
+
+	local pointerDiamond = Instance.new("Frame")
+	pointerDiamond.Size = UDim2.fromOffset(26, 26)
+	pointerDiamond.AnchorPoint = Vector2.new(0.5, 0.5)
+	pointerDiamond.Position = UDim2.fromOffset(19, 2)
+	pointerDiamond.Rotation = 45
+	pointerDiamond.BackgroundColor3 = Color3.fromHex("#DC2626")
+	pointerDiamond.ZIndex = 32
+	addStroke(pointerDiamond, Color3.fromRGB(20, 22, 30), 2)
+	pointerDiamond.Parent = pointerClip
+
+	local wheelRightPane = Instance.new("Frame")
+	wheelRightPane.Size = UDim2.new(0.50, 0, 0.94, 0)
+	wheelRightPane.Position = UDim2.new(0.48, 0, 0.03, 0)
+	wheelRightPane.BackgroundTransparency = 1
+	wheelRightPane.Parent = pageWheel
+
+	local wheelSpinsPlate = Instance.new("Frame")
+	wheelSpinsPlate.Name = "WheelSpinsPlate"
+	wheelSpinsPlate.Size = UDim2.new(1, 0, 0, 42)
+	wheelSpinsPlate.Position = UDim2.new(0, 0, 0, 0)
+	wheelSpinsPlate.BackgroundColor3 = UITheme.Colors.CardBg
+	UITheme.addCorner(wheelSpinsPlate, 10)
+	UITheme.applyStroke(wheelSpinsPlate, 3, UITheme.Colors.GoldBottom)
+	UITheme.addStuds(wheelSpinsPlate, 0.90, 20)
+	UITheme.addBevel(wheelSpinsPlate, 10)
+	UITheme.addShadow(wheelSpinsPlate, 10, 3)
+	wheelSpinsPlate.Parent = wheelRightPane
+
+	wheelSpinsCountLbl = Instance.new("TextLabel")
+	wheelSpinsCountLbl.Name = "SpinsCountText"
+	wheelSpinsCountLbl.Size = UDim2.new(0.92, 0, 0.8, 0)
+	wheelSpinsCountLbl.Position = UDim2.new(0.04, 0, 0.1, 0)
+	wheelSpinsCountLbl.BackgroundTransparency = 1
+	wheelSpinsCountLbl.Font = UITheme.Fonts.Titles
+	wheelSpinsCountLbl.TextColor3 = UITheme.Colors.NoticeYellow
+	wheelSpinsCountLbl.Text = "🎟️ AVAILABLE SPINS: 1"
+	wheelSpinsCountLbl.TextScaled = true
+	UITheme.applyTextStroke(wheelSpinsCountLbl, 2.5, UITheme.Colors.Black)
+	wheelSpinsCountLbl.Parent = wheelSpinsPlate
+
+	local wheelOddsList = {
+		{ text = "$150 — 45%", col = Color3.fromHex("#1D7BF6"), icon = UITheme.Assets.CashStack },
+		{ text = "$350 — 30%", col = Color3.fromHex("#22C55E"), icon = UITheme.Assets.CashStack },
+		{ text = "$750 — 17%", col = Color3.fromHex("#F59E0B"), icon = UITheme.Assets.CashStack },
+		{ text = "CYBER CHAIR + $500 — 8%", col = Color3.fromHex("#FF2E93"), icon = UITheme.Assets.CrownIcon },
+	}
+	for idx, item in wheelOddsList do
+		local row = Instance.new("Frame")
+		row.Name = `OddsRow_{idx}`
+		row.Size = UDim2.new(1, 0, 0, 42)
+		row.Position = UDim2.new(0, 0, 0, 48 + (idx - 1) * 46)
+		row.BackgroundColor3 = UITheme.Colors.CardBg
+		UITheme.addCorner(row, 8)
+		UITheme.applyStroke(row, 3, item.col)
+		UITheme.addStuds(row, 0.90, 20)
+		UITheme.addBevel(row, 8)
+		UITheme.addShadow(row, 8, 3)
+		row.Parent = wheelRightPane
+
+		local rIcon = Instance.new("ImageLabel")
+		rIcon.Name = "RowIcon"
+		rIcon.Size = UDim2.fromOffset(24, 24)
+		rIcon.Position = UDim2.new(0, 10, 0.5, -12)
+		rIcon.BackgroundTransparency = 1
+		rIcon.Image = item.icon
+		rIcon.ScaleType = Enum.ScaleType.Fit
+		rIcon.ZIndex = row.ZIndex + 2
+		rIcon.Parent = row
+
+		local rTxt = Instance.new("TextLabel")
+		rTxt.Name = "RowText"
+		rTxt.Size = UDim2.new(1, -44, 0.8, 0)
+		rTxt.Position = UDim2.new(0, 40, 0.1, 0)
+		rTxt.BackgroundTransparency = 1
+		rTxt.Font = UITheme.Fonts.Primary
+		rTxt.TextColor3 = UITheme.Colors.White
+		rTxt.TextXAlignment = Enum.TextXAlignment.Left
+		rTxt.Text = item.text
+		rTxt.TextScaled = true
+		UITheme.addTextConstraint(rTxt, 11, 16)
+		UITheme.applyTextStroke(rTxt, 2.5, UITheme.Colors.Black)
+		rTxt.ZIndex = row.ZIndex + 2
+		rTxt.Parent = row
+	end
+
+	local btnDoSpinWheel = Instance.new("TextButton")
+	btnDoSpinWheel.Name = "BtnDoSpinWheel"
+	btnDoSpinWheel.Size = UDim2.new(1, 0, 0, 56)
+	btnDoSpinWheel.Position = UDim2.new(0, 0, 1, -58)
+	btnDoSpinWheel.Text = ""
+	UITheme.styleButton(btnDoSpinWheel, "Lime", 10)
+	UITheme.addStuds(btnDoSpinWheel, 0.85, 20)
+	UITheme.addPulse(btnDoSpinWheel, 1.0, 1.04, 1.2)
+	UITheme.addShineSweep(btnDoSpinWheel, 3.0)
+
+	spinBtnLabel = Instance.new("TextLabel")
+	spinBtnLabel.Name = "BtnLabel"
+	spinBtnLabel.Size = UDim2.new(0.92, 0, 0.8, 0)
+	spinBtnLabel.Position = UDim2.new(0.04, 0, 0.1, 0)
+	spinBtnLabel.BackgroundTransparency = 1
+	spinBtnLabel.Font = UITheme.Fonts.Primary
+	spinBtnLabel.TextColor3 = UITheme.Colors.White
+	spinBtnLabel.Text = "🎡 SPIN WHEEL (1)"
+	spinBtnLabel.TextScaled = true
+	UITheme.addTextConstraint(spinBtnLabel, 14, 22)
+	UITheme.applyTextStroke(spinBtnLabel, 3, UITheme.Colors.Black)
+	spinBtnLabel.ZIndex = btnDoSpinWheel.ZIndex + 3
+	spinBtnLabel.Parent = btnDoSpinWheel
+	btnDoSpinWheel.Parent = wheelRightPane
+
+	btnDoSpinWheel.Activated:Connect(function()
+		if wheelSpinning then
+			return
+		end
+		Remotes.MetaAction:FireServer("SpinWheel")
+	end)
+
+	-- ============================================================
+	-- Build Page 8: PLAYER STATS TRACKER (1. Profil, 2. Pertandingan, 3. Koleksi Kartu)
+	-- ============================================================
+	local profileScroll = Instance.new("ScrollingFrame")
+	profileScroll.Size = UDim2.new(1, -24, 1, -20)
+	profileScroll.Position = UDim2.new(0, 12, 0, 10)
+	profileScroll.BackgroundTransparency = 1
+	profileScroll.BorderSizePixel = 0
+	profileScroll.ScrollBarThickness = 6
+	profileScroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
+	profileScroll.CanvasSize = UDim2.fromScale(0, 0)
+	profileScroll.ZIndex = 70
+	profileScroll.Parent = pageProfile
+
+	local profileScrollLayout = Instance.new("UIListLayout")
+	profileScrollLayout.Padding = UDim.new(0, 12)
+	profileScrollLayout.SortOrder = Enum.SortOrder.LayoutOrder
+	profileScrollLayout.Parent = profileScroll
+
+	local function makeProfileSection(order: number, titleText: string, accentColor: Color3, heightPx: number): Frame
+		local sec = Instance.new("Frame")
+		sec.LayoutOrder = order
+		sec.Size = UDim2.new(1, -8, 0, heightPx)
+		sec.BackgroundColor3 = UITheme.Colors.CardDark
+		sec.BorderSizePixel = 0
+		sec.ZIndex = 71
+		UITheme.addCorner(sec, 12)
+		UITheme.applyStroke(sec, 2, accentColor)
+		sec.Parent = profileScroll
+
+		local hdr = Instance.new("TextLabel")
+		hdr.Size = UDim2.new(1, -24, 0, 26)
+		hdr.Position = UDim2.fromOffset(12, 8)
+		hdr.BackgroundTransparency = 1
+		hdr.Font = UITheme.Fonts.Primary
+		hdr.TextColor3 = accentColor
+		hdr.TextXAlignment = Enum.TextXAlignment.Left
+		hdr.TextScaled = true
+		hdr.Text = titleText
+		hdr.ZIndex = 72
+		UITheme.addTextConstraint(hdr, 12, 20)
+		UITheme.applyTextStroke(hdr, 2, UITheme.Colors.Black)
+		hdr.Parent = sec
+		return sec
+	end
+
+	local function makeStatTile(parent: Instance, pos: UDim2, size: UDim2, labelText: string, accent: Color3?): TextLabel
+		local tile = Instance.new("Frame")
+		tile.Size = size
+		tile.Position = pos
+		tile.BackgroundColor3 = UITheme.Colors.CardBg
+		tile.BorderSizePixel = 0
+		tile.ZIndex = 72
+		UITheme.addCorner(tile, 8)
+		UITheme.applyStroke(tile, 1.5, accent or UITheme.Colors.GrayTop)
+		tile.Parent = parent
+
+		local lbl = Instance.new("TextLabel")
+		lbl.Size = UDim2.new(1, -12, 0.42, 0)
+		lbl.Position = UDim2.fromOffset(6, 4)
+		lbl.BackgroundTransparency = 1
+		lbl.Font = UITheme.Fonts.Body
+		lbl.TextColor3 = Color3.fromRGB(175, 190, 215)
+		lbl.TextScaled = true
+		lbl.Text = labelText
+		lbl.ZIndex = 73
+		UITheme.addTextConstraint(lbl, 9, 14)
+		UITheme.applyTextStroke(lbl, 1.5, UITheme.Colors.Black)
+		lbl.Parent = tile
+
+		local val = Instance.new("TextLabel")
+		val.Size = UDim2.new(1, -12,
