@@ -82,7 +82,7 @@ function ShopDailyUI.initShop(screenGui: ScreenGui, modalBackdrop: GuiObject, Re
 		headerColors = UITheme.CONFIG.Headers.Shop,
 		closeStyle = "magenta",
 		headerHeightOffset = 46,
-		size = UDim2.new(0, 460, 0.90, 0),
+		size = UDim2.new(0, 460, 0.48, 0),
 		parent = screenGui,
 		onClose = function()
 			modalBackdrop.Visible = false
@@ -90,8 +90,8 @@ function ShopDailyUI.initShop(screenGui: ScreenGui, modalBackdrop: GuiObject, Re
 	})
 	local shopWindow = shopWindowData.Window
 	local shopSizeConstraint = Instance.new("UISizeConstraint")
-	shopSizeConstraint.MaxSize = Vector2.new(490, 720)
-	shopSizeConstraint.MinSize = Vector2.new(360, 520)
+	shopSizeConstraint.MaxSize = Vector2.new(490, 390)
+	shopSizeConstraint.MinSize = Vector2.new(360, 320)
 	shopSizeConstraint.Parent = shopWindow
 	shopWindow.ZIndex = 26
 	shopWindow.Visible = false
@@ -136,9 +136,16 @@ function ShopDailyUI.initShop(screenGui: ScreenGui, modalBackdrop: GuiObject, Re
 	pageShop.Size = UDim2.fromScale(1, 1)
 	pageShop.CanvasSize = UDim2.new(0, 0, 0, 860)
 	pageShop.AutomaticCanvasSize = Enum.AutomaticSize.Y
+	pageShop.ScrollingDirection = Enum.ScrollingDirection.Y
+	pageShop.ScrollBarThickness = 6
+	pageShop.VerticalScrollBarInset = Enum.ScrollBarInset.ScrollBar
+	pageShop.TopImage = "rbxasset://textures/ui/Scroll/scroll-top.png"
+	pageShop.MidImage = "rbxasset://textures/ui/Scroll/scroll-middle.png"
+	pageShop.BottomImage = "rbxasset://textures/ui/Scroll/scroll-bottom.png"
+	pageShop.ScrollBarImageColor3 = Color3.fromRGB(120, 130, 160)
+	pageShop.ScrollBarImageTransparency = 0.2
 	pageShop.BackgroundTransparency = 1
 	pageShop.Visible = true
-	UITheme.scroll(pageShop)
 	pageShop.Parent = shopWindowData.Body
 
 	local shopGamepassCards: { [string]: { SetOwned: (boolean) -> () } } = {}
@@ -406,23 +413,21 @@ function ShopDailyUI.initShop(screenGui: ScreenGui, modalBackdrop: GuiObject, Re
 	buxGrid.Parent = buxGridWrap
 
 	local buxPacks = {
-		{ id = "bux_300", name = "300 BUX", tag = nil, price = 20, isSafe = false, count = 2 },
-		{ id = "bux_1000", name = "1000 BUX", tag = nil, price = 35, isSafe = false, count = 3 },
-		{ id = "bux_4000", name = "4000 BUX", tag = "MOST\nPOPULAR!", price = 99, isSafe = true, isWideSafe = false },
-		{ id = "bux_15000", name = "15000 BUX", tag = "BEST\nDEAL!", price = 249, isSafe = true, isWideSafe = true },
+		{ id = "bux_300", name = "300 BUX", tag = nil, price = 20, icon = if UITheme.Assets.Icon_Bux300 and UITheme.Assets.Icon_Bux300 ~= "rbxassetid://0" then UITheme.Assets.Icon_Bux300 else UITheme.Assets.Icon_CashCube },
+		{ id = "bux_1000", name = "1000 BUX", tag = nil, price = 35, icon = if UITheme.Assets.Icon_Bux1000 and UITheme.Assets.Icon_Bux1000 ~= "rbxassetid://0" then UITheme.Assets.Icon_Bux1000 else UITheme.Assets.Icon_CashCube },
+		{ id = "bux_4000", name = "4000 BUX", tag = "MOST\nPOPULAR!", price = 99, icon = if UITheme.Assets.Icon_Bux4000 and UITheme.Assets.Icon_Bux4000 ~= "rbxassetid://0" then UITheme.Assets.Icon_Bux4000 else UITheme.Assets.Icon_CashCube },
+		{ id = "bux_15000", name = "15000 BUX", tag = "BEST\nDEAL!", price = 249, icon = if UITheme.Assets.Icon_Bux15000 and UITheme.Assets.Icon_Bux15000 ~= "rbxassetid://0" then UITheme.Assets.Icon_Bux15000 else UITheme.Assets.Icon_CashCube },
 	}
 	for idx, bp in buxPacks do
 		local card = Instance.new("Frame")
 		card.Name = "BuxCard_" .. bp.id
-		card.BackgroundColor3 = Color3.fromHex("#1E752E")
+		card.BackgroundColor3 = Color3.fromHex("#288832")
 		card.BackgroundTransparency = 0
 		card.BorderSizePixel = 0
 		card.ClipsDescendants = true
 		card.LayoutOrder = idx
 		UITheme.addCorner(card, UITheme.CONFIG.CARD_CORNER_RADIUS)
-		UITheme.applyStroke(card, 2, Color3.fromHex("#114B1B"))
-		UITheme.applyGradient(card, Color3.fromHex("#228334"), Color3.fromHex("#196327"), 90)
-		UITheme.studs(card, UITheme.CONFIG.STUDS_PANEL_TRANSPARENCY)
+		UITheme.applyStroke(card, 2, Color3.fromHex("#175C20"))
 		card.Parent = buxGridWrap
 
 		local sbWrap = Instance.new("Frame")
@@ -433,80 +438,19 @@ function ShopDailyUI.initShop(screenGui: ScreenGui, modalBackdrop: GuiObject, Re
 		sbWrap.BackgroundTransparency = 1
 		sbWrap.ZIndex = card.ZIndex + 1
 		sbWrap.Parent = card
-		UITheme.sunburst(sbWrap, Color3.fromHex("#68FF3B"), 0.15)
+		UITheme.sunburst(sbWrap, Color3.fromHex("#69D945"), 0.20)
 		UITheme.attachCardHover(card, 1.04)
 
-		if bp.isSafe then
-			local iconContainer = Instance.new("Frame")
-			iconContainer.Name = "IconContainer"
-			iconContainer.Size = UDim2.fromScale(0.44, 0.62)
-			iconContainer.Position = UDim2.fromScale(0.25, 0.60)
-			iconContainer.AnchorPoint = Vector2.new(0.5, 0.5)
-			iconContainer.BackgroundTransparency = 1
-			iconContainer.ZIndex = card.ZIndex + 2
-			iconContainer.Parent = card
-
-			local cashBg = Instance.new("ImageLabel")
-			cashBg.Name = "CashPile"
-			cashBg.Size = UDim2.fromScale(0.90, 0.60)
-			cashBg.Position = UDim2.fromScale(0.5, 0.75)
-			cashBg.AnchorPoint = Vector2.new(0.5, 0.5)
-			cashBg.BackgroundTransparency = 1
-			cashBg.Image = UITheme.Assets.Icon_CashCube
-			cashBg.ScaleType = Enum.ScaleType.Fit
-			cashBg.ZIndex = iconContainer.ZIndex
-			cashBg.Parent = iconContainer
-
-			local safeBox = Instance.new("Frame")
-			safeBox.Name = "SafeBox"
-			safeBox.Size = if bp.isWideSafe then UDim2.fromScale(0.66, 0.44) else UDim2.fromScale(0.56, 0.42)
-			safeBox.Position = UDim2.fromScale(0.5, 0.45)
-			safeBox.AnchorPoint = Vector2.new(0.5, 0.5)
-			safeBox.BackgroundColor3 = Color3.fromHex("#1F8532")
-			safeBox.BorderSizePixel = 0
-			safeBox.ZIndex = iconContainer.ZIndex + 1
-			UITheme.addCorner(safeBox, 4)
-			UITheme.applyStroke(safeBox, 2, Color3.fromHex("#000000"))
-			safeBox.Parent = iconContainer
-
-			local bandL = Instance.new("Frame")
-			bandL.Size = UDim2.new(0, 4, 1, 0)
-			bandL.Position = UDim2.new(0.12, 0, 0, 0)
-			bandL.BackgroundColor3 = Color3.fromHex("#FFD21F")
-			bandL.BorderSizePixel = 0
-			bandL.ZIndex = safeBox.ZIndex + 1
-			bandL.Parent = safeBox
-
-			local bandR = Instance.new("Frame")
-			bandR.Size = UDim2.new(0, 4, 1, 0)
-			bandR.Position = UDim2.new(0.88, -4, 0, 0)
-			bandR.BackgroundColor3 = Color3.fromHex("#FFD21F")
-			bandR.BorderSizePixel = 0
-			bandR.ZIndex = safeBox.ZIndex + 1
-			bandR.Parent = safeBox
-
-			local dial = Instance.new("Frame")
-			dial.Size = UDim2.fromOffset(12, 12)
-			dial.Position = UDim2.fromScale(0.5, 0.5)
-			dial.AnchorPoint = Vector2.new(0.5, 0.5)
-			dial.BackgroundColor3 = Color3.fromHex("#FFD21F")
-			dial.BorderSizePixel = 0
-			dial.ZIndex = safeBox.ZIndex + 2
-			UITheme.addCorner(dial, 6)
-			UITheme.applyStroke(dial, 1.5, Color3.fromHex("#000000"))
-			dial.Parent = safeBox
-		else
-			local iconImg = Instance.new("ImageLabel")
-			iconImg.Name = "CashIcon"
-			iconImg.Size = if bp.count == 3 then UDim2.fromScale(0.44, 0.60) else UDim2.fromScale(0.40, 0.54)
-			iconImg.Position = UDim2.fromScale(0.25, 0.60)
-			iconImg.AnchorPoint = Vector2.new(0.5, 0.5)
-			iconImg.BackgroundTransparency = 1
-			iconImg.Image = UITheme.Assets.Icon_CashCube
-			iconImg.ScaleType = Enum.ScaleType.Fit
-			iconImg.ZIndex = card.ZIndex + 2
-			iconImg.Parent = card
-		end
+		local iconImg = Instance.new("ImageLabel")
+		iconImg.Name = "BuxIcon"
+		iconImg.Size = UDim2.fromScale(0.46, 0.64)
+		iconImg.Position = UDim2.fromScale(0.25, 0.58)
+		iconImg.AnchorPoint = Vector2.new(0.5, 0.5)
+		iconImg.BackgroundTransparency = 1
+		iconImg.Image = bp.icon
+		iconImg.ScaleType = Enum.ScaleType.Fit
+		iconImg.ZIndex = card.ZIndex + 2
+		iconImg.Parent = card
 
 		local nameLbl = Instance.new("TextLabel")
 		nameLbl.Name = "Title"
@@ -2048,7 +1992,7 @@ function ShopDailyUI.initChairSkins(
 		headerColors = UITheme.CONFIG.Headers.ChairSkins,
 		closeStyle = "magenta",
 		headerHeightOffset = 50,
-		size = UDim2.new(0, 620, 0, 480),
+		size = UDim2.new(0, 620, 0, 490),
 		parent = screenGui,
 		onClose = function()
 			modalBackdrop.Visible = false
@@ -2056,7 +2000,7 @@ function ShopDailyUI.initChairSkins(
 	})
 	local skinsWindow = skinsWindowData.Window
 	local sizeConstraint = Instance.new("UISizeConstraint")
-	sizeConstraint.MaxSize = Vector2.new(650, 500)
+	sizeConstraint.MaxSize = Vector2.new(650, 560)
 	sizeConstraint.MinSize = Vector2.new(460, 360)
 	sizeConstraint.Parent = skinsWindow
 	skinsWindow.ZIndex = 26
@@ -2189,20 +2133,34 @@ function ShopDailyUI.initChairSkins(
 		Remotes.MetaAction:FireServer("UpgradeLuck")
 	end)
 
-	-- 2. Card Grid (6 Chairs: 3 columns x 2 rows)
-	local gridFrame = Instance.new("Frame")
+	-- 2. Card Grid (6 Chairs: 3 columns x 2 rows, scrollable)
+	local gridFrame = Instance.new("ScrollingFrame")
 	gridFrame.Name = "CardGrid"
-	gridFrame.Size = UDim2.new(0.95, 0, 0, 395)
-	gridFrame.Position = UDim2.new(0.025, 0, 0, 56)
+	gridFrame.Size = UDim2.new(0.95, 0, 1, -56)
+	gridFrame.Position = UDim2.new(0.025, 0, 0, 50)
 	gridFrame.BackgroundTransparency = 1
+	gridFrame.BorderSizePixel = 0
+	gridFrame.ScrollBarThickness = 5
+	gridFrame.ScrollBarImageColor3 = Color3.fromHex("#333D52")
+	gridFrame.ScrollingDirection = Enum.ScrollingDirection.Y
+	gridFrame.ElasticBehavior = Enum.ElasticBehavior.Always
+	gridFrame.AutomaticCanvasSize = Enum.AutomaticSize.Y
+	gridFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
 	gridFrame.ZIndex = 27
 	gridFrame.Parent = body
 
+	local padding = Instance.new("UIPadding")
+	padding.PaddingTop = UDim.new(0, 4)
+	padding.PaddingBottom = UDim.new(0, 16)
+	padding.PaddingLeft = UDim.new(0, 2)
+	padding.PaddingRight = UDim.new(0, 6)
+	padding.Parent = gridFrame
+
 	local gridLayout = Instance.new("UIGridLayout")
-	gridLayout.CellSize = UDim2.new(0.315, 0, 0.47, 0)
-	gridLayout.CellPadding = UDim2.new(0.027, 0, 0.045, 0)
+	gridLayout.CellSize = UDim2.new(0.315, 0, 0, 168)
+	gridLayout.CellPadding = UDim2.new(0.027, 0, 0, 10)
 	gridLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
-	gridLayout.VerticalAlignment = Enum.VerticalAlignment.Center
+	gridLayout.VerticalAlignment = Enum.VerticalAlignment.Top
 	gridLayout.SortOrder = Enum.SortOrder.LayoutOrder
 	gridLayout.Parent = gridFrame
 
@@ -2277,7 +2235,7 @@ function ShopDailyUI.initChairSkins(
 		local nameLbl = Instance.new("TextLabel")
 		nameLbl.Name = "SkinName"
 		nameLbl.Size = UDim2.new(1, 0, 0, 22)
-		nameLbl.Position = UDim2.new(0, 0, 0, 10)
+		nameLbl.Position = UDim2.new(0, 0, 0, 8)
 		nameLbl.BackgroundTransparency = 1
 		nameLbl.Font = Enum.Font.FredokaOne
 		nameLbl.TextColor3 = Color3.fromHex("#FFE380")
@@ -2290,8 +2248,8 @@ function ShopDailyUI.initChairSkins(
 		-- Center 2D Chair Icon
 		local chairImg = Instance.new("ImageLabel")
 		chairImg.Name = "ChairIcon"
-		chairImg.Size = UDim2.new(0.78, 0, 0.50, 0)
-		chairImg.Position = UDim2.new(0.11, 0, 0.20, 0)
+		chairImg.Size = UDim2.new(0.78, 0, 0.48, 0)
+		chairImg.Position = UDim2.new(0.11, 0, 0.21, 0)
 		chairImg.BackgroundTransparency = 1
 		chairImg.ScaleType = Enum.ScaleType.Fit
 		chairImg.ZIndex = card.ZIndex + 2
@@ -2302,7 +2260,7 @@ function ShopDailyUI.initChairSkins(
 		local sBtn = Instance.new("TextButton")
 		sBtn.Name = "BtnSkin_" .. skin.id
 		sBtn.Size = UDim2.new(0.86, 0, 0.20, 0)
-		sBtn.Position = UDim2.new(0.07, 0, 0.74, 0)
+		sBtn.Position = UDim2.new(0.07, 0, 0.73, 0)
 		sBtn.Text = ""
 		sBtn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 		sBtn.ZIndex = card.ZIndex + 4

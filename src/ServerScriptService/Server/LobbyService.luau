@@ -1584,16 +1584,16 @@ local function setupStadiumLighting()
 		cc.Name = "StadiumColorPop"
 		cc.Parent = Lighting
 	end
-	cc.Saturation = 0.22
-	cc.Contrast = 0.12
-	cc.Brightness = 0.02
+	cc.Saturation = 0.06
+	cc.Contrast = 0.08
+	cc.Brightness = 0.0
 
 	local bloom = Lighting:FindFirstChildOfClass("BloomEffect")
 	if not bloom then
 		bloom = Instance.new("BloomEffect")
 		bloom.Parent = Lighting
 	end
-	bloom.Intensity = 0.4
+	bloom.Intensity = 0.22
 	bloom.Size = 18
 	bloom.Threshold = 1.8
 
@@ -1625,7 +1625,7 @@ local function buildStadiumLobby()
 
 	local baseplate = Workspace:FindFirstChild("Baseplate") :: BasePart?
 	if baseplate then
-		baseplate.Color = Color3.fromHex("#2FBF2F")
+		baseplate.Color = Color3.fromHex("#265C28")
 		baseplate.Material = Enum.Material.Grass
 	end
 

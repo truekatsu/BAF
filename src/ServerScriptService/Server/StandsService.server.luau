@@ -120,7 +120,7 @@ local function applyStandVariety()
 				sg.Name = "SeatPatternGui"
 				sg.Face = Enum.NormalId.Top
 				sg.CanvasSize = Vector2.new(1200, 40)
-				sg.LightInfluence = 0
+				sg.LightInfluence = 1.0
 				sg.AlwaysOnTop = false
 				sg.Parent = desc
 

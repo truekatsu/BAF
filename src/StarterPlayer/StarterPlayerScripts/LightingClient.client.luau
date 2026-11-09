@@ -41,19 +41,20 @@ local function applyMode(mode: string, prevMode: string?)
 		TweenService:Create(Lighting, tweenInfo, {
 			ClockTime = 14.2,
 			Brightness = 2.2,
-			OutdoorAmbient = Color3.fromRGB(120, 135, 155),
+			OutdoorAmbient = Color3.fromRGB(115, 125, 140),
+			Ambient = Color3.fromRGB(35, 40, 48),
 		}):Play()
 
 		if atmosphere then
-			TweenService:Create(atmosphere, tweenInfo, { Density = 0.30 }):Play()
+			TweenService:Create(atmosphere, tweenInfo, { Density = 0.25 }):Play()
 		end
 		if bloom then
-			TweenService:Create(bloom, tweenInfo, { Intensity = 0.40 }):Play()
+			TweenService:Create(bloom, tweenInfo, { Intensity = 0.20, Threshold = 1.8, Size = 20 }):Play()
 		end
 		if colorCorrection then
 			TweenService:Create(colorCorrection, tweenInfo, {
 				TintColor = Color3.fromRGB(255, 255, 255),
-				Saturation = 0.10,
+				Saturation = 0.08,
 			}):Play()
 		end
 
@@ -90,20 +91,27 @@ local function applyMode(mode: string, prevMode: string?)
 		-- Global Lighting tweens
 		TweenService:Create(Lighting, tweenInfo, {
 			ClockTime = 20.0,
-			Brightness = 0.9,
-			OutdoorAmbient = Color3.fromRGB(48, 54, 72),
+			Brightness = 0.2,
+			OutdoorAmbient = Color3.fromRGB(24, 28, 42),
+			Ambient = Color3.fromRGB(10, 12, 18),
 		}):Play()
 
 		if atmosphere then
-			TweenService:Create(atmosphere, tweenInfo, { Density = 0.38 }):Play()
+			TweenService:Create(atmosphere, tweenInfo, {
+				Color = Color3.fromRGB(25, 35, 60),
+				Decay = Color3.fromRGB(12, 16, 30),
+				Density = 0.35,
+				Haze = 0.40,
+				Glare = 0,
+			}):Play()
 		end
 		if bloom then
-			TweenService:Create(bloom, tweenInfo, { Intensity = 0.45 }):Play()
+			TweenService:Create(bloom, tweenInfo, { Intensity = 0.25, Threshold = 1.8, Size = 22 }):Play()
 		end
 		if colorCorrection then
 			TweenService:Create(colorCorrection, tweenInfo, {
-				TintColor = Color3.fromRGB(250, 246, 238),
-				Saturation = 0.18,
+				TintColor = Color3.fromRGB(245, 248, 255),
+				Saturation = 0.05,
 			}):Play()
 		end
 

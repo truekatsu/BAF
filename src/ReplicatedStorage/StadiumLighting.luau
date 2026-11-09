@@ -57,7 +57,7 @@ StadiumLighting.CONFIG = {
 
 	-- Ground Glow Pool Configuration
 	GROUND_GLOW_SIZE = 60,
-	GROUND_GLOW_TRANSPARENCY = 0.9, -- Warm additive glow at center fading smoothly outward
+	GROUND_GLOW_TRANSPARENCY = 0.95, -- Subtle additive ground glow fading smoothly outward
 	PITCH_SURFACE_Y = 0.0,           -- Top of grass baseplate ground
 	WALKWAY_SURFACE_Y = 0.50,        -- Top of central walkway and plaza roundabout
 	PODIUM_TIER1_Y = 2.25,           -- Top of gold podium tier 1
@@ -76,9 +76,9 @@ StadiumLighting.CONFIG = {
 		CENTER = Vector3.new(0, 25.5, -39),    -- Central plaza hub position
 		SPOT_RANGE = 60,
 		SPOT_ANGLE = 120,
-		SPOT_BRIGHTNESS = 1.0,
+		SPOT_BRIGHTNESS = 0.6,
 		POINT_RANGE = 30,
-		POINT_BRIGHTNESS = 0.8,
+		POINT_BRIGHTNESS = 0.4,
 		COLOR = Color3.fromHex("#FFF4D6"),
 	},
 
@@ -699,31 +699,52 @@ local function updateGlobalLighting(turnOn: boolean)
 
 	if turnOn then
 		TweenService:Create(Lighting, tweenInfo, {
-			Brightness = 1.4,
-			OutdoorAmbient = Color3.fromRGB(58, 66, 82),
-			EnvironmentDiffuseScale = 0.35,
-			EnvironmentSpecularScale = 0.45,
+			Brightness = 0.2,
+			OutdoorAmbient = Color3.fromRGB(24, 28, 42),
+			Ambient = Color3.fromRGB(10, 12, 18),
+			EnvironmentDiffuseScale = 0.25,
+			EnvironmentSpecularScale = 0.30,
 			ShadowSoftness = 0.60,
 		}):Play()
 		if atmosphere then
-			TweenService:Create(atmosphere, tweenInfo, { Density = 0.35, Haze = 0.50 }):Play()
+			TweenService:Create(atmosphere, tweenInfo, {
+				Color = Color3.fromRGB(25, 35, 60),
+				Decay = Color3.fromRGB(12, 16, 30),
+				Density = 0.35,
+				Haze = 0.40,
+				Glare = 0,
+			}):Play()
 		end
 		if bloom then
-			TweenService:Create(bloom, tweenInfo, { Intensity = 0.60 }):Play()
+			TweenService:Create(bloom, tweenInfo, {
+				Intensity = 0.25,
+				Threshold = 1.8,
+				Size = 22,
+			}):Play()
 		end
 	else
 		TweenService:Create(Lighting, tweenInfo, {
-			Brightness = 2.5,
-			OutdoorAmbient = Color3.fromRGB(120, 135, 155),
+			Brightness = 2.4,
+			OutdoorAmbient = Color3.fromRGB(115, 125, 140),
+			Ambient = Color3.fromRGB(35, 40, 48),
 			EnvironmentDiffuseScale = 1.0,
 			EnvironmentSpecularScale = 1.0,
 			ShadowSoftness = 0.20,
 		}):Play()
 		if atmosphere then
-			TweenService:Create(atmosphere, tweenInfo, { Density = 0.25, Haze = 0.20 }):Play()
+			TweenService:Create(atmosphere, tweenInfo, {
+				Color = Color3.fromRGB(220, 235, 255),
+				Decay = Color3.fromRGB(120, 170, 255),
+				Density = 0.22,
+				Haze = 0.20,
+			}):Play()
 		end
 		if bloom then
-			TweenService:Create(bloom, tweenInfo, { Intensity = 0.30 }):Play()
+			TweenService:Create(bloom, tweenInfo, {
+				Intensity = 0.20,
+				Threshold = 1.8,
+				Size = 20,
+			}):Play()
 		end
 	end
 end

@@ -575,7 +575,11 @@ UITheme.Assets = {
 
 
 
-	SunburstTexture = "rbxassetid://96537760078828", -- Verified working chunky radial rays texture
+	SunburstTexture = "rbxassetid://116185617616292", -- Transparent radial rays texture with faded circle
+	Icon_Bux300 = "rbxassetid://81024265406276",
+	Icon_Bux1000 = "rbxassetid://108299948496912",
+	Icon_Bux4000 = "rbxassetid://111348184447248",
+	Icon_Bux15000 = "rbxassetid://95774170379414",
 
 
 
@@ -615,7 +619,7 @@ UITheme.Assets = {
 
 
 
-	Icon_Chest = "rbxassetid://12638178958",
+	Icon_Chest = "rbxassetid://106079886709129",
 
 
 
@@ -3938,47 +3942,15 @@ function UITheme.gamepassCard(props: GamepassCardProps): {
 
 
 
-	card.BackgroundColor3 = Color3.fromHex("#2E3378")
-
-
-
+	card.BackgroundColor3 = Color3.fromHex("#4E44A7")
 	card.BackgroundTransparency = 0
-
-
-
 	card.BorderSizePixel = 0
-
-
-
 	card.ClipsDescendants = true
-
-
-
 	if props.layoutOrder then
-
-
-
 		card.LayoutOrder = props.layoutOrder
-
-
-
 	end
-
-
-
 	UITheme.addCorner(card, UITheme.CONFIG.CARD_CORNER_RADIUS)
-
-
-
-	UITheme.applyStroke(card, 2, Color3.fromHex("#1B1E4A"))
-
-
-
-	UITheme.applyGradient(card, Color3.fromHex("#333985"), Color3.fromHex("#282C6A"), 90)
-
-
-
-	UITheme.studs(card, UITheme.CONFIG.STUDS_PANEL_TRANSPARENCY)
+	UITheme.applyStroke(card, 2, Color3.fromHex("#332A7A"))
 
 
 

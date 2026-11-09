@@ -102,7 +102,7 @@ StandGenerator.CONFIG = {
 
 	-- Neon Accent Lip Strip
 	NEON_LIP = {
-		Enabled = true,
+		Enabled = false,         -- Disabled to prevent unnatural garish glowing rows
 		Thickness = 0.12,
 		Height = 0.16,
 		Transparency = 0.35,     -- Low brightness, sleek modern accent
@@ -228,7 +228,7 @@ local function attachSeatPattern(treadPart: Part, primaryColor: Color3, accentCo
 	local sg = Instance.new("SurfaceGui")
 	sg.Name = "SeatPatternGui"
 	sg.Face = Enum.NormalId.Top
-	sg.LightInfluence = 0.2
+	sg.LightInfluence = 1.0
 	sg.AlwaysOnTop = false
 	sg.SizingMode = Enum.SurfaceGuiSizingMode.PixelsPerStud
 	sg.PixelsPerStud = 12
@@ -292,7 +292,7 @@ local function attachCrowdStrip(
 	local sg = Instance.new("SurfaceGui")
 	sg.Name = "CrowdGui"
 	sg.Face = Enum.NormalId.Front
-	sg.LightInfluence = 0.15
+	sg.LightInfluence = 1.0
 	sg.AlwaysOnTop = false
 	sg.MaxDistance = 350
 	sg.SizingMode = Enum.SurfaceGuiSizingMode.PixelsPerStud
@@ -311,7 +311,9 @@ local function attachCrowdStrip(
 	layout.Padding = UDim.new(0, 3)
 	layout.Parent = root
 
-	local fanCount = math.clamp(math.floor(size.X * 1.3), 8, 56)
+	-- Calculate exact fan count to completely fill the strip width without gaps
+	local totalPixels = size.X * sg.PixelsPerStud
+	local fanCount = math.max(1, math.floor((totalPixels + 3) / 19))
 	for f = 1, fanCount do
 		local fanFrame = Instance.new("Frame")
 		fanFrame.Name = `Fan_{f}`
@@ -332,9 +334,14 @@ local function attachCrowdStrip(
 		local body = Instance.new("Frame")
 		body.Size = UDim2.new(0, 16, 0.58, 0)
 		body.Position = UDim2.new(0, 0, 0.42, 0)
-		local shirtCol = if rng:NextNumber() < 0.70
-			then primaryColor
-			else CROWD_NEUTRAL_SHIRTS[rng:NextInteger(1, #CROWD_NEUTRAL_SHIRTS)]
+		-- All supporter shirts match the stand's color (with subtle tone depth so individual fans remain distinct)
+		local r = rng:NextNumber()
+		local shirtCol = primaryColor
+		if r < 0.20 then
+			shirtCol = primaryColor:Lerp(Color3.new(1, 1, 1), 0.15)
+		elseif r < 0.35 then
+			shirtCol = primaryColor:Lerp(Color3.new(0, 0, 0), 0.15)
+		end
 		body.BackgroundColor3 = shirtCol
 		body.BorderSizePixel = 0
 		body.Parent = fanFrame
@@ -597,29 +604,14 @@ function StandGenerator.Generate(customConfig: GeneratorConfig?): Folder
 	buildAisle(southF, Vector3.new(-42.5, 0, 26), Vector3.new(0, 0, 1), Vector3.new(1, 0, 0), 67, 0.50, "Left_1", cfg)
 	buildAisle(southF, Vector3.new(42.5, 0, 26), Vector3.new(0, 0, 1), Vector3.new(1, 0, 0), 67, 0.50, "Right_1", cfg)
 
-	-- Tunnel Portal (Overhead Lintel, Trim & Sign disabled per user request)
-	local tPortal = Instance.new("Folder")
-	tPortal.Name = "TunnelPortal"
-	tPortal.Parent = southF
-	makePart(tPortal, "Jamb_L", Vector3.new(2.4, 12, 3.5), CFrame.new(-10.2, 6, 28.35), colors.OuterWall)
-	makePart(tPortal, "Jamb_R", Vector3.new(2.4, 12, 3.5), CFrame.new(10.2, 6, 28.35), colors.OuterWall)
-
-	local SPAWN_OVERHEAD_PORTAL = false
-	if SPAWN_OVERHEAD_PORTAL then
-		makePart(tPortal, "Lintel", Vector3.new(22.8, 2.6, 3.9), CFrame.new(0, 13.3, 28.35), colors.OuterWall)
-		makePart(tPortal, "Trim", Vector3.new(23.4, 0.8, 4.3), CFrame.new(0, 14.8, 28.35), colors.OuterTrim)
-		local signP = makePart(tPortal, "Sign", Vector3.new(14, 2, 0.4), CFrame.new(0, 13.3, 26.2), Color3.fromHex("#0F172A"))
-		local sg = Instance.new("SurfaceGui")
-		sg.Face = Enum.NormalId.Front
-		sg.Parent = signP
-		local lbl = Instance.new("TextLabel")
-		lbl.Size = UDim2.fromScale(1, 1)
-		lbl.BackgroundTransparency = 1
-		lbl.Text = "PLAYERS TUNNEL"
-		lbl.TextColor3 = colors.OuterTrim
-		lbl.TextSize = 24
-		lbl.Font = Enum.Font.GothamBlack
-		lbl.Parent = sg
+	-- Tunnel Portal disabled: PlayerTunnelService provides flush tunnel walls; portal jambs penetrated seats
+	local SPAWN_TUNNEL_PORTAL = false
+	if SPAWN_TUNNEL_PORTAL then
+		local tPortal = Instance.new("Folder")
+		tPortal.Name = "TunnelPortal"
+		tPortal.Parent = southF
+		makePart(tPortal, "Jamb_L", Vector3.new(2.4, 12, 3.5), CFrame.new(-10.2, 6, 28.35), colors.OuterWall)
+		makePart(tPortal, "Jamb_R", Vector3.new(2.4, 12, 3.5), CFrame.new(10.2, 6, 28.35), colors.OuterWall)
 	end
 
 	-- 5. Four 45-Degree Corners (Zero-gap connection)
