@@ -51,8 +51,8 @@ local GameConfig = {
 	RARITY_COLORS = table.freeze({
 		Common = Color3.fromHex("#CD7F32"),
 		Rare = Color3.fromHex("#C0C0C0"),
-		Epic = Color3.fromHex("#FFD21F"),
-		Legendary = Color3.fromHex("#A855F7"),
+		Epic = Color3.fromHex("#A855F7"),
+		Legendary = Color3.fromHex("#FFD21F"),
 		Mythic = Color3.fromHex("#FF2E93"),
 	}),
 
@@ -84,10 +84,10 @@ local GameConfig = {
 	CHAIR_SKINS = table.freeze({
 		{ id = "wood", name = "Classic Wood", cost = 0, color = Color3.fromRGB(124, 71, 40), mat = Enum.Material.WoodPlanks },
 		{ id = "stadium", name = "Stadium Blue", cost = 300, color = Color3.fromHex("#1E6FFF"), mat = Enum.Material.SmoothPlastic },
-		{ id = "crimson", name = "Crimson Striker", cost = 500, color = Color3.fromHex("#E5252A"), mat = Enum.Material.SmoothPlastic },
-		{ id = "emerald", name = "Emerald Pitch", cost = 1000, color = Color3.fromHex("#22C55E"), mat = Enum.Material.Neon },
-		{ id = "cyber", name = "Neon Cyber", cost = 2000, color = Color3.fromHex("#A855F7"), mat = Enum.Material.Neon },
-		{ id = "golden", name = "Golden Ballon d'Or", cost = 5000, color = Color3.fromHex("#FFD21F"), mat = Enum.Material.Neon },
+		{ id = "cyber_core", name = "Cyber Core Chair", cost = 3500, color = Color3.fromRGB(18, 20, 32), mat = Enum.Material.Metal },
+		{ id = "crimson", name = "Crimson Chair", cost = 6000, color = Color3.fromRGB(150, 15, 25), mat = Enum.Material.WoodPlanks },
+		{ id = "frostbite", name = "Frostbite Chair", cost = 10000, color = Color3.fromRGB(120, 210, 255), mat = Enum.Material.Glass },
+		{ id = "golden", name = "Football Throne", cost = 15000, color = Color3.fromRGB(255, 195, 30), mat = Enum.Material.SmoothPlastic },
 	}),
 
 	DAILY_REWARDS = table.freeze({
@@ -97,7 +97,7 @@ local GameConfig = {
 		{ day = 4, label = "500 BUX", bux = 500, spins = 0, chair = nil },
 		{ day = 5, label = "1000 BUX", bux = 1000, spins = 0, chair = nil },
 		{ day = 6, label = "2 SPINS", bux = 0, spins = 2, chair = nil },
-		{ day = 7, label = "GOLDEN CHAIR", bux = 2500, spins = 0, chair = "golden" },
+		{ day = 7, label = "FOOTBALL THRONE", bux = 2500, spins = 0, chair = "golden" },
 	}),
 
 	PLAYTIME_REWARDS = table.freeze({
@@ -106,7 +106,7 @@ local GameConfig = {
 		{ id = "pt_3", seconds = 900, timeLabel = "15 MIN", rewardLabel = "$500", bux = 500, spins = 0, chair = nil },
 		{ id = "pt_4", seconds = 1800, timeLabel = "30 MIN", rewardLabel = "$1K", bux = 1000, spins = 0, chair = nil },
 		{ id = "pt_5", seconds = 3600, timeLabel = "1 HOUR", rewardLabel = "$5K + 2 SPINS", bux = 5000, spins = 2, chair = nil },
-		{ id = "pt_6", seconds = 7200, timeLabel = "2 HOURS", rewardLabel = "$10K + CHAIR", bux = 10000, spins = 5, chair = "emerald" },
+		{ id = "pt_6", seconds = 7200, timeLabel = "2 HOURS", rewardLabel = "$10K + CHAIR", bux = 10000, spins = 5, chair = "crimson" },
 	}),
 
 	QUESTS = table.freeze({
@@ -123,7 +123,7 @@ local GameConfig = {
 		{ id = 1, label = "$350", icon = "💵", color = "#C5E61A", weight = 10, bux = 350, chair = nil, toast = "🎡 Wheel Prize: +$350!" },
 		{ id = 2, label = "$150", icon = "💵", color = "#1D7BF6", weight = 23, bux = 150, chair = nil, toast = "🎡 Wheel Prize: +$150!" },
 		{ id = 3, label = "$350", icon = "💵", color = "#CBD5E1", weight = 10, bux = 350, chair = nil, toast = "🎡 Wheel Prize: +$350!" },
-		{ id = 4, label = "GRAND\nPRIZE", icon = "🪑", color = "#C85A6E", weight = 8, bux = 500, chair = "cyber", toast = "🎡 JACKPOT! Neon Cyber Chair + $500!" },
+		{ id = 4, label = "GRAND\nPRIZE", icon = "🪑", color = "#C85A6E", weight = 8, bux = 500, chair = "frostbite", toast = "🎡 JACKPOT! Frostbite Chair + $500!" },
 		{ id = 5, label = "$750", icon = "💰", color = "#C26D27", weight = 9, bux = 750, chair = nil, toast = "🎡 Wheel Prize: +$750!" },
 		{ id = 6, label = "$150", icon = "💵", color = "#C81E2B", weight = 22, bux = 150, chair = nil, toast = "🎡 Wheel Prize: +$150!" },
 		{ id = 7, label = "$750", icon = "💰", color = "#D91CE5", weight = 8, bux = 750, chair = nil, toast = "🎡 Wheel Prize: +$750!" },
@@ -169,6 +169,27 @@ function GameConfig.getChairSkin(chairId: string)
 	for _, skin in GameConfig.CHAIR_SKINS do
 		if skin.id == chairId then
 			return skin
+		end
+	end
+	if chairId == "emerald" then
+		for _, skin in GameConfig.CHAIR_SKINS do
+			if skin.id == "crimson" then
+				return skin
+			end
+		end
+	end
+	if chairId == "cyber" then
+		for _, skin in GameConfig.CHAIR_SKINS do
+			if skin.id == "frostbite" then
+				return skin
+			end
+		end
+	end
+	if chairId == "football_throne" or chairId == "royal" then
+		for _, skin in GameConfig.CHAIR_SKINS do
+			if skin.id == "golden" then
+				return skin
+			end
 		end
 	end
 	return GameConfig.CHAIR_SKINS[1]

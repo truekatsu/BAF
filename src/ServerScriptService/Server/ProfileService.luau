@@ -504,9 +504,10 @@ local function grantShopItem(player: Player, itemKey: string): boolean
 	end
 	if itemKey == "starter_pack" then
 		grantBux(player, profile, 500)
+		profile.OwnedChairs["cyber_core"] = true
 		profile.OwnedChairs["crimson"] = true
-		profile.EquippedChair = "crimson"
-		syncLeaderstats(player, profile, "Starter Pack Unlocked: +$500 Bux & Crimson Chair!")
+		profile.EquippedChair = "cyber_core"
+		syncLeaderstats(player, profile, "Starter Pack Unlocked: +$500 Bux & Cyber Core Chair!")
 		return true
 	elseif itemKey == "skip_daily" then
 		profile.LastDailyClaim = 0
@@ -879,6 +880,18 @@ local function loadPlayer(player: Player)
 	data.SessionJoinTime = Workspace:GetServerTimeNow()
 	data.PlaytimeClaimed = {}
 	data.OwnedChairs["wood"] = true
+	if data.OwnedChairs["emerald"] and not data.OwnedChairs["crimson"] then
+		data.OwnedChairs["crimson"] = true
+	end
+	if data.EquippedChair == "emerald" then
+		data.EquippedChair = "crimson"
+	end
+	if data.OwnedChairs["cyber"] and not data.OwnedChairs["frostbite"] then
+		data.OwnedChairs["frostbite"] = true
+	end
+	if data.EquippedChair == "cyber" then
+		data.EquippedChair = "frostbite"
+	end
 	if not player:IsDescendantOf(Players) then
 		return
 	end

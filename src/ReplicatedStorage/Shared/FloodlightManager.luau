@@ -42,9 +42,9 @@ FloodlightManager.CONFIG = {
 	LAMP_ROWS = 3,               -- Grid rows of neon lamp panels
 
 	-- Light Sources
-	SPOT_RANGE = 110.0,          -- Studs distance of main floodlight throw
-	SPOT_ANGLE = 90.0,           -- Beam spread angle (degrees)
-	POINT_RANGE = 16.0,          -- Ambient flare range around the lamp array
+	SPOT_RANGE = 120.0,          -- Studs distance of main floodlight throw
+	SPOT_ANGLE = 86.0,           -- Balanced beam spread angle (degrees)
+	POINT_RANGE = 14.0,          -- Ambient flare range around the lamp array
 	CAST_SHADOWS = false,        -- Always false for silky 60 FPS mobile performance
 
 	-- Mode Presets
@@ -66,8 +66,8 @@ FloodlightManager.CONFIG = {
 			ClockTime = 20.0,
 			Brightness = 0.2,
 			OutdoorAmbient = Color3.fromRGB(24, 28, 42),
-			SpotBrightness = 1.8,
-			PointBrightness = 1.2,
+			SpotBrightness = 4.8,
+			PointBrightness = 0.8,
 			LampTransparency = 0.0,
 			BeamsEnabled = true,
 			AtmosphereDensity = 0.35,
@@ -97,18 +97,18 @@ FloodlightManager.CONFIG = {
 		EventGold = Color3.fromHex("#F5B82E"),      -- Celebration Gold
 	},
 
-	-- Tower Layout (10 towers placed outside the roof edge, rising above the roofline)
+	-- Tower Layout (10 towers with balanced zone targets covering the pitch naturally)
 	TOWERS = {
-		{ name = "Tower_Corner_NW", pos = Vector3.new(-126.6, 0, -142.6) },
-		{ name = "Tower_Corner_NE", pos = Vector3.new(126.6, 0, -142.6) },
-		{ name = "Tower_Corner_SE", pos = Vector3.new(126.6, 0, 56.6) },
-		{ name = "Tower_Corner_SW", pos = Vector3.new(-126.6, 0, 56.6) },
-		{ name = "Tower_North_1", pos = Vector3.new(-54.0, 0, -157.5) },
-		{ name = "Tower_North_2", pos = Vector3.new(54.0, 0, -157.5) },
-		{ name = "Tower_South_1", pos = Vector3.new(-54.0, 0, 71.5) },
-		{ name = "Tower_South_2", pos = Vector3.new(54.0, 0, 71.5) },
-		{ name = "Tower_West", pos = Vector3.new(-141.5, 0, -43.0) },
-		{ name = "Tower_East", pos = Vector3.new(141.5, 0, -43.0) },
+		{ name = "Tower_Corner_NW", pos = Vector3.new(-126.6, 0, -142.6), target = Vector3.new(-65, 0, -65) },
+		{ name = "Tower_Corner_NE", pos = Vector3.new(126.6, 0, -142.6), target = Vector3.new(65, 0, -65) },
+		{ name = "Tower_Corner_SE", pos = Vector3.new(126.6, 0, 56.6), target = Vector3.new(65, 0, -13) },
+		{ name = "Tower_Corner_SW", pos = Vector3.new(-126.6, 0, 56.6), target = Vector3.new(-65, 0, -13) },
+		{ name = "Tower_North_1", pos = Vector3.new(-54.0, 0, -157.5), target = Vector3.new(-30, 0, -60) },
+		{ name = "Tower_North_2", pos = Vector3.new(54.0, 0, -157.5), target = Vector3.new(30, 0, -60) },
+		{ name = "Tower_South_1", pos = Vector3.new(-54.0, 0, 71.5), target = Vector3.new(-30, 0, -18) },
+		{ name = "Tower_South_2", pos = Vector3.new(54.0, 0, 71.5), target = Vector3.new(30, 0, -18) },
+		{ name = "Tower_West", pos = Vector3.new(-141.5, 0, -43.0), target = Vector3.new(-50, 0, -39) },
+		{ name = "Tower_East", pos = Vector3.new(141.5, 0, -43.0), target = Vector3.new(50, 0, -39) },
 	},
 }
 
@@ -247,7 +247,7 @@ function FloodlightManager.Generate(customConfig: FloodlightConfig?): Folder
 		local mastBaseY = pedH + 0.8
 		local headY = mastBaseY + mastH + 0.5
 		local headPos = towerPos + Vector3.new(0, headY, 0)
-		local targetPos = pitchCenter + Vector3.new(0, 2, 0)
+		local targetPos = (tData.target or pitchCenter) + Vector3.new(0, 2, 0)
 
 		-- 1. Base Pedestal (Ground Y=0 to outer wall rim Y=26)
 		makePart(m, "BasePedestal", Vector3.new(3.8, pedH, 3.8), CFrame.new(towerPos + Vector3.new(0, pedH * 0.5, 0)), colors.BasePedestal, Enum.Material.Metal, true, true)
@@ -328,14 +328,14 @@ function FloodlightManager.Generate(customConfig: FloodlightConfig?): Folder
 		beam.Attachment0 = att0
 		beam.Attachment1 = att1
 		beam.FaceCamera = true
-		beam.Width0 = 7.0
-		beam.Width1 = 36.0
-		beam.LightEmission = 0.5
+		beam.Width0 = 3.0
+		beam.Width1 = 14.0
+		beam.LightEmission = 0.12
 		beam.LightInfluence = 0.0
 		beam.Color = ColorSequence.new(colors.LightColor)
 		beam.Transparency = NumberSequence.new({
-			NumberSequenceKeypoint.new(0, 0.80),
-			NumberSequenceKeypoint.new(0.5, 0.90),
+			NumberSequenceKeypoint.new(0, 0.95),
+			NumberSequenceKeypoint.new(0.4, 0.975),
 			NumberSequenceKeypoint.new(1, 1.0),
 		})
 		beam.Enabled = false -- Enabled in Night mode

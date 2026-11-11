@@ -1209,6 +1209,82 @@ UITheme.addStuds = function(parent: Instance, opacity: number?, tileSize: number
 
 end
 
+-- 3D Relief Studs for Buttons (sampled from reference relief texture, color-matched per variant)
+function UITheme.applyButtonStuds(btn: GuiObject, variant: (VariantName | string)?, customTint: Color3?, customTrans: number?): ImageLabel
+	local v = string.lower(tostring(variant or "lime"))
+	local assetId = UITheme.Assets.Header_Studs_Shop_Red or "rbxassetid://128225868192722"
+	local tint = customTint or Color3.new(1, 1, 1)
+	local trans = customTrans or 0.18
+
+	if v == "lime" or v == "green" or v == "equipped" or v == "equip" then
+		assetId = UITheme.Assets.Header_Studs_DailyQuest_Green or "rbxassetid://88180889470659"
+		trans = customTrans or 0.20
+	elseif v == "gold" or v == "orange" or v == "yellow" or v == "buy" then
+		assetId = UITheme.Assets.Header_Studs_Daily_Orange or "rbxassetid://91925564826237"
+		trans = customTrans or 0.20
+	elseif v == "blue" or v == "cyan" or v == "skip" then
+		assetId = UITheme.Assets.Header_Studs_Playtime_Blue or "rbxassetid://73760157351730"
+		trans = customTrans or 0.20
+	elseif v == "purple" then
+		assetId = UITheme.Assets.Header_Studs_Shop_Red or "rbxassetid://128225868192722"
+		tint = customTint or Color3.fromHex("#852BD5")
+		trans = customTrans or 0.20
+	elseif v == "gray" or v == "dark" or v == "locked" or v == "claimed" then
+		assetId = UITheme.Assets.Header_Studs_Playtime_Blue or "rbxassetid://73760157351730"
+		tint = customTint or Color3.fromHex("#8895A5")
+		trans = customTrans or 0.35
+	elseif v == "brown" or v == "quest_pending" then
+		assetId = UITheme.Assets.Header_Studs_Daily_Orange or "rbxassetid://91925564826237"
+		tint = customTint or Color3.fromHex("#7A3E10")
+		trans = customTrans or 0.25
+	elseif v == "red" or v == "magenta" then
+		assetId = UITheme.Assets.Header_Studs_Shop_Red or "rbxassetid://128225868192722"
+		trans = customTrans or 0.20
+	elseif v == "tabinactive" or v == "tab_inactive" then
+		assetId = UITheme.Assets.Header_Studs_Playtime_Blue or "rbxassetid://73760157351730"
+		tint = customTint or Color3.fromHex("#3A4456")
+		trans = customTrans or 0.38
+	end
+
+	local studs = btn:FindFirstChild("ButtonStuds") or btn:FindFirstChild("Studs")
+	if not studs or not studs:IsA("ImageLabel") then
+		studs = Instance.new("ImageLabel")
+		studs.Name = "ButtonStuds"
+		studs.Size = UDim2.new(1.3, 0, 1.8, 0)
+		studs.Position = UDim2.fromScale(0.5, 0.5)
+		studs.AnchorPoint = Vector2.new(0.5, 0.5)
+		studs.BackgroundTransparency = 1
+		studs.ScaleType = Enum.ScaleType.Crop
+		studs.Parent = btn
+	end
+
+	studs.Image = assetId
+	studs.ImageColor3 = tint
+	studs.ImageTransparency = trans
+	studs.ZIndex = btn.ZIndex + 1
+
+	if btn:IsA("GuiObject") then
+		btn.ClipsDescendants = true
+		local btnCorner = btn:FindFirstChildOfClass("UICorner")
+		if btnCorner then
+			local studsCorner = studs:FindFirstChildOfClass("UICorner") or Instance.new("UICorner")
+			studsCorner.CornerRadius = btnCorner.CornerRadius
+			studsCorner.Parent = studs
+		end
+	end
+
+	for _, child in ipairs(btn:GetChildren()) do
+		if child ~= studs and child.Name ~= "InnerRim" and child:IsA("GuiObject") then
+			if child.ZIndex <= studs.ZIndex then
+				child.ZIndex = studs.ZIndex + 2
+			end
+		end
+	end
+
+	return studs :: ImageLabel
+end
+
+
 
 
 -- Rotating sunburst rays behind icons (color-matched to icon + continuous 360 spin)
@@ -2211,6 +2287,7 @@ function UITheme.button(props: ButtonProps | TextButton, variantParam: VariantNa
 
 
 		UITheme.addTextConstraint(btn, 10, 28)
+		UITheme.applyButtonStuds(btn, variant)
 
 
 
@@ -2998,7 +3075,7 @@ function UITheme.window(props: WindowProps): {
 
 
 
-	UITheme.studs(closeBtn, UITheme.CONFIG.STUDS_HEADER_TRANSPARENCY)
+	UITheme.applyButtonStuds(closeBtn, closeVariant)
 
 
 
@@ -3214,7 +3291,7 @@ function UITheme.priceButton(target: Instance, price: number | string, arg3: any
 
 
 
-	robuxIcon.ZIndex = btn.ZIndex + 2
+	robuxIcon.ZIndex = btn.ZIndex + 3
 
 
 
@@ -3278,7 +3355,7 @@ function UITheme.priceButton(target: Instance, price: number | string, arg3: any
 
 
 
-	priceLbl.ZIndex = btn.ZIndex + 2
+	priceLbl.ZIndex = btn.ZIndex + 3
 
 
 

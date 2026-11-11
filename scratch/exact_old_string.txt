@@ -1,0 +1,349 @@
+local function applyChairSkin(tableModel: Model, seatName: string, player: Player?)
+	local profile = if player then ProfileService.get(player) else nil
+	local skin = GameConfig.getChairSkin(if profile then profile.EquippedChair else "wood")
+	local seat = tableModel:FindFirstChild(seatName) :: Seat?
+
+	local oldDecor = tableModel:FindFirstChild(seatName .. "_Decor")
+	if oldDecor then
+		oldDecor:Destroy()
+	end
+
+	local isStadium = (skin.id == "stadium")
+	local isCyberCore = (skin.id == "cyber_core")
+	local isCrimson = (skin.id == "crimson" or skin.id == "emerald")
+	local isFrostbite = (skin.id == "frostbite" or skin.id == "cyber")
+	local isRoyal = (skin.id == "golden" or skin.id == "football_throne")
+
+	for _, child in tableModel:GetChildren() do
+		if child:IsA("BasePart") then
+			if child.Name == seatName then
+				child.Color = if isRoyal then Color3.fromRGB(180, 20, 32) else skin.color
+				child.Material = skin.mat
+			elseif string.find(child.Name, `^{seatName}_Leg`) ~= nil then
+				child.Transparency = if isStadium then 1 else 0
+				child.Color = if isRoyal then Color3.fromRGB(255, 195, 30) else skin.color
+				child.Material = skin.mat
+			elseif string.find(child.Name, `^{seatName}_Back`) ~= nil then
+				child.Color = if isRoyal then Color3.fromRGB(255, 195, 30) else skin.color
+				child.Material = skin.mat
+			end
+		end
+	end
+
+	if isStadium and seat then
+		local decor = Instance.new("Model")
+		decor.Name = seatName .. "_Decor"
+
+		local darkBase = Color3.fromHex("#242C38")
+		local darkStud = Color3.fromHex("#2B3442")
+		local blueRib = Color3.fromHex("#2879FF")
+		local seatCF = seat.CFrame
+
+		local function addDecorPart(name: string, size: Vector3, cf: CFrame, col: Color3): Part
+			local p = Instance.new("Part")
+			p.Name = name
+			p.Size = size
+			p.CFrame = cf
+			p.Color = col
+			p.Material = Enum.Material.SmoothPlastic
+			p.Anchored = true
+			p.CanCollide = false
+			p.CastShadow = false
+			p.Parent = decor
+			return p
+		end
+
+		local function addDecorCylinder(name: string, len: number, rad: number, cf: CFrame, col: Color3): Part
+			local p = Instance.new("Part")
+			p.Name = name
+			p.Shape = Enum.PartType.Cylinder
+			p.Size = Vector3.new(len, rad * 2, rad * 2)
+			p.CFrame = cf * CFrame.Angles(0, 0, math.rad(90))
+			p.Color = col
+			p.Material = Enum.Material.SmoothPlastic
+			p.Anchored = true
+			p.CanCollide = false
+			p.CastShadow = false
+			p.Parent = decor
+			return p
+		end
+
+		local floorY = seatCF.Position.Y - 1.45
+		local centerXZ = Vector3.new(seatCF.Position.X, floorY, seatCF.Position.Z)
+		local baseCF = (seatCF - seatCF.Position) + centerXZ
+
+		addDecorPart("BasePlate", Vector3.new(1.8, 0.3, 1.8), baseCF * CFrame.new(0, 0.15, 0), darkBase)
+		local sDist = 0.5
+		addDecorCylinder("Stud_1", 0.14, 0.22, baseCF * CFrame.new(-sDist, 0.35, -sDist), darkStud)
+		addDecorCylinder("Stud_2", 0.14, 0.22, baseCF * CFrame.new( sDist, 0.35, -sDist), darkStud)
+		addDecorCylinder("Stud_3", 0.14, 0.22, baseCF * CFrame.new(-sDist, 0.35,  sDist), darkStud)
+		addDecorCylinder("Stud_4", 0.14, 0.22, baseCF * CFrame.new( sDist, 0.35,  sDist), darkStud)
+		addDecorPart("CenterPost", Vector3.new(0.6, 1.1, 0.6), baseCF * CFrame.new(0, 0.85, 0), darkBase)
+
+		local backPart = tableModel:FindFirstChild(seatName .. "_Back") :: BasePart?
+		if backPart then
+			local bCF = backPart.CFrame
+			addDecorPart("RibLeft", Vector3.new(0.4, 1.6, 0.08), bCF * CFrame.new(-0.45, 0, 0.18), blueRib)
+			addDecorPart("RibRight", Vector3.new(0.4, 1.6, 0.08), bCF * CFrame.new(0.45, 0, 0.18), blueRib)
+		end
+
+		decor.Parent = tableModel
+	elseif isCyberCore and seat then
+		local decor = Instance.new("Model")
+		decor.Name = seatName .. "_Decor"
+
+		local cMetal = Color3.fromRGB(18, 20, 32)
+		local cCyan = Color3.fromRGB(0, 255, 240)
+		local cMagenta = Color3.fromRGB(255, 0, 200)
+		local seatCF = seat.CFrame
+
+		local function addDecorPart(name: string, size: Vector3, cf: CFrame, col: Color3, mat: Enum.Material?): Part
+			local p = Instance.new("Part")
+			p.Name = name
+			p.Size = size
+			p.CFrame = cf
+			p.Color = col
+			p.Material = mat or Enum.Material.Metal
+			p.Anchored = true
+			p.CanCollide = false
+			p.CastShadow = false
+			p.Parent = decor
+			return p
+		end
+
+		-- Seat border neon circuit traces
+		addDecorPart("CircuitX1", Vector3.new(2.1, 0.06, 0.08), seatCF * CFrame.new(0, 0.22, -1.05), cCyan, Enum.Material.Neon)
+		addDecorPart("CircuitX2", Vector3.new(2.1, 0.06, 0.08), seatCF * CFrame.new(0, 0.22,  1.05), cCyan, Enum.Material.Neon)
+		addDecorPart("CircuitZ1", Vector3.new(0.08, 0.06, 2.1), seatCF * CFrame.new(-1.05, 0.22, 0), cMagenta, Enum.Material.Neon)
+		addDecorPart("CircuitZ2", Vector3.new(0.08, 0.06, 2.1), seatCF * CFrame.new( 1.05, 0.22, 0), cMagenta, Enum.Material.Neon)
+
+		-- Leg caps & magenta light
+		for _, lx in { -0.85, 0.85 } do
+			for _, lz in { -0.85, 0.85 } do
+				local legBase = seatCF * CFrame.new(lx, -0.7, lz)
+				local cap = addDecorPart("CyberCap", Vector3.new(0.42, 0.22, 0.42), legBase, cMetal)
+				addDecorPart("CapGem", Vector3.new(0.12, 0.12, 0.04), legBase * CFrame.new(0, 0, -0.22) * CFrame.Angles(0, 0, math.rad(45)), cMagenta, Enum.Material.Neon)
+			end
+		end
+
+		-- Backrest neon accent & digital spark emitter
+		local backPart = tableModel:FindFirstChild(seatName .. "_Back") :: BasePart?
+		if backPart then
+			local bCF = backPart.CFrame
+			addDecorPart("CoreTrace", Vector3.new(0.08, 2.0, 0.08), bCF * CFrame.new(0, 0, 0.18), cCyan, Enum.Material.Neon)
+			local core = addDecorPart("MiniCore", Vector3.new(0.4, 0.4, 0.4), bCF * CFrame.new(0, 0.4, 0.22) * CFrame.Angles(math.rad(45), math.rad(45), 0), cCyan, Enum.Material.Neon)
+			
+			local pl = Instance.new("PointLight")
+			pl.Color = cCyan
+			pl.Brightness = 2.0
+			pl.Range = 10
+			pl.Parent = core
+
+			local att = Instance.new("Attachment")
+			att.Parent = core
+			local sparks = Instance.new("ParticleEmitter")
+			sparks.Color = ColorSequence.new(cCyan, cMagenta)
+			sparks.LightEmission = 1
+			sparks.Size = NumberSequence.new(0.4, 0.05)
+			sparks.Lifetime = NumberRange.new(0.6, 1.2)
+			sparks.Rate = 10
+			sparks.Speed = NumberRange.new(1, 2.5)
+			sparks.Parent = att
+		end
+
+		decor.Parent = tableModel
+	elseif isCrimson and seat then
+		local decor = Instance.new("Model")
+		decor.Name = seatName .. "_Decor"
+
+		local darkIron = Color3.fromRGB(30, 24, 28)
+		local neonRed = Color3.fromRGB(255, 40, 50)
+		local seatCF = seat.CFrame
+
+		local function addDecorPart(name: string, size: Vector3, cf: CFrame, col: Color3, mat: Enum.Material?): Part
+			local p = Instance.new("Part")
+			p.Name = name
+			p.Size = size
+			p.CFrame = cf
+			p.Color = col
+			p.Material = mat or Enum.Material.Slate
+			p.Anchored = true
+			p.CanCollide = false
+			p.CastShadow = false
+			p.Parent = decor
+			return p
+		end
+
+		for _, cx in { -1, 1 } do
+			for _, cz in { -1, 1 } do
+				local cornerPos = seatCF * CFrame.new(cx * 1.8, 0.38, cz * 1.8)
+				addDecorPart("BracketX", Vector3.new(0.8, 0.1, 0.25), cornerPos, darkIron)
+				addDecorPart("BracketZ", Vector3.new(0.25, 0.1, 0.8), cornerPos, darkIron)
+				addDecorPart("Gem", Vector3.new(0.22, 0.22, 0.08), cornerPos * CFrame.new(0, 0.08, 0) * CFrame.Angles(0, math.rad(45), 0), neonRed, Enum.Material.Neon)
+			end
+		end
+
+		for _, lx in { -1.6, 1.6 } do
+			for _, lz in { -1.6, 1.6 } do
+				local legBasePos = seatCF * CFrame.new(lx, -2.6, lz)
+				local cap = addDecorPart("IronCap", Vector3.new(0.95, 0.4, 0.95), legBasePos, darkIron)
+				local att = Instance.new("Attachment")
+				att.Name = "FireAtt"
+				att.Position = Vector3.zero
+				att.Parent = cap
+
+				local emitter = Instance.new("ParticleEmitter")
+				emitter.Name = "TableFireEmitter"
+				emitter.Texture = "rbxassetid://253188732"
+				emitter.Color = ColorSequence.new(Color3.fromRGB(255, 80, 60), Color3.fromRGB(120, 0, 10))
+				emitter.LightEmission = 1
+				emitter.LightInfluence = 0
+				emitter.Size = NumberSequence.new(1.2, 0)
+				emitter.Lifetime = NumberRange.new(0.6, 1.2)
+				emitter.Rate = 12
+				emitter.Speed = NumberRange.new(1.5, 3)
+				emitter.SpreadAngle = Vector2.new(15, 15)
+				emitter.Acceleration = Vector3.new(0, 5, 0)
+				emitter.Transparency = NumberSequence.new(0.2, 1)
+				emitter.Parent = att
+			end
+		end
+
+		decor.Parent = tableModel
+	elseif isFrostbite and seat then
+		local decor = Instance.new("Model")
+		decor.Name = seatName .. "_Decor"
+
+		local cDeep = Color3.fromRGB(60, 150, 230)
+		local cGlow = Color3.fromRGB(160, 240, 255)
+		local seatCF = seat.CFrame
+
+		local function addDecorPart(name: string, size: Vector3, cf: CFrame, col: Color3, mat: Enum.Material?): Part
+			local p = Instance.new("Part")
+			p.Name = name
+			p.Size = size
+			p.CFrame = cf
+			p.Color = col
+			p.Material = mat or Enum.Material.Glass
+			p.Anchored = true
+			p.CanCollide = false
+			p.CastShadow = false
+			p.Parent = decor
+			return p
+		end
+
+		-- Ice chevron plates on front
+		addDecorPart("IceChevronL", Vector3.new(0.9, 0.2, 0.1), seatCF * CFrame.new(-0.45, 0.1, -1.05) * CFrame.Angles(0, 0, math.rad(-20)), cGlow, Enum.Material.Neon)
+		addDecorPart("IceChevronR", Vector3.new(0.9, 0.2, 0.1), seatCF * CFrame.new( 0.45, 0.1, -1.05) * CFrame.Angles(0, 0, math.rad( 20)), cGlow, Enum.Material.Neon)
+
+		-- Hanging icicles under seat edge
+		for i = 0, 3 do
+			addDecorPart("Icicle_" .. i, Vector3.new(0.08, 0.4, 0.08), seatCF * CFrame.new(-0.75 + i * 0.5, -0.3, -1.05), cGlow, Enum.Material.Glass)
+		end
+
+		-- Top crystal shard on backrest
+		local backPart = tableModel:FindFirstChild(seatName .. "_Back") :: BasePart?
+		if backPart then
+			local bCF = backPart.CFrame
+			local gem = addDecorPart("IceGem", Vector3.new(0.5, 0.7, 0.3), bCF * CFrame.new(0, 1.4, 0) * CFrame.Angles(0, 0, math.rad(45)), cGlow, Enum.Material.Neon)
+			
+			local pl = Instance.new("PointLight")
+			pl.Color = Color3.fromRGB(140, 230, 255)
+			pl.Brightness = 2.0
+			pl.Range = 12
+			pl.Parent = gem
+
+			local att = Instance.new("Attachment")
+			att.Parent = gem
+			local mist = Instance.new("ParticleEmitter")
+			mist.Color = ColorSequence.new(Color3.fromRGB(180, 240, 255), Color3.fromRGB(255, 255, 255))
+			mist.LightEmission = 0.8
+			mist.Size = NumberSequence.new(0.6, 0.1)
+			mist.Lifetime = NumberRange.new(0.8, 1.6)
+			mist.Rate = 10
+			mist.Speed = NumberRange.new(0.6, 1.5)
+			mist.Parent = att
+		end
+
+		decor.Parent = tableModel
+	elseif isRoyal and seat then
+		local decor = Instance.new("Model")
+		decor.Name = seatName .. "_Decor"
+
+		local cGold = Color3.fromRGB(255, 195, 30)
+		local cVelvet = Color3.fromRGB(180, 20, 32)
+		local cRuby = Color3.fromRGB(255, 30, 50)
+		local cWhite = Color3.fromRGB(255, 255, 255)
+		local cBlack = Color3.fromRGB(20, 20, 22)
+		local seatCF = seat.CFrame
+
+		local function addDecorPart(name: string, size: Vector3, cf: CFrame, col: Color3, mat: Enum.Material?, shape: Enum.PartType?): Part
+			local p = Instance.new("Part")
+			p.Name = name
+			p.Size = size
+			p.CFrame = cf
+			p.Color = col
+			p.Material = mat or Enum.Material.SmoothPlastic
+			p.Anchored = true
+			p.CanCollide = false
+			p.CastShadow = false
+			if shape then
+				p.Shape = shape
+			end
+			p.Parent = decor
+			return p
+		end
+
+		-- Gold base foot slabs & front ruby diamond frame
+		addDecorPart("BaseSlabL", Vector3.new(0.6, 0.25, 2.0), seatCF * CFrame.new(-1.1, -1.3, 0), cGold)
+		addDecorPart("BaseSlabR", Vector3.new(0.6, 0.25, 2.0), seatCF * CFrame.new( 1.1, -1.3, 0), cGold)
+		addDecorPart("FrontDiamond", Vector3.new(0.6, 0.6, 0.1), seatCF * CFrame.new(0, 0, -1.05) * CFrame.Angles(0, 0, math.rad(45)), cGold)
+		addDecorPart("FrontRuby", Vector3.new(0.3, 0.3, 0.15), seatCF * CFrame.new(0, 0, -1.1) * CFrame.Angles(0, 0, math.rad(45)), cRuby, Enum.Material.Neon)
+
+		-- Armrest gold caps
+		addDecorPart("ArmrestCapL", Vector3.new(0.45, 0.35, 1.6), seatCF * CFrame.new(-1.25, 0.6, 0), cGold)
+		addDecorPart("ArmrestCapR", Vector3.new(0.45, 0.35, 1.6), seatCF * CFrame.new( 1.25, 0.6, 0), cGold)
+
+		-- Backrest crown peaks, soccer ball emblem & golden sparkles
+		local backPart = tableModel:FindFirstChild(seatName .. "_Back") :: BasePart?
+		if backPart then
+			local bCF = backPart.CFrame
+			local crownPeaks = {
+				{ -0.6, 0.5, -18 },
+				{ -0.3, 0.8,  -9 },
+				{  0.0, 1.1,   0 },
+				{  0.3, 0.8,   9 },
+				{  0.6, 0.5,  18 },
+			}
+			for idx, cfg in ipairs(crownPeaks) do
+				local px, ph, prot = cfg[1], cfg[2], cfg[3]
+				addDecorPart("CrownPeak_" .. idx, Vector3.new(0.28, ph, 0.2), bCF * CFrame.new(px, 1.2 + ph * 0.4, 0) * CFrame.Angles(0, 0, math.rad(prot)), cGold)
+			end
+			addDecorPart("CrownRuby", Vector3.new(0.28, 0.28, 0.15), bCF * CFrame.new(0, 1.9, -0.1) * CFrame.Angles(0, 0, math.rad(45)), cRuby, Enum.Material.Neon)
+
+			addDecorPart("EmblemRing", Vector3.new(1.1, 1.1, 0.12), bCF * CFrame.new(0, 0.7, 0.18) * CFrame.Angles(0, 0, math.rad(45)), cGold)
+			addDecorPart("SoccerBall", Vector3.new(0.85, 0.85, 0.85), bCF * CFrame.new(0, 0.7, 0.18), cWhite, Enum.Material.SmoothPlastic, Enum.PartType.Ball)
+			addDecorPart("SoccerPatch", Vector3.new(0.25, 0.25, 0.05), bCF * CFrame.new(0, 0.7, 0.62) * CFrame.Angles(0, 0, math.rad(36)), cBlack)
+
+			local pl = Instance.new("PointLight")
+			pl.Color = Color3.fromRGB(255, 210, 90)
+			pl.Brightness = 2.0
+			pl.Range = 12
+			pl.Parent = backPart
+
+			local att = Instance.new("Attachment")
+			att.Parent = backPart
+			local sparkles = Instance.new("ParticleEmitter")
+			sparkles.Color = ColorSequence.new(Color3.fromRGB(255, 230, 120), Color3.fromRGB(255, 180, 20))
+			sparkles.LightEmission = 1
+			sparkles.Size = NumberSequence.new(0.35, 0.05)
+			sparkles.Lifetime = NumberRange.new(0.8, 1.8)
+			sparkles.Rate = 8
+			sparkles.Speed = NumberRange.new(0.6, 1.5)
+			sparkles.Texture = "rbxasset://textures/particles/sparkles_main.dds"
+			sparkles.Parent = att
+		end
+
+		decor.Parent = tableModel
+	end
+end

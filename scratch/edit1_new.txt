@@ -1,0 +1,2 @@
+local ProfileService = require(script.Parent.ProfileService)
+local ChairModelBuilder = require(ReplicatedStorage:WaitForChild("Prefabs"):WaitForChild("ChairModelBuilder"))

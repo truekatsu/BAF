@@ -1,0 +1,64 @@
+with open('src/ServerScriptService/Server/MatchService.luau', 'r', encoding='utf-8') as f:
+    content = f.read()
+
+start_marker = 'local function applyChairSkin(tableModel: Model, seatName: string, player: Player?)'
+end_marker = 'local function updateTableSign(session: TableSession)'
+
+idx1 = content.find(start_marker)
+idx2 = content.find(end_marker)
+
+assert idx1 != -1, 'start_marker not found'
+assert idx2 != -1, 'end_marker not found'
+
+new_fn = """local function applyChairSkin(tableModel: Model, seatName: string, player: Player?)
+	local profile = if player then ProfileService.get(player) else nil
+	local skin = GameConfig.getChairSkin(if profile then profile.EquippedChair else "wood")
+	local seat = tableModel:FindFirstChild(seatName) :: Seat?
+	if not seat then return end
+
+	local oldDecor = tableModel:FindFirstChild(seatName .. "_Decor")
+	if oldDecor then
+		oldDecor:Destroy()
+	end
+
+	local isWood = (skin.id == "wood")
+	local isStadium = (skin.id == "stadium")
+	local isMesh = not isWood and not isStadium
+
+	for _, child in tableModel:GetChildren() do
+		if child:IsA("BasePart") then
+			if child.Name == seatName then
+				child.Transparency = if isWood then 0 else 1
+				child.Color = skin.color
+				child.Material = skin.mat
+			elseif string.find(child.Name, `^{seatName}_Leg`) ~= nil or string.find(child.Name, `^{seatName}_Back`) ~= nil then
+				child.Transparency = if isWood then 0 else 1
+				child.Color = skin.color
+				child.Material = skin.mat
+			end
+		end
+	end
+
+	if isStadium then
+		local decor = ChairModelBuilder.buildStadiumChair()
+		decor.Name = seatName .. "_Decor"
+		local floorY = seat.Position.Y - 1.6
+		local decorCF = CFrame.lookAt(Vector3.new(seat.Position.X, floorY, seat.Position.Z), Vector3.new(seat.Position.X, floorY, seat.Position.Z) + seat.CFrame.LookVector)
+		decor:PivotTo(decorCF)
+		decor.Parent = tableModel
+	elseif isMesh then
+		local floorY = seat.Position.Y - 1.6
+		local decorCF = CFrame.lookAt(Vector3.new(seat.Position.X, floorY, seat.Position.Z), Vector3.new(seat.Position.X, floorY, seat.Position.Z) + seat.CFrame.LookVector)
+		local decor = ChairModelBuilder.buildMeshChair(skin.id, decorCF, false)
+		decor.Name = seatName .. "_Decor"
+		decor.Parent = tableModel
+	end
+end
+
+"""
+
+new_content = content[:idx1] + new_fn + content[idx2:]
+with open('src/ServerScriptService/Server/MatchService.luau', 'w', encoding='utf-8') as f:
+    f.write(new_content)
+
+print('Successfully updated MatchService.luau!')

@@ -16,6 +16,7 @@ local Footballers = require(Shared:WaitForChild("Footballers"))
 local MatchLogic = require(Shared:WaitForChild("MatchLogic"))
 local Remotes = require(Shared:WaitForChild("Remotes"))
 local ProfileService = require(script.Parent.ProfileService)
+local ChairModelBuilder = require(ReplicatedStorage:WaitForChild("Prefabs"):WaitForChild("ChairModelBuilder"))
 
 export type Phase = "Idle" | "Waiting" | "Intro" | "Countdown" | "Build" | "Showdown" | "Result"
 
@@ -43,6 +44,7 @@ type TableSession = {
 	phaseToken: number,
 	rematchA: boolean,
 	rematchB: boolean,
+	humanInSeatB: boolean?,
 }
 
 local RATE_LIMIT_PER_SEC = 8
@@ -92,18 +94,57 @@ end
 
 local function applyChairSkin(tableModel: Model, seatName: string, player: Player?)
 	local profile = if player then ProfileService.get(player) else nil
-	local skin = GameConfig.getChairSkin(if profile then profile.EquippedChair else "wood")
+	local equipped = if profile and profile.EquippedChair then profile.EquippedChair elseif player then (player:GetAttribute("EquippedChair") :: string?) else nil
+	local skin = GameConfig.getChairSkin(equipped or "wood")
+	local seat = tableModel:FindFirstChild(seatName) :: Seat?
+	if not seat then return end
+
+	local oldDecor = tableModel:FindFirstChild(seatName .. "_Decor")
+	if oldDecor then
+		oldDecor:Destroy()
+	end
+
+	local isWood = (skin.id == "wood")
+	local isStadium = (skin.id == "stadium")
+	local isMesh = not isWood and not isStadium
+
 	for _, child in tableModel:GetChildren() do
-		if child:IsA("BasePart") and (child.Name == seatName or string.find(child.Name, `^{seatName}_`) ~= nil) then
-			child.Color = skin.color
-			child.Material = skin.mat
+		if child:IsA("BasePart") then
+			if child.Name == seatName then
+				child.Transparency = if isWood then 0 else 1
+				child.Color = skin.color
+				child.Material = skin.mat
+			elseif string.find(child.Name, `^{seatName}_Leg`) ~= nil or string.find(child.Name, `^{seatName}_Back`) ~= nil then
+				child.Transparency = if isWood then 0 else 1
+				child.Color = skin.color
+				child.Material = skin.mat
+			end
 		end
+	end
+
+	if isStadium then
+		local decor = ChairModelBuilder.buildStadiumChair()
+		decor.Name = seatName .. "_Decor"
+		local floorY = seat.Position.Y - 1.6
+		local decorCF = CFrame.lookAt(Vector3.new(seat.Position.X, floorY, seat.Position.Z), Vector3.new(seat.Position.X, floorY, seat.Position.Z) + seat.CFrame.LookVector)
+		decor:PivotTo(decorCF)
+		decor.Parent = tableModel
+	elseif isMesh then
+		local floorY = seat.Position.Y - 1.6
+		local decorCF = CFrame.lookAt(Vector3.new(seat.Position.X, floorY, seat.Position.Z), Vector3.new(seat.Position.X, floorY, seat.Position.Z) + seat.CFrame.LookVector)
+		local decor = ChairModelBuilder.buildMeshChair(skin.id, decorCF, false)
+		decor.Name = seatName .. "_Decor"
+		decor.Parent = tableModel
 	end
 end
 
 local function updateTableSign(session: TableSession)
-	applyChairSkin(session.model, "SeatA", session.playerA)
-	applyChairSkin(session.model, "SeatB", session.playerB)
+	local occB = session.seatB.Occupant
+	local humanInB = session.humanInSeatB or (session.playerB == nil and session.playerA ~= nil and occB ~= nil and occB.Parent ~= nil and Players:GetPlayerFromCharacter(occB.Parent) == session.playerA)
+	local seatAPlayer = if humanInB then session.playerB else session.playerA
+	local seatBPlayer = if humanInB then session.playerA else session.playerB
+	applyChairSkin(session.model, "SeatA", seatAPlayer)
+	applyChairSkin(session.model, "SeatB", seatBPlayer)
 	local label = session.billboardLabel
 	local count = (if session.playerA then 1 else 0) + (if session.playerB or session.isBot then 1 else 0)
 
@@ -307,7 +348,7 @@ end
 local function spawnBotCharacter(session: TableSession)
 	despawnBotCharacter(session)
 	local occB = session.seatB.Occupant
-	local isHumanInB = occB ~= nil and occB.Parent ~= nil and Players:GetPlayerFromCharacter(occB.Parent) == session.playerA
+	local isHumanInB = session.humanInSeatB or (occB ~= nil and occB.Parent ~= nil and Players:GetPlayerFromCharacter(occB.Parent) == session.playerA)
 	local botSeat = if isHumanInB then session.seatA else session.seatB
 	botSeat.Disabled = true
 
@@ -424,6 +465,7 @@ local function resetSession(session: TableSession, unseat: boolean)
 
 	session.playerA = nil
 	session.playerB = nil
+	session.humanInSeatB = false
 	updateTableSign(session)
 end
 
@@ -779,6 +821,11 @@ local function onSeatChanged(session: TableSession)
 	if not pA and pB then
 		pA = pB
 		pB = nil
+		session.humanInSeatB = true
+	elseif pA and not pB then
+		session.humanInSeatB = false
+	else
+		session.humanInSeatB = false
 	end
 
 	if not pA and not pB then
@@ -1062,6 +1109,7 @@ local function bindTableModel(model: Model)
 		phaseToken = 0,
 		rematchA = false,
 		rematchB = false,
+		humanInSeatB = false,
 	}
 	sessionsByTable[model] = session
 	updateTableSign(session)

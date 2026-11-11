@@ -1,0 +1,5798 @@
+<?xml version="1.0" encoding="utf-8"?>
+<roblox xmlns:xmime="http://www.w3.org/2005/05/xmlmime" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.roblox.com/roblox.xsd" version="4">
+	<Meta name="ExplicitAutoJoints">true</Meta>
+	<Item class="Model" referent="RBX1">
+		<Properties>
+			<string name="Name">AllChairsShowcase</string>
+		</Properties>
+		<Item class="Model" referent="RBX2">
+			<Properties>
+				<string name="Name">CrimsonFlameChair</string>
+			</Properties>
+			<Item class="Seat" referent="RBX3">
+				<Properties>
+					<string name="Name">Seat</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">true</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>4.0000</X>
+						<Y>0.7000</Y>
+						<Z>4.0000</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>-12.0000</X>
+						<Y>2.8500</Y>
+						<Z>0.0000</Z>
+						<R00>1.000000</R00>
+						<R01>-0.000000</R01>
+						<R02>0.000000</R02>
+						<R10>0.000000</R10>
+						<R11>1.000000</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>0.588235</R>
+						<G>0.058824</G>
+						<B>0.098039</B>
+					</Color3>
+					<token name="Material">528</token>
+				</Properties>
+				<Item class="PointLight" referent="RBX4">
+					<Properties>
+						<string name="Name">SeatGlow</string>
+						<Color3 name="Color">
+							<R>1.000000</R>
+							<G>0.156863</G>
+							<B>0.156863</B>
+						</Color3>
+						<float name="Brightness">2.00</float>
+						<float name="Range">14.00</float>
+						<bool name="Shadows">false</bool>
+					</Properties>
+				</Item>
+			</Item>
+			<Item class="Part" referent="RBX5">
+				<Properties>
+					<string name="Name">Leg_FL</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">true</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.8000</X>
+						<Y>2.5000</Y>
+						<Z>0.8000</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>-13.6000</X>
+						<Y>1.2500</Y>
+						<Z>-1.6000</Z>
+						<R00>1.000000</R00>
+						<R01>-0.000000</R01>
+						<R02>0.000000</R02>
+						<R10>0.000000</R10>
+						<R11>1.000000</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>0.431373</R>
+						<G>0.039216</G>
+						<B>0.078431</B>
+					</Color3>
+					<token name="Material">528</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX6">
+				<Properties>
+					<string name="Name">LegCap_FL</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.9500</X>
+						<Y>0.5000</Y>
+						<Z>0.9500</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>-13.6000</X>
+						<Y>0.2500</Y>
+						<Z>-1.6000</Z>
+						<R00>1.000000</R00>
+						<R01>-0.000000</R01>
+						<R02>0.000000</R02>
+						<R10>0.000000</R10>
+						<R11>1.000000</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>0.117647</R>
+						<G>0.094118</G>
+						<B>0.109804</B>
+					</Color3>
+					<token name="Material">800</token>
+				</Properties>
+				<Item class="ParticleEmitter" referent="RBX7">
+					<Properties>
+						<string name="Name">FireEmitter</string>
+						<Content name="Texture">
+							<url>rbxassetid://253188732</url>
+						</Content>
+						<float name="Rate">16.0</float>
+						<float name="LightEmission">1.0</float>
+					</Properties>
+				</Item>
+			</Item>
+			<Item class="Part" referent="RBX8">
+				<Properties>
+					<string name="Name">Gem_LegCap_FL</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.2400</X>
+						<Y>0.2400</Y>
+						<Z>0.0800</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>-13.6000</X>
+						<Y>0.2500</Y>
+						<Z>-2.0900</Z>
+						<R00>0.707107</R00>
+						<R01>-0.707107</R01>
+						<R02>0.000000</R02>
+						<R10>0.707107</R10>
+						<R11>0.707107</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>1.000000</R>
+						<G>0.156863</G>
+						<B>0.196078</B>
+					</Color3>
+					<token name="Material">288</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX9">
+				<Properties>
+					<string name="Name">Leg_FR</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">true</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.8000</X>
+						<Y>2.5000</Y>
+						<Z>0.8000</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>-10.4000</X>
+						<Y>1.2500</Y>
+						<Z>-1.6000</Z>
+						<R00>1.000000</R00>
+						<R01>-0.000000</R01>
+						<R02>0.000000</R02>
+						<R10>0.000000</R10>
+						<R11>1.000000</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>0.431373</R>
+						<G>0.039216</G>
+						<B>0.078431</B>
+					</Color3>
+					<token name="Material">528</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX10">
+				<Properties>
+					<string name="Name">LegCap_FR</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.9500</X>
+						<Y>0.5000</Y>
+						<Z>0.9500</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>-10.4000</X>
+						<Y>0.2500</Y>
+						<Z>-1.6000</Z>
+						<R00>1.000000</R00>
+						<R01>-0.000000</R01>
+						<R02>0.000000</R02>
+						<R10>0.000000</R10>
+						<R11>1.000000</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>0.117647</R>
+						<G>0.094118</G>
+						<B>0.109804</B>
+					</Color3>
+					<token name="Material">800</token>
+				</Properties>
+				<Item class="ParticleEmitter" referent="RBX11">
+					<Properties>
+						<string name="Name">FireEmitter</string>
+						<Content name="Texture">
+							<url>rbxassetid://253188732</url>
+						</Content>
+						<float name="Rate">16.0</float>
+						<float name="LightEmission">1.0</float>
+					</Properties>
+				</Item>
+			</Item>
+			<Item class="Part" referent="RBX12">
+				<Properties>
+					<string name="Name">Gem_LegCap_FR</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.2400</X>
+						<Y>0.2400</Y>
+						<Z>0.0800</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>-10.4000</X>
+						<Y>0.2500</Y>
+						<Z>-2.0900</Z>
+						<R00>0.707107</R00>
+						<R01>-0.707107</R01>
+						<R02>0.000000</R02>
+						<R10>0.707107</R10>
+						<R11>0.707107</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>1.000000</R>
+						<G>0.156863</G>
+						<B>0.196078</B>
+					</Color3>
+					<token name="Material">288</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX13">
+				<Properties>
+					<string name="Name">Leg_BL</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">true</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.8000</X>
+						<Y>2.5000</Y>
+						<Z>0.8000</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>-13.6000</X>
+						<Y>1.2500</Y>
+						<Z>1.6000</Z>
+						<R00>1.000000</R00>
+						<R01>-0.000000</R01>
+						<R02>0.000000</R02>
+						<R10>0.000000</R10>
+						<R11>1.000000</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>0.431373</R>
+						<G>0.039216</G>
+						<B>0.078431</B>
+					</Color3>
+					<token name="Material">528</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX14">
+				<Properties>
+					<string name="Name">LegCap_BL</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.9500</X>
+						<Y>0.5000</Y>
+						<Z>0.9500</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>-13.6000</X>
+						<Y>0.2500</Y>
+						<Z>1.6000</Z>
+						<R00>1.000000</R00>
+						<R01>-0.000000</R01>
+						<R02>0.000000</R02>
+						<R10>0.000000</R10>
+						<R11>1.000000</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>0.117647</R>
+						<G>0.094118</G>
+						<B>0.109804</B>
+					</Color3>
+					<token name="Material">800</token>
+				</Properties>
+				<Item class="ParticleEmitter" referent="RBX15">
+					<Properties>
+						<string name="Name">FireEmitter</string>
+						<Content name="Texture">
+							<url>rbxassetid://253188732</url>
+						</Content>
+						<float name="Rate">16.0</float>
+						<float name="LightEmission">1.0</float>
+					</Properties>
+				</Item>
+			</Item>
+			<Item class="Part" referent="RBX16">
+				<Properties>
+					<string name="Name">Gem_LegCap_BL</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.2400</X>
+						<Y>0.2400</Y>
+						<Z>0.0800</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>-13.6000</X>
+						<Y>0.2500</Y>
+						<Z>1.1100</Z>
+						<R00>0.707107</R00>
+						<R01>-0.707107</R01>
+						<R02>0.000000</R02>
+						<R10>0.707107</R10>
+						<R11>0.707107</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>1.000000</R>
+						<G>0.156863</G>
+						<B>0.196078</B>
+					</Color3>
+					<token name="Material">288</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX17">
+				<Properties>
+					<string name="Name">Leg_BR</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">true</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.8000</X>
+						<Y>2.5000</Y>
+						<Z>0.8000</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>-10.4000</X>
+						<Y>1.2500</Y>
+						<Z>1.6000</Z>
+						<R00>1.000000</R00>
+						<R01>-0.000000</R01>
+						<R02>0.000000</R02>
+						<R10>0.000000</R10>
+						<R11>1.000000</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>0.431373</R>
+						<G>0.039216</G>
+						<B>0.078431</B>
+					</Color3>
+					<token name="Material">528</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX18">
+				<Properties>
+					<string name="Name">LegCap_BR</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.9500</X>
+						<Y>0.5000</Y>
+						<Z>0.9500</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>-10.4000</X>
+						<Y>0.2500</Y>
+						<Z>1.6000</Z>
+						<R00>1.000000</R00>
+						<R01>-0.000000</R01>
+						<R02>0.000000</R02>
+						<R10>0.000000</R10>
+						<R11>1.000000</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>0.117647</R>
+						<G>0.094118</G>
+						<B>0.109804</B>
+					</Color3>
+					<token name="Material">800</token>
+				</Properties>
+				<Item class="ParticleEmitter" referent="RBX19">
+					<Properties>
+						<string name="Name">FireEmitter</string>
+						<Content name="Texture">
+							<url>rbxassetid://253188732</url>
+						</Content>
+						<float name="Rate">16.0</float>
+						<float name="LightEmission">1.0</float>
+					</Properties>
+				</Item>
+			</Item>
+			<Item class="Part" referent="RBX20">
+				<Properties>
+					<string name="Name">Gem_LegCap_BR</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.2400</X>
+						<Y>0.2400</Y>
+						<Z>0.0800</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>-10.4000</X>
+						<Y>0.2500</Y>
+						<Z>1.1100</Z>
+						<R00>0.707107</R00>
+						<R01>-0.707107</R01>
+						<R02>0.000000</R02>
+						<R10>0.707107</R10>
+						<R11>0.707107</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>1.000000</R>
+						<G>0.156863</G>
+						<B>0.196078</B>
+					</Color3>
+					<token name="Material">288</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX21">
+				<Properties>
+					<string name="Name">Post_Left</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">true</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.8000</X>
+						<Y>5.0000</Y>
+						<Z>0.8000</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>-13.6000</X>
+						<Y>5.7000</Y>
+						<Z>1.6000</Z>
+						<R00>1.000000</R00>
+						<R01>-0.000000</R01>
+						<R02>0.000000</R02>
+						<R10>0.000000</R10>
+						<R11>1.000000</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>0.588235</R>
+						<G>0.058824</G>
+						<B>0.098039</B>
+					</Color3>
+					<token name="Material">528</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX22">
+				<Properties>
+					<string name="Name">PostCap_Left</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.9500</X>
+						<Y>0.5000</Y>
+						<Z>0.9500</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>-13.6000</X>
+						<Y>8.2000</Y>
+						<Z>1.6000</Z>
+						<R00>1.000000</R00>
+						<R01>-0.000000</R01>
+						<R02>0.000000</R02>
+						<R10>0.000000</R10>
+						<R11>1.000000</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>0.117647</R>
+						<G>0.094118</G>
+						<B>0.109804</B>
+					</Color3>
+					<token name="Material">800</token>
+				</Properties>
+				<Item class="ParticleEmitter" referent="RBX23">
+					<Properties>
+						<string name="Name">FireEmitter</string>
+						<Content name="Texture">
+							<url>rbxassetid://253188732</url>
+						</Content>
+						<float name="Rate">20.0</float>
+						<float name="LightEmission">1.0</float>
+					</Properties>
+				</Item>
+			</Item>
+			<Item class="Part" referent="RBX24">
+				<Properties>
+					<string name="Name">Gem_PostCap_Left</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.2400</X>
+						<Y>0.2400</Y>
+						<Z>0.0800</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>-13.6000</X>
+						<Y>8.2000</Y>
+						<Z>1.1100</Z>
+						<R00>0.707107</R00>
+						<R01>-0.707107</R01>
+						<R02>0.000000</R02>
+						<R10>0.707107</R10>
+						<R11>0.707107</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>1.000000</R>
+						<G>0.156863</G>
+						<B>0.196078</B>
+					</Color3>
+					<token name="Material">288</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX25">
+				<Properties>
+					<string name="Name">Post_Right</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">true</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.8000</X>
+						<Y>5.0000</Y>
+						<Z>0.8000</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>-10.4000</X>
+						<Y>5.7000</Y>
+						<Z>1.6000</Z>
+						<R00>1.000000</R00>
+						<R01>-0.000000</R01>
+						<R02>0.000000</R02>
+						<R10>0.000000</R10>
+						<R11>1.000000</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>0.588235</R>
+						<G>0.058824</G>
+						<B>0.098039</B>
+					</Color3>
+					<token name="Material">528</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX26">
+				<Properties>
+					<string name="Name">PostCap_Right</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.9500</X>
+						<Y>0.5000</Y>
+						<Z>0.9500</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>-10.4000</X>
+						<Y>8.2000</Y>
+						<Z>1.6000</Z>
+						<R00>1.000000</R00>
+						<R01>-0.000000</R01>
+						<R02>0.000000</R02>
+						<R10>0.000000</R10>
+						<R11>1.000000</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>0.117647</R>
+						<G>0.094118</G>
+						<B>0.109804</B>
+					</Color3>
+					<token name="Material">800</token>
+				</Properties>
+				<Item class="ParticleEmitter" referent="RBX27">
+					<Properties>
+						<string name="Name">FireEmitter</string>
+						<Content name="Texture">
+							<url>rbxassetid://253188732</url>
+						</Content>
+						<float name="Rate">20.0</float>
+						<float name="LightEmission">1.0</float>
+					</Properties>
+				</Item>
+			</Item>
+			<Item class="Part" referent="RBX28">
+				<Properties>
+					<string name="Name">Gem_PostCap_Right</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.2400</X>
+						<Y>0.2400</Y>
+						<Z>0.0800</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>-10.4000</X>
+						<Y>8.2000</Y>
+						<Z>1.1100</Z>
+						<R00>0.707107</R00>
+						<R01>-0.707107</R01>
+						<R02>0.000000</R02>
+						<R10>0.707107</R10>
+						<R11>0.707107</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>1.000000</R>
+						<G>0.156863</G>
+						<B>0.196078</B>
+					</Color3>
+					<token name="Material">288</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX29">
+				<Properties>
+					<string name="Name">BackrestPanel</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">true</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>3.2000</X>
+						<Y>4.4000</Y>
+						<Z>0.4000</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>-12.0000</X>
+						<Y>5.7000</Y>
+						<Z>1.6000</Z>
+						<R00>1.000000</R00>
+						<R01>-0.000000</R01>
+						<R02>0.000000</R02>
+						<R10>0.000000</R10>
+						<R11>1.000000</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>0.588235</R>
+						<G>0.058824</G>
+						<B>0.098039</B>
+					</Color3>
+					<token name="Material">528</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX30">
+				<Properties>
+					<string name="Name">BracketX_FL</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.8500</X>
+						<Y>0.1200</Y>
+						<Z>0.2800</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>-13.6000</X>
+						<Y>3.2600</Y>
+						<Z>-1.6000</Z>
+						<R00>1.000000</R00>
+						<R01>-0.000000</R01>
+						<R02>0.000000</R02>
+						<R10>0.000000</R10>
+						<R11>1.000000</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>0.117647</R>
+						<G>0.094118</G>
+						<B>0.109804</B>
+					</Color3>
+					<token name="Material">800</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX31">
+				<Properties>
+					<string name="Name">BracketZ_FL</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.2800</X>
+						<Y>0.1200</Y>
+						<Z>0.8500</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>-13.6000</X>
+						<Y>3.2600</Y>
+						<Z>-1.6000</Z>
+						<R00>1.000000</R00>
+						<R01>-0.000000</R01>
+						<R02>0.000000</R02>
+						<R10>0.000000</R10>
+						<R11>1.000000</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>0.117647</R>
+						<G>0.094118</G>
+						<B>0.109804</B>
+					</Color3>
+					<token name="Material">800</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX32">
+				<Properties>
+					<string name="Name">Gem_Corner_FL</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.2400</X>
+						<Y>0.2400</Y>
+						<Z>0.0800</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>-13.6000</X>
+						<Y>3.3200</Y>
+						<Z>-1.6000</Z>
+						<R00>0.707107</R00>
+						<R01>-0.000000</R01>
+						<R02>0.707107</R02>
+						<R10>0.707107</R10>
+						<R11>0.000000</R11>
+						<R12>-0.707107</R12>
+						<R20>-0.000000</R20>
+						<R21>1.000000</R21>
+						<R22>0.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>1.000000</R>
+						<G>0.156863</G>
+						<B>0.196078</B>
+					</Color3>
+					<token name="Material">288</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX33">
+				<Properties>
+					<string name="Name">BracketX_FR</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.8500</X>
+						<Y>0.1200</Y>
+						<Z>0.2800</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>-10.4000</X>
+						<Y>3.2600</Y>
+						<Z>-1.6000</Z>
+						<R00>1.000000</R00>
+						<R01>-0.000000</R01>
+						<R02>0.000000</R02>
+						<R10>0.000000</R10>
+						<R11>1.000000</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>0.117647</R>
+						<G>0.094118</G>
+						<B>0.109804</B>
+					</Color3>
+					<token name="Material">800</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX34">
+				<Properties>
+					<string name="Name">BracketZ_FR</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.2800</X>
+						<Y>0.1200</Y>
+						<Z>0.8500</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>-10.4000</X>
+						<Y>3.2600</Y>
+						<Z>-1.6000</Z>
+						<R00>1.000000</R00>
+						<R01>-0.000000</R01>
+						<R02>0.000000</R02>
+						<R10>0.000000</R10>
+						<R11>1.000000</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>0.117647</R>
+						<G>0.094118</G>
+						<B>0.109804</B>
+					</Color3>
+					<token name="Material">800</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX35">
+				<Properties>
+					<string name="Name">Gem_Corner_FR</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.2400</X>
+						<Y>0.2400</Y>
+						<Z>0.0800</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>-10.4000</X>
+						<Y>3.3200</Y>
+						<Z>-1.6000</Z>
+						<R00>0.707107</R00>
+						<R01>-0.000000</R01>
+						<R02>0.707107</R02>
+						<R10>0.707107</R10>
+						<R11>0.000000</R11>
+						<R12>-0.707107</R12>
+						<R20>-0.000000</R20>
+						<R21>1.000000</R21>
+						<R22>0.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>1.000000</R>
+						<G>0.156863</G>
+						<B>0.196078</B>
+					</Color3>
+					<token name="Material">288</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX36">
+				<Properties>
+					<string name="Name">BracketX_BL</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.8500</X>
+						<Y>0.1200</Y>
+						<Z>0.2800</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>-13.6000</X>
+						<Y>3.2600</Y>
+						<Z>1.6000</Z>
+						<R00>1.000000</R00>
+						<R01>-0.000000</R01>
+						<R02>0.000000</R02>
+						<R10>0.000000</R10>
+						<R11>1.000000</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>0.117647</R>
+						<G>0.094118</G>
+						<B>0.109804</B>
+					</Color3>
+					<token name="Material">800</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX37">
+				<Properties>
+					<string name="Name">BracketZ_BL</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.2800</X>
+						<Y>0.1200</Y>
+						<Z>0.8500</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>-13.6000</X>
+						<Y>3.2600</Y>
+						<Z>1.6000</Z>
+						<R00>1.000000</R00>
+						<R01>-0.000000</R01>
+						<R02>0.000000</R02>
+						<R10>0.000000</R10>
+						<R11>1.000000</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>0.117647</R>
+						<G>0.094118</G>
+						<B>0.109804</B>
+					</Color3>
+					<token name="Material">800</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX38">
+				<Properties>
+					<string name="Name">Gem_Corner_BL</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.2400</X>
+						<Y>0.2400</Y>
+						<Z>0.0800</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>-13.6000</X>
+						<Y>3.3200</Y>
+						<Z>1.6000</Z>
+						<R00>0.707107</R00>
+						<R01>-0.000000</R01>
+						<R02>0.707107</R02>
+						<R10>0.707107</R10>
+						<R11>0.000000</R11>
+						<R12>-0.707107</R12>
+						<R20>-0.000000</R20>
+						<R21>1.000000</R21>
+						<R22>0.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>1.000000</R>
+						<G>0.156863</G>
+						<B>0.196078</B>
+					</Color3>
+					<token name="Material">288</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX39">
+				<Properties>
+					<string name="Name">BracketX_BR</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.8500</X>
+						<Y>0.1200</Y>
+						<Z>0.2800</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>-10.4000</X>
+						<Y>3.2600</Y>
+						<Z>1.6000</Z>
+						<R00>1.000000</R00>
+						<R01>-0.000000</R01>
+						<R02>0.000000</R02>
+						<R10>0.000000</R10>
+						<R11>1.000000</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>0.117647</R>
+						<G>0.094118</G>
+						<B>0.109804</B>
+					</Color3>
+					<token name="Material">800</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX40">
+				<Properties>
+					<string name="Name">BracketZ_BR</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.2800</X>
+						<Y>0.1200</Y>
+						<Z>0.8500</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>-10.4000</X>
+						<Y>3.2600</Y>
+						<Z>1.6000</Z>
+						<R00>1.000000</R00>
+						<R01>-0.000000</R01>
+						<R02>0.000000</R02>
+						<R10>0.000000</R10>
+						<R11>1.000000</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>0.117647</R>
+						<G>0.094118</G>
+						<B>0.109804</B>
+					</Color3>
+					<token name="Material">800</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX41">
+				<Properties>
+					<string name="Name">Gem_Corner_BR</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.2400</X>
+						<Y>0.2400</Y>
+						<Z>0.0800</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>-10.4000</X>
+						<Y>3.3200</Y>
+						<Z>1.6000</Z>
+						<R00>0.707107</R00>
+						<R01>-0.000000</R01>
+						<R02>0.707107</R02>
+						<R10>0.707107</R10>
+						<R11>0.000000</R11>
+						<R12>-0.707107</R12>
+						<R20>-0.000000</R20>
+						<R21>1.000000</R21>
+						<R22>0.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>1.000000</R>
+						<G>0.156863</G>
+						<B>0.196078</B>
+					</Color3>
+					<token name="Material">288</token>
+				</Properties>
+			</Item>
+			<Item class="Script" referent="RBX42">
+				<Properties>
+					<string name="Name">ChairEffectController</string>
+					<ProtectedString name="Source">local TweenService = game:GetService("TweenService")
+local model = script.Parent
+local tweenInfo = TweenInfo.new(1.5, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true)
+for _, desc in ipairs(model:GetDescendants()) do
+    if desc:IsA("BasePart") and desc.Name:find("Gem") then
+        desc.Color = Color3.fromRGB(153, 24, 30)
+        local tw = TweenService:Create(desc, tweenInfo, { Color = Color3.fromRGB(255, 40, 50) })
+        tw:Play()
+    end
+end</ProtectedString>
+				</Properties>
+			</Item>
+		</Item>
+		<Item class="Model" referent="RBX43">
+			<Properties>
+				<string name="Name">CyberCoreChair</string>
+			</Properties>
+			<Item class="Seat" referent="RBX44">
+				<Properties>
+					<string name="Name">Seat</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">true</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>4.0000</X>
+						<Y>0.7000</Y>
+						<Z>4.0000</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>-4.0000</X>
+						<Y>2.8500</Y>
+						<Z>0.0000</Z>
+						<R00>1.000000</R00>
+						<R01>-0.000000</R01>
+						<R02>0.000000</R02>
+						<R10>0.000000</R10>
+						<R11>1.000000</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>0.070588</R>
+						<G>0.078431</G>
+						<B>0.125490</B>
+					</Color3>
+					<token name="Material">1088</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX45">
+				<Properties>
+					<string name="Name">SeatCircuitX1</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>3.8000</X>
+						<Y>0.0800</Y>
+						<Z>0.1200</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>-4.0000</X>
+						<Y>3.2200</Y>
+						<Z>-1.8000</Z>
+						<R00>1.000000</R00>
+						<R01>-0.000000</R01>
+						<R02>0.000000</R02>
+						<R10>0.000000</R10>
+						<R11>1.000000</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>0.000000</R>
+						<G>1.000000</G>
+						<B>0.941176</B>
+					</Color3>
+					<token name="Material">288</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX46">
+				<Properties>
+					<string name="Name">SeatCircuitX2</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>3.8000</X>
+						<Y>0.0800</Y>
+						<Z>0.1200</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>-4.0000</X>
+						<Y>3.2200</Y>
+						<Z>1.8000</Z>
+						<R00>1.000000</R00>
+						<R01>-0.000000</R01>
+						<R02>0.000000</R02>
+						<R10>0.000000</R10>
+						<R11>1.000000</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>0.000000</R>
+						<G>1.000000</G>
+						<B>0.941176</B>
+					</Color3>
+					<token name="Material">288</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX47">
+				<Properties>
+					<string name="Name">SeatCircuitZ1</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.1200</X>
+						<Y>0.0800</Y>
+						<Z>3.6000</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>-5.8000</X>
+						<Y>3.2200</Y>
+						<Z>0.0000</Z>
+						<R00>1.000000</R00>
+						<R01>-0.000000</R01>
+						<R02>0.000000</R02>
+						<R10>0.000000</R10>
+						<R11>1.000000</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>1.000000</R>
+						<G>0.000000</G>
+						<B>0.784314</B>
+					</Color3>
+					<token name="Material">288</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX48">
+				<Properties>
+					<string name="Name">SeatCircuitZ2</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.1200</X>
+						<Y>0.0800</Y>
+						<Z>3.6000</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>-2.2000</X>
+						<Y>3.2200</Y>
+						<Z>0.0000</Z>
+						<R00>1.000000</R00>
+						<R01>-0.000000</R01>
+						<R02>0.000000</R02>
+						<R10>0.000000</R10>
+						<R11>1.000000</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>1.000000</R>
+						<G>0.000000</G>
+						<B>0.784314</B>
+					</Color3>
+					<token name="Material">288</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX49">
+				<Properties>
+					<string name="Name">SeatChipCenter</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>1.2000</X>
+						<Y>0.0600</Y>
+						<Z>1.2000</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>-4.0000</X>
+						<Y>3.2200</Y>
+						<Z>0.0000</Z>
+						<R00>0.707107</R00>
+						<R01>-0.000000</R01>
+						<R02>0.707107</R02>
+						<R10>0.000000</R10>
+						<R11>1.000000</R11>
+						<R12>-0.000000</R12>
+						<R20>-0.707107</R20>
+						<R21>0.000000</R21>
+						<R22>0.707107</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>0.000000</R>
+						<G>1.000000</G>
+						<B>0.941176</B>
+					</Color3>
+					<token name="Material">288</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX50">
+				<Properties>
+					<string name="Name">Leg_FL</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">true</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.8000</X>
+						<Y>2.5000</Y>
+						<Z>0.8000</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>-5.6000</X>
+						<Y>1.2500</Y>
+						<Z>-1.6000</Z>
+						<R00>1.000000</R00>
+						<R01>-0.000000</R01>
+						<R02>0.000000</R02>
+						<R10>0.000000</R10>
+						<R11>1.000000</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>0.070588</R>
+						<G>0.078431</G>
+						<B>0.125490</B>
+					</Color3>
+					<token name="Material">1088</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX51">
+				<Properties>
+					<string name="Name">LegTrace_FL</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.1200</X>
+						<Y>2.4000</Y>
+						<Z>0.1200</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>-5.6000</X>
+						<Y>1.2500</Y>
+						<Z>-1.9800</Z>
+						<R00>1.000000</R00>
+						<R01>-0.000000</R01>
+						<R02>0.000000</R02>
+						<R10>0.000000</R10>
+						<R11>1.000000</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>0.000000</R>
+						<G>1.000000</G>
+						<B>0.941176</B>
+					</Color3>
+					<token name="Material">288</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX52">
+				<Properties>
+					<string name="Name">LegCap_FL</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.9500</X>
+						<Y>0.5000</Y>
+						<Z>0.9500</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>-5.6000</X>
+						<Y>0.2500</Y>
+						<Z>-1.6000</Z>
+						<R00>1.000000</R00>
+						<R01>-0.000000</R01>
+						<R02>0.000000</R02>
+						<R10>0.000000</R10>
+						<R11>1.000000</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>0.137255</R>
+						<G>0.156863</G>
+						<B>0.235294</B>
+					</Color3>
+					<token name="Material">1088</token>
+				</Properties>
+				<Item class="PointLight" referent="RBX53">
+					<Properties>
+						<string name="Name">CapLight_FL</string>
+						<Color3 name="Color">
+							<R>1.000000</R>
+							<G>0.000000</G>
+							<B>0.784314</B>
+						</Color3>
+						<float name="Brightness">1.50</float>
+						<float name="Range">8.00</float>
+						<bool name="Shadows">false</bool>
+					</Properties>
+				</Item>
+			</Item>
+			<Item class="Part" referent="RBX54">
+				<Properties>
+					<string name="Name">Gem_LegCap_FL</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.2400</X>
+						<Y>0.2400</Y>
+						<Z>0.0800</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>-5.6000</X>
+						<Y>0.2500</Y>
+						<Z>-2.0900</Z>
+						<R00>0.707107</R00>
+						<R01>-0.707107</R01>
+						<R02>0.000000</R02>
+						<R10>0.707107</R10>
+						<R11>0.707107</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>1.000000</R>
+						<G>0.000000</G>
+						<B>0.784314</B>
+					</Color3>
+					<token name="Material">288</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX55">
+				<Properties>
+					<string name="Name">Leg_FR</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">true</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.8000</X>
+						<Y>2.5000</Y>
+						<Z>0.8000</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>-2.4000</X>
+						<Y>1.2500</Y>
+						<Z>-1.6000</Z>
+						<R00>1.000000</R00>
+						<R01>-0.000000</R01>
+						<R02>0.000000</R02>
+						<R10>0.000000</R10>
+						<R11>1.000000</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>0.070588</R>
+						<G>0.078431</G>
+						<B>0.125490</B>
+					</Color3>
+					<token name="Material">1088</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX56">
+				<Properties>
+					<string name="Name">LegTrace_FR</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.1200</X>
+						<Y>2.4000</Y>
+						<Z>0.1200</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>-2.4000</X>
+						<Y>1.2500</Y>
+						<Z>-1.9800</Z>
+						<R00>1.000000</R00>
+						<R01>-0.000000</R01>
+						<R02>0.000000</R02>
+						<R10>0.000000</R10>
+						<R11>1.000000</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>0.000000</R>
+						<G>1.000000</G>
+						<B>0.941176</B>
+					</Color3>
+					<token name="Material">288</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX57">
+				<Properties>
+					<string name="Name">LegCap_FR</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.9500</X>
+						<Y>0.5000</Y>
+						<Z>0.9500</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>-2.4000</X>
+						<Y>0.2500</Y>
+						<Z>-1.6000</Z>
+						<R00>1.000000</R00>
+						<R01>-0.000000</R01>
+						<R02>0.000000</R02>
+						<R10>0.000000</R10>
+						<R11>1.000000</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>0.137255</R>
+						<G>0.156863</G>
+						<B>0.235294</B>
+					</Color3>
+					<token name="Material">1088</token>
+				</Properties>
+				<Item class="PointLight" referent="RBX58">
+					<Properties>
+						<string name="Name">CapLight_FR</string>
+						<Color3 name="Color">
+							<R>1.000000</R>
+							<G>0.000000</G>
+							<B>0.784314</B>
+						</Color3>
+						<float name="Brightness">1.50</float>
+						<float name="Range">8.00</float>
+						<bool name="Shadows">false</bool>
+					</Properties>
+				</Item>
+			</Item>
+			<Item class="Part" referent="RBX59">
+				<Properties>
+					<string name="Name">Gem_LegCap_FR</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.2400</X>
+						<Y>0.2400</Y>
+						<Z>0.0800</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>-2.4000</X>
+						<Y>0.2500</Y>
+						<Z>-2.0900</Z>
+						<R00>0.707107</R00>
+						<R01>-0.707107</R01>
+						<R02>0.000000</R02>
+						<R10>0.707107</R10>
+						<R11>0.707107</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>1.000000</R>
+						<G>0.000000</G>
+						<B>0.784314</B>
+					</Color3>
+					<token name="Material">288</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX60">
+				<Properties>
+					<string name="Name">Leg_BL</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">true</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.8000</X>
+						<Y>2.5000</Y>
+						<Z>0.8000</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>-5.6000</X>
+						<Y>1.2500</Y>
+						<Z>1.6000</Z>
+						<R00>1.000000</R00>
+						<R01>-0.000000</R01>
+						<R02>0.000000</R02>
+						<R10>0.000000</R10>
+						<R11>1.000000</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>0.070588</R>
+						<G>0.078431</G>
+						<B>0.125490</B>
+					</Color3>
+					<token name="Material">1088</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX61">
+				<Properties>
+					<string name="Name">LegTrace_BL</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.1200</X>
+						<Y>2.4000</Y>
+						<Z>0.1200</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>-5.6000</X>
+						<Y>1.2500</Y>
+						<Z>1.2200</Z>
+						<R00>1.000000</R00>
+						<R01>-0.000000</R01>
+						<R02>0.000000</R02>
+						<R10>0.000000</R10>
+						<R11>1.000000</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>0.000000</R>
+						<G>1.000000</G>
+						<B>0.941176</B>
+					</Color3>
+					<token name="Material">288</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX62">
+				<Properties>
+					<string name="Name">LegCap_BL</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.9500</X>
+						<Y>0.5000</Y>
+						<Z>0.9500</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>-5.6000</X>
+						<Y>0.2500</Y>
+						<Z>1.6000</Z>
+						<R00>1.000000</R00>
+						<R01>-0.000000</R01>
+						<R02>0.000000</R02>
+						<R10>0.000000</R10>
+						<R11>1.000000</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>0.137255</R>
+						<G>0.156863</G>
+						<B>0.235294</B>
+					</Color3>
+					<token name="Material">1088</token>
+				</Properties>
+				<Item class="PointLight" referent="RBX63">
+					<Properties>
+						<string name="Name">CapLight_BL</string>
+						<Color3 name="Color">
+							<R>1.000000</R>
+							<G>0.000000</G>
+							<B>0.784314</B>
+						</Color3>
+						<float name="Brightness">1.50</float>
+						<float name="Range">8.00</float>
+						<bool name="Shadows">false</bool>
+					</Properties>
+				</Item>
+			</Item>
+			<Item class="Part" referent="RBX64">
+				<Properties>
+					<string name="Name">Gem_LegCap_BL</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.2400</X>
+						<Y>0.2400</Y>
+						<Z>0.0800</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>-5.6000</X>
+						<Y>0.2500</Y>
+						<Z>1.1100</Z>
+						<R00>0.707107</R00>
+						<R01>-0.707107</R01>
+						<R02>0.000000</R02>
+						<R10>0.707107</R10>
+						<R11>0.707107</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>1.000000</R>
+						<G>0.000000</G>
+						<B>0.784314</B>
+					</Color3>
+					<token name="Material">288</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX65">
+				<Properties>
+					<string name="Name">Leg_BR</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">true</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.8000</X>
+						<Y>2.5000</Y>
+						<Z>0.8000</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>-2.4000</X>
+						<Y>1.2500</Y>
+						<Z>1.6000</Z>
+						<R00>1.000000</R00>
+						<R01>-0.000000</R01>
+						<R02>0.000000</R02>
+						<R10>0.000000</R10>
+						<R11>1.000000</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>0.070588</R>
+						<G>0.078431</G>
+						<B>0.125490</B>
+					</Color3>
+					<token name="Material">1088</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX66">
+				<Properties>
+					<string name="Name">LegTrace_BR</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.1200</X>
+						<Y>2.4000</Y>
+						<Z>0.1200</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>-2.4000</X>
+						<Y>1.2500</Y>
+						<Z>1.2200</Z>
+						<R00>1.000000</R00>
+						<R01>-0.000000</R01>
+						<R02>0.000000</R02>
+						<R10>0.000000</R10>
+						<R11>1.000000</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>0.000000</R>
+						<G>1.000000</G>
+						<B>0.941176</B>
+					</Color3>
+					<token name="Material">288</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX67">
+				<Properties>
+					<string name="Name">LegCap_BR</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.9500</X>
+						<Y>0.5000</Y>
+						<Z>0.9500</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>-2.4000</X>
+						<Y>0.2500</Y>
+						<Z>1.6000</Z>
+						<R00>1.000000</R00>
+						<R01>-0.000000</R01>
+						<R02>0.000000</R02>
+						<R10>0.000000</R10>
+						<R11>1.000000</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>0.137255</R>
+						<G>0.156863</G>
+						<B>0.235294</B>
+					</Color3>
+					<token name="Material">1088</token>
+				</Properties>
+				<Item class="PointLight" referent="RBX68">
+					<Properties>
+						<string name="Name">CapLight_BR</string>
+						<Color3 name="Color">
+							<R>1.000000</R>
+							<G>0.000000</G>
+							<B>0.784314</B>
+						</Color3>
+						<float name="Brightness">1.50</float>
+						<float name="Range">8.00</float>
+						<bool name="Shadows">false</bool>
+					</Properties>
+				</Item>
+			</Item>
+			<Item class="Part" referent="RBX69">
+				<Properties>
+					<string name="Name">Gem_LegCap_BR</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.2400</X>
+						<Y>0.2400</Y>
+						<Z>0.0800</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>-2.4000</X>
+						<Y>0.2500</Y>
+						<Z>1.1100</Z>
+						<R00>0.707107</R00>
+						<R01>-0.707107</R01>
+						<R02>0.000000</R02>
+						<R10>0.707107</R10>
+						<R11>0.707107</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>1.000000</R>
+						<G>0.000000</G>
+						<B>0.784314</B>
+					</Color3>
+					<token name="Material">288</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX70">
+				<Properties>
+					<string name="Name">Post_Left</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">true</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.8000</X>
+						<Y>5.0000</Y>
+						<Z>0.8000</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>-5.6000</X>
+						<Y>5.7000</Y>
+						<Z>1.6000</Z>
+						<R00>1.000000</R00>
+						<R01>-0.000000</R01>
+						<R02>0.000000</R02>
+						<R10>0.000000</R10>
+						<R11>1.000000</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>0.070588</R>
+						<G>0.078431</G>
+						<B>0.125490</B>
+					</Color3>
+					<token name="Material">1088</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX71">
+				<Properties>
+					<string name="Name">PostTrace_Left</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.1200</X>
+						<Y>4.8000</Y>
+						<Z>0.1200</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>-5.6000</X>
+						<Y>5.7000</Y>
+						<Z>1.1800</Z>
+						<R00>1.000000</R00>
+						<R01>-0.000000</R01>
+						<R02>0.000000</R02>
+						<R10>0.000000</R10>
+						<R11>1.000000</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>1.000000</R>
+						<G>0.000000</G>
+						<B>0.784314</B>
+					</Color3>
+					<token name="Material">288</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX72">
+				<Properties>
+					<string name="Name">PostCap_Left</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.9500</X>
+						<Y>0.5000</Y>
+						<Z>0.9500</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>-5.6000</X>
+						<Y>8.2000</Y>
+						<Z>1.6000</Z>
+						<R00>1.000000</R00>
+						<R01>-0.000000</R01>
+						<R02>0.000000</R02>
+						<R10>0.000000</R10>
+						<R11>1.000000</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>0.137255</R>
+						<G>0.156863</G>
+						<B>0.235294</B>
+					</Color3>
+					<token name="Material">1088</token>
+				</Properties>
+				<Item class="PointLight" referent="RBX73">
+					<Properties>
+						<string name="Name">PostLight_Left</string>
+						<Color3 name="Color">
+							<R>0.000000</R>
+							<G>1.000000</G>
+							<B>0.941176</B>
+						</Color3>
+						<float name="Brightness">1.50</float>
+						<float name="Range">8.00</float>
+						<bool name="Shadows">false</bool>
+					</Properties>
+				</Item>
+			</Item>
+			<Item class="Part" referent="RBX74">
+				<Properties>
+					<string name="Name">Gem_PostCap_Left</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.2400</X>
+						<Y>0.2400</Y>
+						<Z>0.0800</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>-5.6000</X>
+						<Y>8.2000</Y>
+						<Z>1.1100</Z>
+						<R00>0.707107</R00>
+						<R01>-0.707107</R01>
+						<R02>0.000000</R02>
+						<R10>0.707107</R10>
+						<R11>0.707107</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>0.000000</R>
+						<G>1.000000</G>
+						<B>0.941176</B>
+					</Color3>
+					<token name="Material">288</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX75">
+				<Properties>
+					<string name="Name">Post_Right</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">true</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.8000</X>
+						<Y>5.0000</Y>
+						<Z>0.8000</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>-2.4000</X>
+						<Y>5.7000</Y>
+						<Z>1.6000</Z>
+						<R00>1.000000</R00>
+						<R01>-0.000000</R01>
+						<R02>0.000000</R02>
+						<R10>0.000000</R10>
+						<R11>1.000000</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>0.070588</R>
+						<G>0.078431</G>
+						<B>0.125490</B>
+					</Color3>
+					<token name="Material">1088</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX76">
+				<Properties>
+					<string name="Name">PostTrace_Right</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.1200</X>
+						<Y>4.8000</Y>
+						<Z>0.1200</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>-2.4000</X>
+						<Y>5.7000</Y>
+						<Z>1.1800</Z>
+						<R00>1.000000</R00>
+						<R01>-0.000000</R01>
+						<R02>0.000000</R02>
+						<R10>0.000000</R10>
+						<R11>1.000000</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>1.000000</R>
+						<G>0.000000</G>
+						<B>0.784314</B>
+					</Color3>
+					<token name="Material">288</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX77">
+				<Properties>
+					<string name="Name">PostCap_Right</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.9500</X>
+						<Y>0.5000</Y>
+						<Z>0.9500</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>-2.4000</X>
+						<Y>8.2000</Y>
+						<Z>1.6000</Z>
+						<R00>1.000000</R00>
+						<R01>-0.000000</R01>
+						<R02>0.000000</R02>
+						<R10>0.000000</R10>
+						<R11>1.000000</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>0.137255</R>
+						<G>0.156863</G>
+						<B>0.235294</B>
+					</Color3>
+					<token name="Material">1088</token>
+				</Properties>
+				<Item class="PointLight" referent="RBX78">
+					<Properties>
+						<string name="Name">PostLight_Right</string>
+						<Color3 name="Color">
+							<R>0.000000</R>
+							<G>1.000000</G>
+							<B>0.941176</B>
+						</Color3>
+						<float name="Brightness">1.50</float>
+						<float name="Range">8.00</float>
+						<bool name="Shadows">false</bool>
+					</Properties>
+				</Item>
+			</Item>
+			<Item class="Part" referent="RBX79">
+				<Properties>
+					<string name="Name">Gem_PostCap_Right</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.2400</X>
+						<Y>0.2400</Y>
+						<Z>0.0800</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>-2.4000</X>
+						<Y>8.2000</Y>
+						<Z>1.1100</Z>
+						<R00>0.707107</R00>
+						<R01>-0.707107</R01>
+						<R02>0.000000</R02>
+						<R10>0.707107</R10>
+						<R11>0.707107</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>0.000000</R>
+						<G>1.000000</G>
+						<B>0.941176</B>
+					</Color3>
+					<token name="Material">288</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX80">
+				<Properties>
+					<string name="Name">BackrestPanel</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">true</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>3.2000</X>
+						<Y>4.4000</Y>
+						<Z>0.4000</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>-4.0000</X>
+						<Y>5.7000</Y>
+						<Z>1.6000</Z>
+						<R00>1.000000</R00>
+						<R01>-0.000000</R01>
+						<R02>0.000000</R02>
+						<R10>0.000000</R10>
+						<R11>1.000000</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>0.070588</R>
+						<G>0.078431</G>
+						<B>0.125490</B>
+					</Color3>
+					<token name="Material">1088</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX81">
+				<Properties>
+					<string name="Name">HexStrut_0</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.4500</X>
+						<Y>0.1000</Y>
+						<Z>0.1200</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>-3.1500</X>
+						<Y>5.7000</Y>
+						<Z>1.3600</Z>
+						<R00>0.866025</R00>
+						<R01>-0.500000</R01>
+						<R02>0.000000</R02>
+						<R10>0.500000</R10>
+						<R11>0.866025</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>1.000000</R>
+						<G>0.000000</G>
+						<B>0.784314</B>
+					</Color3>
+					<token name="Material">288</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX82">
+				<Properties>
+					<string name="Name">HexStrut_1</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.4500</X>
+						<Y>0.1000</Y>
+						<Z>0.1200</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>-3.5750</X>
+						<Y>6.4361</Y>
+						<Z>1.3600</Z>
+						<R00>0.000000</R00>
+						<R01>-1.000000</R01>
+						<R02>0.000000</R02>
+						<R10>1.000000</R10>
+						<R11>0.000000</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>1.000000</R>
+						<G>0.000000</G>
+						<B>0.784314</B>
+					</Color3>
+					<token name="Material">288</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX83">
+				<Properties>
+					<string name="Name">HexStrut_2</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.4500</X>
+						<Y>0.1000</Y>
+						<Z>0.1200</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>-4.4250</X>
+						<Y>6.4361</Y>
+						<Z>1.3600</Z>
+						<R00>-0.866025</R00>
+						<R01>-0.500000</R01>
+						<R02>0.000000</R02>
+						<R10>0.500000</R10>
+						<R11>-0.866025</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>1.000000</R>
+						<G>0.000000</G>
+						<B>0.784314</B>
+					</Color3>
+					<token name="Material">288</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX84">
+				<Properties>
+					<string name="Name">HexStrut_3</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.4500</X>
+						<Y>0.1000</Y>
+						<Z>0.1200</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>-4.8500</X>
+						<Y>5.7000</Y>
+						<Z>1.3600</Z>
+						<R00>-0.866025</R00>
+						<R01>0.500000</R01>
+						<R02>0.000000</R02>
+						<R10>-0.500000</R10>
+						<R11>-0.866025</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>-0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>1.000000</R>
+						<G>0.000000</G>
+						<B>0.784314</B>
+					</Color3>
+					<token name="Material">288</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX85">
+				<Properties>
+					<string name="Name">HexStrut_4</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.4500</X>
+						<Y>0.1000</Y>
+						<Z>0.1200</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>-4.4250</X>
+						<Y>4.9639</Y>
+						<Z>1.3600</Z>
+						<R00>-0.000000</R00>
+						<R01>1.000000</R01>
+						<R02>0.000000</R02>
+						<R10>-1.000000</R10>
+						<R11>-0.000000</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>-0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>1.000000</R>
+						<G>0.000000</G>
+						<B>0.784314</B>
+					</Color3>
+					<token name="Material">288</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX86">
+				<Properties>
+					<string name="Name">HexStrut_5</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.4500</X>
+						<Y>0.1000</Y>
+						<Z>0.1200</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>-3.5750</X>
+						<Y>4.9639</Y>
+						<Z>1.3600</Z>
+						<R00>0.866025</R00>
+						<R01>0.500000</R01>
+						<R02>0.000000</R02>
+						<R10>-0.500000</R10>
+						<R11>0.866025</R11>
+						<R12>-0.000000</R12>
+						<R20>-0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>1.000000</R>
+						<G>0.000000</G>
+						<B>0.784314</B>
+					</Color3>
+					<token name="Material">288</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX87">
+				<Properties>
+					<string name="Name">EnergyCore</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.8000</X>
+						<Y>0.8000</Y>
+						<Z>0.8000</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>-4.0000</X>
+						<Y>5.7000</Y>
+						<Z>1.3500</Z>
+						<R00>0.707107</R00>
+						<R01>-0.000000</R01>
+						<R02>0.707107</R02>
+						<R10>0.500000</R10>
+						<R11>0.707107</R11>
+						<R12>-0.500000</R12>
+						<R20>-0.500000</R20>
+						<R21>0.707107</R21>
+						<R22>0.500000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>0.000000</R>
+						<G>1.000000</G>
+						<B>0.941176</B>
+					</Color3>
+					<token name="Material">288</token>
+				</Properties>
+				<Item class="PointLight" referent="RBX88">
+					<Properties>
+						<string name="Name">CoreLight</string>
+						<Color3 name="Color">
+							<R>0.000000</R>
+							<G>1.000000</G>
+							<B>0.941176</B>
+						</Color3>
+						<float name="Brightness">3.00</float>
+						<float name="Range">16.00</float>
+						<bool name="Shadows">false</bool>
+					</Properties>
+				</Item>
+				<Item class="ParticleEmitter" referent="RBX89">
+					<Properties>
+						<string name="Name">DigitalSparks</string>
+						<Content name="Texture">
+							<url>rbxassetid://253188732</url>
+						</Content>
+						<float name="Rate">20.0</float>
+						<float name="LightEmission">1.0</float>
+					</Properties>
+				</Item>
+			</Item>
+			<Item class="Script" referent="RBX90">
+				<Properties>
+					<string name="Name">CyberEffectController</string>
+					<ProtectedString name="Source">local RunService = game:GetService("TweenService")
+local model = script.Parent
+local core = model:FindFirstChild("EnergyCore")
+local baseY = core and core.Position.Y or 5.7
+local t = 0
+game:GetService("RunService").Heartbeat:Connect(function(dt)
+    t = t + dt
+    if core and core:IsA("BasePart") then
+        core.CFrame = CFrame.new(core.Position.X, baseY + math.sin(t * 3) * 0.18, core.Position.Z) * CFrame.Angles(0, t * 1.5, 0) * CFrame.Angles(math.rad(45), 0, math.rad(45))
+    end
+end)</ProtectedString>
+				</Properties>
+			</Item>
+		</Item>
+		<Item class="Model" referent="RBX91">
+			<Properties>
+				<string name="Name">FrostbiteIceThrone</string>
+			</Properties>
+			<Item class="Seat" referent="RBX92">
+				<Properties>
+					<string name="Name">Seat</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">true</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>3.8000</X>
+						<Y>0.7000</Y>
+						<Z>3.6000</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>4.0000</X>
+						<Y>2.5000</Y>
+						<Z>0.0000</Z>
+						<R00>1.000000</R00>
+						<R01>-0.000000</R01>
+						<R02>0.000000</R02>
+						<R10>0.000000</R10>
+						<R11>1.000000</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>0.235294</R>
+						<G>0.588235</G>
+						<B>0.901961</B>
+					</Color3>
+					<token name="Material">1568</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX93">
+				<Properties>
+					<string name="Name">SeatCushionRecess</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>3.2000</X>
+						<Y>0.2500</Y>
+						<Z>3.0000</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>4.0000</X>
+						<Y>2.8800</Y>
+						<Z>0.1000</Z>
+						<R00>1.000000</R00>
+						<R01>-0.000000</R01>
+						<R02>0.000000</R02>
+						<R10>0.000000</R10>
+						<R11>1.000000</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>0.470588</R>
+						<G>0.823529</G>
+						<B>1.000000</B>
+					</Color3>
+					<token name="Material">1568</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX94">
+				<Properties>
+					<string name="Name">Chevron_L_0</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>1.1000</X>
+						<Y>0.2800</Y>
+						<Z>0.2000</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>3.4500</X>
+						<Y>2.2000</Y>
+						<Z>-1.8500</Z>
+						<R00>0.927184</R00>
+						<R01>0.374607</R01>
+						<R02>0.000000</R02>
+						<R10>-0.374607</R10>
+						<R11>0.927184</R11>
+						<R12>-0.000000</R12>
+						<R20>-0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>0.627451</R>
+						<G>0.941176</G>
+						<B>1.000000</B>
+					</Color3>
+					<token name="Material">288</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX95">
+				<Properties>
+					<string name="Name">Chevron_R_0</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>1.1000</X>
+						<Y>0.2800</Y>
+						<Z>0.2000</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>4.5500</X>
+						<Y>2.2000</Y>
+						<Z>-1.8500</Z>
+						<R00>0.927184</R00>
+						<R01>-0.374607</R01>
+						<R02>0.000000</R02>
+						<R10>0.374607</R10>
+						<R11>0.927184</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>0.627451</R>
+						<G>0.941176</G>
+						<B>1.000000</B>
+					</Color3>
+					<token name="Material">288</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX96">
+				<Properties>
+					<string name="Name">Chevron_L_1</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>1.1000</X>
+						<Y>0.2800</Y>
+						<Z>0.2000</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>3.4500</X>
+						<Y>1.7500</Y>
+						<Z>-1.8500</Z>
+						<R00>0.927184</R00>
+						<R01>0.374607</R01>
+						<R02>0.000000</R02>
+						<R10>-0.374607</R10>
+						<R11>0.927184</R11>
+						<R12>-0.000000</R12>
+						<R20>-0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>0.627451</R>
+						<G>0.941176</G>
+						<B>1.000000</B>
+					</Color3>
+					<token name="Material">288</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX97">
+				<Properties>
+					<string name="Name">Chevron_R_1</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>1.1000</X>
+						<Y>0.2800</Y>
+						<Z>0.2000</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>4.5500</X>
+						<Y>1.7500</Y>
+						<Z>-1.8500</Z>
+						<R00>0.927184</R00>
+						<R01>-0.374607</R01>
+						<R02>0.000000</R02>
+						<R10>0.374607</R10>
+						<R11>0.927184</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>0.627451</R>
+						<G>0.941176</G>
+						<B>1.000000</B>
+					</Color3>
+					<token name="Material">288</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX98">
+				<Properties>
+					<string name="Name">Chevron_L_2</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>1.1000</X>
+						<Y>0.2800</Y>
+						<Z>0.2000</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>3.4500</X>
+						<Y>1.3000</Y>
+						<Z>-1.8500</Z>
+						<R00>0.927184</R00>
+						<R01>0.374607</R01>
+						<R02>0.000000</R02>
+						<R10>-0.374607</R10>
+						<R11>0.927184</R11>
+						<R12>-0.000000</R12>
+						<R20>-0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>0.627451</R>
+						<G>0.941176</G>
+						<B>1.000000</B>
+					</Color3>
+					<token name="Material">288</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX99">
+				<Properties>
+					<string name="Name">Chevron_R_2</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>1.1000</X>
+						<Y>0.2800</Y>
+						<Z>0.2000</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>4.5500</X>
+						<Y>1.3000</Y>
+						<Z>-1.8500</Z>
+						<R00>0.927184</R00>
+						<R01>-0.374607</R01>
+						<R02>0.000000</R02>
+						<R10>0.374607</R10>
+						<R11>0.927184</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>0.627451</R>
+						<G>0.941176</G>
+						<B>1.000000</B>
+					</Color3>
+					<token name="Material">288</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX100">
+				<Properties>
+					<string name="Name">Leg_FL</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">true</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.8000</X>
+						<Y>2.2000</Y>
+						<Z>0.8000</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>2.5000</X>
+						<Y>1.1000</Y>
+						<Z>-1.4000</Z>
+						<R00>1.000000</R00>
+						<R01>-0.000000</R01>
+						<R02>0.000000</R02>
+						<R10>0.000000</R10>
+						<R11>1.000000</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>0.235294</R>
+						<G>0.588235</G>
+						<B>0.901961</B>
+					</Color3>
+					<token name="Material">1568</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX101">
+				<Properties>
+					<string name="Name">FootBlock_FL</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>1.1500</X>
+						<Y>0.7500</Y>
+						<Z>1.1500</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>2.5000</X>
+						<Y>0.3800</Y>
+						<Z>-1.4000</Z>
+						<R00>0.965926</R00>
+						<R01>-0.000000</R01>
+						<R02>0.258819</R02>
+						<R10>0.000000</R10>
+						<R11>1.000000</R11>
+						<R12>-0.000000</R12>
+						<R20>-0.258819</R20>
+						<R21>0.000000</R21>
+						<R22>0.965926</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>0.470588</R>
+						<G>0.823529</G>
+						<B>1.000000</B>
+					</Color3>
+					<token name="Material">1568</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX102">
+				<Properties>
+					<string name="Name">Leg_FR</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">true</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.8000</X>
+						<Y>2.2000</Y>
+						<Z>0.8000</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>5.5000</X>
+						<Y>1.1000</Y>
+						<Z>-1.4000</Z>
+						<R00>1.000000</R00>
+						<R01>-0.000000</R01>
+						<R02>0.000000</R02>
+						<R10>0.000000</R10>
+						<R11>1.000000</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>0.235294</R>
+						<G>0.588235</G>
+						<B>0.901961</B>
+					</Color3>
+					<token name="Material">1568</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX103">
+				<Properties>
+					<string name="Name">FootBlock_FR</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>1.1500</X>
+						<Y>0.7500</Y>
+						<Z>1.1500</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>5.5000</X>
+						<Y>0.3800</Y>
+						<Z>-1.4000</Z>
+						<R00>0.965926</R00>
+						<R01>-0.000000</R01>
+						<R02>-0.258819</R02>
+						<R10>0.000000</R10>
+						<R11>1.000000</R11>
+						<R12>-0.000000</R12>
+						<R20>0.258819</R20>
+						<R21>0.000000</R21>
+						<R22>0.965926</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>0.470588</R>
+						<G>0.823529</G>
+						<B>1.000000</B>
+					</Color3>
+					<token name="Material">1568</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX104">
+				<Properties>
+					<string name="Name">Leg_BL</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">true</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.8000</X>
+						<Y>2.2000</Y>
+						<Z>0.8000</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>2.5000</X>
+						<Y>1.1000</Y>
+						<Z>1.4000</Z>
+						<R00>1.000000</R00>
+						<R01>-0.000000</R01>
+						<R02>0.000000</R02>
+						<R10>0.000000</R10>
+						<R11>1.000000</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>0.235294</R>
+						<G>0.588235</G>
+						<B>0.901961</B>
+					</Color3>
+					<token name="Material">1568</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX105">
+				<Properties>
+					<string name="Name">FootBlock_BL</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>1.1500</X>
+						<Y>0.7500</Y>
+						<Z>1.1500</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>2.5000</X>
+						<Y>0.3800</Y>
+						<Z>1.4000</Z>
+						<R00>0.965926</R00>
+						<R01>-0.000000</R01>
+						<R02>0.258819</R02>
+						<R10>0.000000</R10>
+						<R11>1.000000</R11>
+						<R12>-0.000000</R12>
+						<R20>-0.258819</R20>
+						<R21>0.000000</R21>
+						<R22>0.965926</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>0.470588</R>
+						<G>0.823529</G>
+						<B>1.000000</B>
+					</Color3>
+					<token name="Material">1568</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX106">
+				<Properties>
+					<string name="Name">Leg_BR</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">true</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.8000</X>
+						<Y>2.2000</Y>
+						<Z>0.8000</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>5.5000</X>
+						<Y>1.1000</Y>
+						<Z>1.4000</Z>
+						<R00>1.000000</R00>
+						<R01>-0.000000</R01>
+						<R02>0.000000</R02>
+						<R10>0.000000</R10>
+						<R11>1.000000</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>0.235294</R>
+						<G>0.588235</G>
+						<B>0.901961</B>
+					</Color3>
+					<token name="Material">1568</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX107">
+				<Properties>
+					<string name="Name">FootBlock_BR</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>1.1500</X>
+						<Y>0.7500</Y>
+						<Z>1.1500</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>5.5000</X>
+						<Y>0.3800</Y>
+						<Z>1.4000</Z>
+						<R00>0.965926</R00>
+						<R01>-0.000000</R01>
+						<R02>-0.258819</R02>
+						<R10>0.000000</R10>
+						<R11>1.000000</R11>
+						<R12>-0.000000</R12>
+						<R20>0.258819</R20>
+						<R21>0.000000</R21>
+						<R22>0.965926</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>0.470588</R>
+						<G>0.823529</G>
+						<B>1.000000</B>
+					</Color3>
+					<token name="Material">1568</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX108">
+				<Properties>
+					<string name="Name">ArmrestPillar_Left</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">true</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.8500</X>
+						<Y>1.8000</Y>
+						<Z>0.8500</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>2.1000</X>
+						<Y>1.7000</Y>
+						<Z>-1.2000</Z>
+						<R00>1.000000</R00>
+						<R01>-0.000000</R01>
+						<R02>0.000000</R02>
+						<R10>0.000000</R10>
+						<R11>1.000000</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>0.235294</R>
+						<G>0.588235</G>
+						<B>0.901961</B>
+					</Color3>
+					<token name="Material">1568</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX109">
+				<Properties>
+					<string name="Name">Armrest_Left</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">true</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.8500</X>
+						<Y>0.8500</Y>
+						<Z>3.2000</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>2.1000</X>
+						<Y>3.4000</Y>
+						<Z>0.0000</Z>
+						<R00>1.000000</R00>
+						<R01>-0.000000</R01>
+						<R02>0.000000</R02>
+						<R10>0.000000</R10>
+						<R11>1.000000</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>0.235294</R>
+						<G>0.588235</G>
+						<B>0.901961</B>
+					</Color3>
+					<token name="Material">1568</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX110">
+				<Properties>
+					<string name="Name">SnowCap_Left</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.9500</X>
+						<Y>0.2800</Y>
+						<Z>3.2000</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>2.1000</X>
+						<Y>3.8500</Y>
+						<Z>0.0000</Z>
+						<R00>1.000000</R00>
+						<R01>-0.000000</R01>
+						<R02>0.000000</R02>
+						<R10>0.000000</R10>
+						<R11>1.000000</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>0.960784</R>
+						<G>0.980392</G>
+						<B>1.000000</B>
+					</Color3>
+					<token name="Material">272</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX111">
+				<Properties>
+					<string name="Name">Icicle_Left_0</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.1200</X>
+						<Y>0.5500</Y>
+						<Z>0.1200</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>2.1000</X>
+						<Y>2.7500</Y>
+						<Z>-1.2000</Z>
+						<R00>1.000000</R00>
+						<R01>-0.000000</R01>
+						<R02>0.000000</R02>
+						<R10>0.000000</R10>
+						<R11>1.000000</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>0.627451</R>
+						<G>0.941176</G>
+						<B>1.000000</B>
+					</Color3>
+					<token name="Material">1568</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX112">
+				<Properties>
+					<string name="Name">Icicle_Left_1</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.1200</X>
+						<Y>0.5500</Y>
+						<Z>0.1200</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>2.1000</X>
+						<Y>2.7000</Y>
+						<Z>-0.4000</Z>
+						<R00>1.000000</R00>
+						<R01>-0.000000</R01>
+						<R02>0.000000</R02>
+						<R10>0.000000</R10>
+						<R11>1.000000</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>0.627451</R>
+						<G>0.941176</G>
+						<B>1.000000</B>
+					</Color3>
+					<token name="Material">1568</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX113">
+				<Properties>
+					<string name="Name">Icicle_Left_2</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.1200</X>
+						<Y>0.5500</Y>
+						<Z>0.1200</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>2.1000</X>
+						<Y>2.6500</Y>
+						<Z>0.4000</Z>
+						<R00>1.000000</R00>
+						<R01>-0.000000</R01>
+						<R02>0.000000</R02>
+						<R10>0.000000</R10>
+						<R11>1.000000</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>0.627451</R>
+						<G>0.941176</G>
+						<B>1.000000</B>
+					</Color3>
+					<token name="Material">1568</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX114">
+				<Properties>
+					<string name="Name">Icicle_Left_3</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.1200</X>
+						<Y>0.5500</Y>
+						<Z>0.1200</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>2.1000</X>
+						<Y>2.6000</Y>
+						<Z>1.2000</Z>
+						<R00>1.000000</R00>
+						<R01>-0.000000</R01>
+						<R02>0.000000</R02>
+						<R10>0.000000</R10>
+						<R11>1.000000</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>0.627451</R>
+						<G>0.941176</G>
+						<B>1.000000</B>
+					</Color3>
+					<token name="Material">1568</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX115">
+				<Properties>
+					<string name="Name">ArmrestPillar_Right</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">true</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.8500</X>
+						<Y>1.8000</Y>
+						<Z>0.8500</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>5.9000</X>
+						<Y>1.7000</Y>
+						<Z>-1.2000</Z>
+						<R00>1.000000</R00>
+						<R01>-0.000000</R01>
+						<R02>0.000000</R02>
+						<R10>0.000000</R10>
+						<R11>1.000000</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>0.235294</R>
+						<G>0.588235</G>
+						<B>0.901961</B>
+					</Color3>
+					<token name="Material">1568</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX116">
+				<Properties>
+					<string name="Name">Armrest_Right</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">true</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.8500</X>
+						<Y>0.8500</Y>
+						<Z>3.2000</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>5.9000</X>
+						<Y>3.4000</Y>
+						<Z>0.0000</Z>
+						<R00>1.000000</R00>
+						<R01>-0.000000</R01>
+						<R02>0.000000</R02>
+						<R10>0.000000</R10>
+						<R11>1.000000</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>0.235294</R>
+						<G>0.588235</G>
+						<B>0.901961</B>
+					</Color3>
+					<token name="Material">1568</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX117">
+				<Properties>
+					<string name="Name">SnowCap_Right</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.9500</X>
+						<Y>0.2800</Y>
+						<Z>3.2000</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>5.9000</X>
+						<Y>3.8500</Y>
+						<Z>0.0000</Z>
+						<R00>1.000000</R00>
+						<R01>-0.000000</R01>
+						<R02>0.000000</R02>
+						<R10>0.000000</R10>
+						<R11>1.000000</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>0.960784</R>
+						<G>0.980392</G>
+						<B>1.000000</B>
+					</Color3>
+					<token name="Material">272</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX118">
+				<Properties>
+					<string name="Name">Icicle_Right_0</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.1200</X>
+						<Y>0.5500</Y>
+						<Z>0.1200</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>5.9000</X>
+						<Y>2.7500</Y>
+						<Z>-1.2000</Z>
+						<R00>1.000000</R00>
+						<R01>-0.000000</R01>
+						<R02>0.000000</R02>
+						<R10>0.000000</R10>
+						<R11>1.000000</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>0.627451</R>
+						<G>0.941176</G>
+						<B>1.000000</B>
+					</Color3>
+					<token name="Material">1568</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX119">
+				<Properties>
+					<string name="Name">Icicle_Right_1</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.1200</X>
+						<Y>0.5500</Y>
+						<Z>0.1200</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>5.9000</X>
+						<Y>2.7000</Y>
+						<Z>-0.4000</Z>
+						<R00>1.000000</R00>
+						<R01>-0.000000</R01>
+						<R02>0.000000</R02>
+						<R10>0.000000</R10>
+						<R11>1.000000</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>0.627451</R>
+						<G>0.941176</G>
+						<B>1.000000</B>
+					</Color3>
+					<token name="Material">1568</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX120">
+				<Properties>
+					<string name="Name">Icicle_Right_2</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.1200</X>
+						<Y>0.5500</Y>
+						<Z>0.1200</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>5.9000</X>
+						<Y>2.6500</Y>
+						<Z>0.4000</Z>
+						<R00>1.000000</R00>
+						<R01>-0.000000</R01>
+						<R02>0.000000</R02>
+						<R10>0.000000</R10>
+						<R11>1.000000</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>0.627451</R>
+						<G>0.941176</G>
+						<B>1.000000</B>
+					</Color3>
+					<token name="Material">1568</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX121">
+				<Properties>
+					<string name="Name">Icicle_Right_3</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.1200</X>
+						<Y>0.5500</Y>
+						<Z>0.1200</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>5.9000</X>
+						<Y>2.6000</Y>
+						<Z>1.2000</Z>
+						<R00>1.000000</R00>
+						<R01>-0.000000</R01>
+						<R02>0.000000</R02>
+						<R10>0.000000</R10>
+						<R11>1.000000</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>0.627451</R>
+						<G>0.941176</G>
+						<B>1.000000</B>
+					</Color3>
+					<token name="Material">1568</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX122">
+				<Properties>
+					<string name="Name">BackrestSlab</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">true</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>3.4000</X>
+						<Y>5.2000</Y>
+						<Z>0.6000</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>4.0000</X>
+						<Y>5.1000</Y>
+						<Z>1.5000</Z>
+						<R00>1.000000</R00>
+						<R01>-0.000000</R01>
+						<R02>0.000000</R02>
+						<R10>0.000000</R10>
+						<R11>1.000000</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>0.235294</R>
+						<G>0.588235</G>
+						<B>0.901961</B>
+					</Color3>
+					<token name="Material">1568</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX123">
+				<Properties>
+					<string name="Name">BackChevron_L_0</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>1.6000</X>
+						<Y>0.3200</Y>
+						<Z>0.1800</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>3.2800</X>
+						<Y>3.8000</Y>
+						<Z>1.1800</Z>
+						<R00>0.898794</R00>
+						<R01>0.438371</R01>
+						<R02>0.000000</R02>
+						<R10>-0.438371</R10>
+						<R11>0.898794</R11>
+						<R12>-0.000000</R12>
+						<R20>-0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>0.470588</R>
+						<G>0.823529</G>
+						<B>1.000000</B>
+					</Color3>
+					<token name="Material">1568</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX124">
+				<Properties>
+					<string name="Name">BackChevron_R_0</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>1.6000</X>
+						<Y>0.3200</Y>
+						<Z>0.1800</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>4.7200</X>
+						<Y>3.8000</Y>
+						<Z>1.1800</Z>
+						<R00>0.898794</R00>
+						<R01>-0.438371</R01>
+						<R02>0.000000</R02>
+						<R10>0.438371</R10>
+						<R11>0.898794</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>0.470588</R>
+						<G>0.823529</G>
+						<B>1.000000</B>
+					</Color3>
+					<token name="Material">1568</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX125">
+				<Properties>
+					<string name="Name">BackChevron_L_1</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>1.4200</X>
+						<Y>0.3200</Y>
+						<Z>0.1800</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>3.3610</X>
+						<Y>4.5500</Y>
+						<Z>1.1800</Z>
+						<R00>0.898794</R00>
+						<R01>0.438371</R01>
+						<R02>0.000000</R02>
+						<R10>-0.438371</R10>
+						<R11>0.898794</R11>
+						<R12>-0.000000</R12>
+						<R20>-0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>0.470588</R>
+						<G>0.823529</G>
+						<B>1.000000</B>
+					</Color3>
+					<token name="Material">1568</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX126">
+				<Properties>
+					<string name="Name">BackChevron_R_1</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>1.4200</X>
+						<Y>0.3200</Y>
+						<Z>0.1800</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>4.6390</X>
+						<Y>4.5500</Y>
+						<Z>1.1800</Z>
+						<R00>0.898794</R00>
+						<R01>-0.438371</R01>
+						<R02>0.000000</R02>
+						<R10>0.438371</R10>
+						<R11>0.898794</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>0.470588</R>
+						<G>0.823529</G>
+						<B>1.000000</B>
+					</Color3>
+					<token name="Material">1568</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX127">
+				<Properties>
+					<string name="Name">BackChevron_L_2</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>1.2400</X>
+						<Y>0.3200</Y>
+						<Z>0.1800</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>3.4420</X>
+						<Y>5.3000</Y>
+						<Z>1.1800</Z>
+						<R00>0.898794</R00>
+						<R01>0.438371</R01>
+						<R02>0.000000</R02>
+						<R10>-0.438371</R10>
+						<R11>0.898794</R11>
+						<R12>-0.000000</R12>
+						<R20>-0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>0.470588</R>
+						<G>0.823529</G>
+						<B>1.000000</B>
+					</Color3>
+					<token name="Material">1568</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX128">
+				<Properties>
+					<string name="Name">BackChevron_R_2</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>1.2400</X>
+						<Y>0.3200</Y>
+						<Z>0.1800</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>4.5580</X>
+						<Y>5.3000</Y>
+						<Z>1.1800</Z>
+						<R00>0.898794</R00>
+						<R01>-0.438371</R01>
+						<R02>0.000000</R02>
+						<R10>0.438371</R10>
+						<R11>0.898794</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>0.470588</R>
+						<G>0.823529</G>
+						<B>1.000000</B>
+					</Color3>
+					<token name="Material">1568</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX129">
+				<Properties>
+					<string name="Name">BackChevron_L_3</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>1.0600</X>
+						<Y>0.3200</Y>
+						<Z>0.1800</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>3.5230</X>
+						<Y>6.0500</Y>
+						<Z>1.1800</Z>
+						<R00>0.898794</R00>
+						<R01>0.438371</R01>
+						<R02>0.000000</R02>
+						<R10>-0.438371</R10>
+						<R11>0.898794</R11>
+						<R12>-0.000000</R12>
+						<R20>-0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>0.470588</R>
+						<G>0.823529</G>
+						<B>1.000000</B>
+					</Color3>
+					<token name="Material">1568</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX130">
+				<Properties>
+					<string name="Name">BackChevron_R_3</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>1.0600</X>
+						<Y>0.3200</Y>
+						<Z>0.1800</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>4.4770</X>
+						<Y>6.0500</Y>
+						<Z>1.1800</Z>
+						<R00>0.898794</R00>
+						<R01>-0.438371</R01>
+						<R02>0.000000</R02>
+						<R10>0.438371</R10>
+						<R11>0.898794</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>0.470588</R>
+						<G>0.823529</G>
+						<B>1.000000</B>
+					</Color3>
+					<token name="Material">1568</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX131">
+				<Properties>
+					<string name="Name">BackChevron_L_4</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.8800</X>
+						<Y>0.3200</Y>
+						<Z>0.1800</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>3.6040</X>
+						<Y>6.8000</Y>
+						<Z>1.1800</Z>
+						<R00>0.898794</R00>
+						<R01>0.438371</R01>
+						<R02>0.000000</R02>
+						<R10>-0.438371</R10>
+						<R11>0.898794</R11>
+						<R12>-0.000000</R12>
+						<R20>-0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>0.470588</R>
+						<G>0.823529</G>
+						<B>1.000000</B>
+					</Color3>
+					<token name="Material">1568</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX132">
+				<Properties>
+					<string name="Name">BackChevron_R_4</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.8800</X>
+						<Y>0.3200</Y>
+						<Z>0.1800</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>4.3960</X>
+						<Y>6.8000</Y>
+						<Z>1.1800</Z>
+						<R00>0.898794</R00>
+						<R01>-0.438371</R01>
+						<R02>0.000000</R02>
+						<R10>0.438371</R10>
+						<R11>0.898794</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>0.470588</R>
+						<G>0.823529</G>
+						<B>1.000000</B>
+					</Color3>
+					<token name="Material">1568</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX133">
+				<Properties>
+					<string name="Name">CrystalShard_1</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.4800</X>
+						<Y>4.0000</Y>
+						<Z>0.4800</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>1.8000</X>
+						<Y>7.0000</Y>
+						<Z>1.6500</Z>
+						<R00>0.848048</R00>
+						<R01>0.529919</R01>
+						<R02>0.000000</R02>
+						<R10>-0.529919</R10>
+						<R11>0.848048</R11>
+						<R12>-0.000000</R12>
+						<R20>-0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>0.627451</R>
+						<G>0.941176</G>
+						<B>1.000000</B>
+					</Color3>
+					<token name="Material">288</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX134">
+				<Properties>
+					<string name="Name">CrystalShard_2</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.5200</X>
+						<Y>4.8000</Y>
+						<Z>0.5200</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>2.2000</X>
+						<Y>7.3600</Y>
+						<Z>1.6500</Z>
+						<R00>0.898794</R00>
+						<R01>0.438371</R01>
+						<R02>0.000000</R02>
+						<R10>-0.438371</R10>
+						<R11>0.898794</R11>
+						<R12>-0.000000</R12>
+						<R20>-0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>0.627451</R>
+						<G>0.941176</G>
+						<B>1.000000</B>
+					</Color3>
+					<token name="Material">288</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX135">
+				<Properties>
+					<string name="Name">CrystalShard_3</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.5500</X>
+						<Y>5.6000</Y>
+						<Z>0.5500</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>2.6000</X>
+						<Y>7.7200</Y>
+						<Z>1.6500</Z>
+						<R00>0.939693</R00>
+						<R01>0.342020</R01>
+						<R02>0.000000</R02>
+						<R10>-0.342020</R10>
+						<R11>0.939693</R11>
+						<R12>-0.000000</R12>
+						<R20>-0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>0.627451</R>
+						<G>0.941176</G>
+						<B>1.000000</B>
+					</Color3>
+					<token name="Material">288</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX136">
+				<Properties>
+					<string name="Name">CrystalShard_4</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.5800</X>
+						<Y>6.2000</Y>
+						<Z>0.5800</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>3.0000</X>
+						<Y>7.9900</Y>
+						<Z>1.6500</Z>
+						<R00>0.970296</R00>
+						<R01>0.241922</R01>
+						<R02>0.000000</R02>
+						<R10>-0.241922</R10>
+						<R11>0.970296</R11>
+						<R12>-0.000000</R12>
+						<R20>-0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>0.627451</R>
+						<G>0.941176</G>
+						<B>1.000000</B>
+					</Color3>
+					<token name="Material">288</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX137">
+				<Properties>
+					<string name="Name">CrystalShard_5</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.6000</X>
+						<Y>6.8000</Y>
+						<Z>0.6000</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>3.5000</X>
+						<Y>8.2600</Y>
+						<Z>1.6500</Z>
+						<R00>0.992546</R00>
+						<R01>0.121869</R01>
+						<R02>0.000000</R02>
+						<R10>-0.121869</R10>
+						<R11>0.992546</R11>
+						<R12>-0.000000</R12>
+						<R20>-0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>0.627451</R>
+						<G>0.941176</G>
+						<B>1.000000</B>
+					</Color3>
+					<token name="Material">288</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX138">
+				<Properties>
+					<string name="Name">CrystalShard_6</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.6400</X>
+						<Y>7.4000</Y>
+						<Z>0.6400</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>4.0000</X>
+						<Y>8.5300</Y>
+						<Z>1.6500</Z>
+						<R00>1.000000</R00>
+						<R01>-0.000000</R01>
+						<R02>0.000000</R02>
+						<R10>0.000000</R10>
+						<R11>1.000000</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>0.627451</R>
+						<G>0.941176</G>
+						<B>1.000000</B>
+					</Color3>
+					<token name="Material">288</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX139">
+				<Properties>
+					<string name="Name">CrystalShard_7</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.6000</X>
+						<Y>6.8000</Y>
+						<Z>0.6000</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>4.5000</X>
+						<Y>8.2600</Y>
+						<Z>1.6500</Z>
+						<R00>0.992546</R00>
+						<R01>-0.121869</R01>
+						<R02>0.000000</R02>
+						<R10>0.121869</R10>
+						<R11>0.992546</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>0.627451</R>
+						<G>0.941176</G>
+						<B>1.000000</B>
+					</Color3>
+					<token name="Material">288</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX140">
+				<Properties>
+					<string name="Name">CrystalShard_8</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.5800</X>
+						<Y>6.2000</Y>
+						<Z>0.5800</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>5.0000</X>
+						<Y>7.9900</Y>
+						<Z>1.6500</Z>
+						<R00>0.970296</R00>
+						<R01>-0.241922</R01>
+						<R02>0.000000</R02>
+						<R10>0.241922</R10>
+						<R11>0.970296</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>0.627451</R>
+						<G>0.941176</G>
+						<B>1.000000</B>
+					</Color3>
+					<token name="Material">288</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX141">
+				<Properties>
+					<string name="Name">CrystalShard_9</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.5500</X>
+						<Y>5.6000</Y>
+						<Z>0.5500</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>5.4000</X>
+						<Y>7.7200</Y>
+						<Z>1.6500</Z>
+						<R00>0.939693</R00>
+						<R01>-0.342020</R01>
+						<R02>0.000000</R02>
+						<R10>0.342020</R10>
+						<R11>0.939693</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>0.627451</R>
+						<G>0.941176</G>
+						<B>1.000000</B>
+					</Color3>
+					<token name="Material">288</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX142">
+				<Properties>
+					<string name="Name">CrystalShard_10</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.5200</X>
+						<Y>4.8000</Y>
+						<Z>0.5200</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>5.8000</X>
+						<Y>7.3600</Y>
+						<Z>1.6500</Z>
+						<R00>0.898794</R00>
+						<R01>-0.438371</R01>
+						<R02>0.000000</R02>
+						<R10>0.438371</R10>
+						<R11>0.898794</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>0.627451</R>
+						<G>0.941176</G>
+						<B>1.000000</B>
+					</Color3>
+					<token name="Material">288</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX143">
+				<Properties>
+					<string name="Name">CrystalShard_11</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.4800</X>
+						<Y>4.0000</Y>
+						<Z>0.4800</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>6.2000</X>
+						<Y>7.0000</Y>
+						<Z>1.6500</Z>
+						<R00>0.848048</R00>
+						<R01>-0.529919</R01>
+						<R02>0.000000</R02>
+						<R10>0.529919</R10>
+						<R11>0.848048</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>0.627451</R>
+						<G>0.941176</G>
+						<B>1.000000</B>
+					</Color3>
+					<token name="Material">288</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX144">
+				<Properties>
+					<string name="Name">TopDiamondGem</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>1.2000</X>
+						<Y>1.8000</Y>
+						<Z>0.8000</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>4.0000</X>
+						<Y>8.8000</Y>
+						<Z>1.4500</Z>
+						<R00>0.707107</R00>
+						<R01>-0.707107</R01>
+						<R02>0.000000</R02>
+						<R10>0.707107</R10>
+						<R11>0.707107</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>0.392157</R>
+						<G>0.921569</G>
+						<B>1.000000</B>
+					</Color3>
+					<token name="Material">288</token>
+				</Properties>
+				<Item class="PointLight" referent="RBX145">
+					<Properties>
+						<string name="Name">IceGlow</string>
+						<Color3 name="Color">
+							<R>0.549020</R>
+							<G>0.901961</G>
+							<B>1.000000</B>
+						</Color3>
+						<float name="Brightness">2.50</float>
+						<float name="Range">16.00</float>
+						<bool name="Shadows">false</bool>
+					</Properties>
+				</Item>
+				<Item class="ParticleEmitter" referent="RBX146">
+					<Properties>
+						<string name="Name">FrostMist</string>
+						<Content name="Texture">
+							<url>rbxassetid://253188732</url>
+						</Content>
+						<float name="Rate">12.0</float>
+						<float name="LightEmission">1.0</float>
+					</Properties>
+				</Item>
+			</Item>
+			<Item class="Script" referent="RBX147">
+				<Properties>
+					<string name="Name">FrostEffectController</string>
+					<ProtectedString name="Source">local TweenService = game:GetService("TweenService")
+local model = script.Parent
+local topGem = model:FindFirstChild("TopDiamondGem")
+if topGem and topGem:IsA("BasePart") then
+    local tw = TweenService:Create(topGem, TweenInfo.new(2.0, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true), {
+        Color = Color3.fromRGB(180, 250, 255)
+    })
+    tw:Play()
+end</ProtectedString>
+				</Properties>
+			</Item>
+		</Item>
+		<Item class="Model" referent="RBX148">
+			<Properties>
+				<string name="Name">RoyalFootballThrone</string>
+			</Properties>
+			<Item class="Part" referent="RBX149">
+				<Properties>
+					<string name="Name">FootSlab_Left</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">true</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>1.8000</X>
+						<Y>0.6000</Y>
+						<Z>3.2000</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>10.1000</X>
+						<Y>0.3000</Y>
+						<Z>0.0000</Z>
+						<R00>1.000000</R00>
+						<R01>-0.000000</R01>
+						<R02>0.000000</R02>
+						<R10>0.000000</R10>
+						<R11>1.000000</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>1.000000</R>
+						<G>0.764706</G>
+						<B>0.117647</B>
+					</Color3>
+					<token name="Material">272</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX150">
+				<Properties>
+					<string name="Name">Pillar_Left</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">true</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>1.4000</X>
+						<Y>1.8000</Y>
+						<Z>2.4000</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>10.1000</X>
+						<Y>1.5000</Y>
+						<Z>0.0000</Z>
+						<R00>1.000000</R00>
+						<R01>-0.000000</R01>
+						<R02>0.000000</R02>
+						<R10>0.000000</R10>
+						<R11>1.000000</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>1.000000</R>
+						<G>0.764706</G>
+						<B>0.117647</B>
+					</Color3>
+					<token name="Material">272</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX151">
+				<Properties>
+					<string name="Name">PillarRedPanel_Left</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>1.1000</X>
+						<Y>1.4000</Y>
+						<Z>0.0500</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>10.1000</X>
+						<Y>1.5000</Y>
+						<Z>-1.2300</Z>
+						<R00>1.000000</R00>
+						<R01>-0.000000</R01>
+						<R02>0.000000</R02>
+						<R10>0.000000</R10>
+						<R11>1.000000</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>0.705882</R>
+						<G>0.078431</G>
+						<B>0.125490</B>
+					</Color3>
+					<token name="Material">272</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX152">
+				<Properties>
+					<string name="Name">FootSlab_Right</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">true</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>1.8000</X>
+						<Y>0.6000</Y>
+						<Z>3.2000</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>13.9000</X>
+						<Y>0.3000</Y>
+						<Z>0.0000</Z>
+						<R00>1.000000</R00>
+						<R01>-0.000000</R01>
+						<R02>0.000000</R02>
+						<R10>0.000000</R10>
+						<R11>1.000000</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>1.000000</R>
+						<G>0.764706</G>
+						<B>0.117647</B>
+					</Color3>
+					<token name="Material">272</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX153">
+				<Properties>
+					<string name="Name">Pillar_Right</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">true</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>1.4000</X>
+						<Y>1.8000</Y>
+						<Z>2.4000</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>13.9000</X>
+						<Y>1.5000</Y>
+						<Z>0.0000</Z>
+						<R00>1.000000</R00>
+						<R01>-0.000000</R01>
+						<R02>0.000000</R02>
+						<R10>0.000000</R10>
+						<R11>1.000000</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>1.000000</R>
+						<G>0.764706</G>
+						<B>0.117647</B>
+					</Color3>
+					<token name="Material">272</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX154">
+				<Properties>
+					<string name="Name">PillarRedPanel_Right</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>1.1000</X>
+						<Y>1.4000</Y>
+						<Z>0.0500</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>13.9000</X>
+						<Y>1.5000</Y>
+						<Z>-1.2300</Z>
+						<R00>1.000000</R00>
+						<R01>-0.000000</R01>
+						<R02>0.000000</R02>
+						<R10>0.000000</R10>
+						<R11>1.000000</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>0.705882</R>
+						<G>0.078431</G>
+						<B>0.125490</B>
+					</Color3>
+					<token name="Material">272</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX155">
+				<Properties>
+					<string name="Name">UndersideHollow</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>2.2000</X>
+						<Y>1.6000</Y>
+						<Z>2.6000</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>12.0000</X>
+						<Y>1.4000</Y>
+						<Z>0.0000</Z>
+						<R00>1.000000</R00>
+						<R01>-0.000000</R01>
+						<R02>0.000000</R02>
+						<R10>0.000000</R10>
+						<R11>1.000000</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>0.117647</R>
+						<G>0.094118</G>
+						<B>0.086275</B>
+					</Color3>
+					<token name="Material">272</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX156">
+				<Properties>
+					<string name="Name">SeatFrame</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>3.6000</X>
+						<Y>0.6000</Y>
+						<Z>3.2000</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>12.0000</X>
+						<Y>2.5000</Y>
+						<Z>0.0000</Z>
+						<R00>1.000000</R00>
+						<R01>-0.000000</R01>
+						<R02>0.000000</R02>
+						<R10>0.000000</R10>
+						<R11>1.000000</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>1.000000</R>
+						<G>0.764706</G>
+						<B>0.117647</B>
+					</Color3>
+					<token name="Material">272</token>
+				</Properties>
+			</Item>
+			<Item class="Seat" referent="RBX157">
+				<Properties>
+					<string name="Name">Seat</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">true</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>3.2000</X>
+						<Y>0.8000</Y>
+						<Z>2.8000</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>12.0000</X>
+						<Y>2.9000</Y>
+						<Z>0.1000</Z>
+						<R00>1.000000</R00>
+						<R01>-0.000000</R01>
+						<R02>0.000000</R02>
+						<R10>0.000000</R10>
+						<R11>1.000000</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>0.705882</R>
+						<G>0.078431</G>
+						<B>0.125490</B>
+					</Color3>
+					<token name="Material">272</token>
+				</Properties>
+				<Item class="PointLight" referent="RBX158">
+					<Properties>
+						<string name="Name">ThroneGlow</string>
+						<Color3 name="Color">
+							<R>1.000000</R>
+							<G>0.823529</G>
+							<B>0.352941</B>
+						</Color3>
+						<float name="Brightness">2.50</float>
+						<float name="Range">16.00</float>
+						<bool name="Shadows">false</bool>
+					</Properties>
+				</Item>
+				<Item class="ParticleEmitter" referent="RBX193">
+					<Properties>
+						<string name="Name">GoldenSparkles</string>
+						<Content name="Texture">
+							<url>rbxasset://textures/particles/sparkles_main.dds</url>
+						</Content>
+						<float name="Rate">10.0</float>
+						<float name="LightEmission">1.0</float>
+					</Properties>
+				</Item>
+			</Item>
+			<Item class="Part" referent="RBX159">
+				<Properties>
+					<string name="Name">FrontDiamondFrame</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>1.4000</X>
+						<Y>1.4000</Y>
+						<Z>0.1500</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>12.0000</X>
+						<Y>2.5000</Y>
+						<Z>-1.6500</Z>
+						<R00>0.707107</R00>
+						<R01>-0.707107</R01>
+						<R02>0.000000</R02>
+						<R10>0.707107</R10>
+						<R11>0.707107</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>1.000000</R>
+						<G>0.764706</G>
+						<B>0.117647</B>
+					</Color3>
+					<token name="Material">272</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX160">
+				<Properties>
+					<string name="Name">FrontRubyGem</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.7000</X>
+						<Y>0.7000</Y>
+						<Z>0.2200</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>12.0000</X>
+						<Y>2.5000</Y>
+						<Z>-1.7200</Z>
+						<R00>0.707107</R00>
+						<R01>-0.707107</R01>
+						<R02>0.000000</R02>
+						<R10>0.707107</R10>
+						<R11>0.707107</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>1.000000</R>
+						<G>0.117647</G>
+						<B>0.196078</B>
+					</Color3>
+					<token name="Material">288</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX161">
+				<Properties>
+					<string name="Name">Armrest_Left</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">true</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>1.3000</X>
+						<Y>1.4000</Y>
+						<Z>3.0000</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>9.8000</X>
+						<Y>3.7000</Y>
+						<Z>0.0000</Z>
+						<R00>1.000000</R00>
+						<R01>-0.000000</R01>
+						<R02>0.000000</R02>
+						<R10>0.000000</R10>
+						<R11>1.000000</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>1.000000</R>
+						<G>0.764706</G>
+						<B>0.117647</B>
+					</Color3>
+					<token name="Material">272</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX162">
+				<Properties>
+					<string name="Name">ArmrestPanel_Left</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.9000</X>
+						<Y>1.0000</Y>
+						<Z>0.0500</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>9.8000</X>
+						<Y>3.7000</Y>
+						<Z>-1.5300</Z>
+						<R00>1.000000</R00>
+						<R01>-0.000000</R01>
+						<R02>0.000000</R02>
+						<R10>0.000000</R10>
+						<R11>1.000000</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>0.705882</R>
+						<G>0.078431</G>
+						<B>0.125490</B>
+					</Color3>
+					<token name="Material">272</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX163">
+				<Properties>
+					<string name="Name">ArmrestGem_Left</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.3500</X>
+						<Y>0.3500</Y>
+						<Z>0.0800</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>9.8000</X>
+						<Y>3.7000</Y>
+						<Z>-1.5800</Z>
+						<R00>0.707107</R00>
+						<R01>-0.707107</R01>
+						<R02>0.000000</R02>
+						<R10>0.707107</R10>
+						<R11>0.707107</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>1.000000</R>
+						<G>0.764706</G>
+						<B>0.117647</B>
+					</Color3>
+					<token name="Material">272</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX164">
+				<Properties>
+					<string name="Name">Armrest_Right</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">true</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>1.3000</X>
+						<Y>1.4000</Y>
+						<Z>3.0000</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>14.2000</X>
+						<Y>3.7000</Y>
+						<Z>0.0000</Z>
+						<R00>1.000000</R00>
+						<R01>-0.000000</R01>
+						<R02>0.000000</R02>
+						<R10>0.000000</R10>
+						<R11>1.000000</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>1.000000</R>
+						<G>0.764706</G>
+						<B>0.117647</B>
+					</Color3>
+					<token name="Material">272</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX165">
+				<Properties>
+					<string name="Name">ArmrestPanel_Right</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.9000</X>
+						<Y>1.0000</Y>
+						<Z>0.0500</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>14.2000</X>
+						<Y>3.7000</Y>
+						<Z>-1.5300</Z>
+						<R00>1.000000</R00>
+						<R01>-0.000000</R01>
+						<R02>0.000000</R02>
+						<R10>0.000000</R10>
+						<R11>1.000000</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>0.705882</R>
+						<G>0.078431</G>
+						<B>0.125490</B>
+					</Color3>
+					<token name="Material">272</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX166">
+				<Properties>
+					<string name="Name">ArmrestGem_Right</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.3500</X>
+						<Y>0.3500</Y>
+						<Z>0.0800</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>14.2000</X>
+						<Y>3.7000</Y>
+						<Z>-1.5800</Z>
+						<R00>0.707107</R00>
+						<R01>-0.707107</R01>
+						<R02>0.000000</R02>
+						<R10>0.707107</R10>
+						<R11>0.707107</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>1.000000</R>
+						<G>0.764706</G>
+						<B>0.117647</B>
+					</Color3>
+					<token name="Material">272</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX167">
+				<Properties>
+					<string name="Name">BackrestFrame</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">true</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>4.4000</X>
+						<Y>6.2000</Y>
+						<Z>0.8000</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>12.0000</X>
+						<Y>6.0000</Y>
+						<Z>1.4000</Z>
+						<R00>1.000000</R00>
+						<R01>-0.000000</R01>
+						<R02>0.000000</R02>
+						<R10>0.000000</R10>
+						<R11>1.000000</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>1.000000</R>
+						<G>0.764706</G>
+						<B>0.117647</B>
+					</Color3>
+					<token name="Material">272</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX168">
+				<Properties>
+					<string name="Name">WingSpike_Left</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>1.2000</X>
+						<Y>1.8000</Y>
+						<Z>0.6000</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>9.6000</X>
+						<Y>8.8000</Y>
+						<Z>1.4000</Z>
+						<R00>0.819152</R00>
+						<R01>-0.573576</R01>
+						<R02>0.000000</R02>
+						<R10>0.573576</R10>
+						<R11>0.819152</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>1.000000</R>
+						<G>0.764706</G>
+						<B>0.117647</B>
+					</Color3>
+					<token name="Material">272</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX169">
+				<Properties>
+					<string name="Name">WingSpike_Right</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>1.2000</X>
+						<Y>1.8000</Y>
+						<Z>0.6000</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>14.4000</X>
+						<Y>8.8000</Y>
+						<Z>1.4000</Z>
+						<R00>0.819152</R00>
+						<R01>0.573576</R01>
+						<R02>0.000000</R02>
+						<R10>-0.573576</R10>
+						<R11>0.819152</R11>
+						<R12>-0.000000</R12>
+						<R20>-0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>1.000000</R>
+						<G>0.764706</G>
+						<B>0.117647</B>
+					</Color3>
+					<token name="Material">272</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX170">
+				<Properties>
+					<string name="Name">QuiltedPanel</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>3.2000</X>
+						<Y>4.8000</Y>
+						<Z>0.5000</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>12.0000</X>
+						<Y>5.6000</Y>
+						<Z>1.1000</Z>
+						<R00>1.000000</R00>
+						<R01>-0.000000</R01>
+						<R02>0.000000</R02>
+						<R10>0.000000</R10>
+						<R11>1.000000</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>0.705882</R>
+						<G>0.078431</G>
+						<B>0.125490</B>
+					</Color3>
+					<token name="Material">272</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX171">
+				<Properties>
+					<string name="Name">TuftButton_0_0</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.3500</X>
+						<Y>0.3500</Y>
+						<Z>0.3500</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>11.0500</X>
+						<Y>4.4000</Y>
+						<Z>0.8200</Z>
+						<R00>1.000000</R00>
+						<R01>-0.000000</R01>
+						<R02>0.000000</R02>
+						<R10>0.000000</R10>
+						<R11>1.000000</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>1.000000</R>
+						<G>0.764706</G>
+						<B>0.117647</B>
+					</Color3>
+					<token name="Material">272</token>
+					<token name="shape">0</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX172">
+				<Properties>
+					<string name="Name">TuftButton_0_1</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.3500</X>
+						<Y>0.3500</Y>
+						<Z>0.3500</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>12.0000</X>
+						<Y>4.4000</Y>
+						<Z>0.8200</Z>
+						<R00>1.000000</R00>
+						<R01>-0.000000</R01>
+						<R02>0.000000</R02>
+						<R10>0.000000</R10>
+						<R11>1.000000</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>1.000000</R>
+						<G>0.764706</G>
+						<B>0.117647</B>
+					</Color3>
+					<token name="Material">272</token>
+					<token name="shape">0</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX173">
+				<Properties>
+					<string name="Name">TuftButton_0_2</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.3500</X>
+						<Y>0.3500</Y>
+						<Z>0.3500</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>12.9500</X>
+						<Y>4.4000</Y>
+						<Z>0.8200</Z>
+						<R00>1.000000</R00>
+						<R01>-0.000000</R01>
+						<R02>0.000000</R02>
+						<R10>0.000000</R10>
+						<R11>1.000000</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>1.000000</R>
+						<G>0.764706</G>
+						<B>0.117647</B>
+					</Color3>
+					<token name="Material">272</token>
+					<token name="shape">0</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX174">
+				<Properties>
+					<string name="Name">TuftButton_1_0</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.3500</X>
+						<Y>0.3500</Y>
+						<Z>0.3500</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>11.0500</X>
+						<Y>5.5500</Y>
+						<Z>0.8200</Z>
+						<R00>1.000000</R00>
+						<R01>-0.000000</R01>
+						<R02>0.000000</R02>
+						<R10>0.000000</R10>
+						<R11>1.000000</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>1.000000</R>
+						<G>0.764706</G>
+						<B>0.117647</B>
+					</Color3>
+					<token name="Material">272</token>
+					<token name="shape">0</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX175">
+				<Properties>
+					<string name="Name">TuftButton_1_1</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.3500</X>
+						<Y>0.3500</Y>
+						<Z>0.3500</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>12.0000</X>
+						<Y>5.5500</Y>
+						<Z>0.8200</Z>
+						<R00>1.000000</R00>
+						<R01>-0.000000</R01>
+						<R02>0.000000</R02>
+						<R10>0.000000</R10>
+						<R11>1.000000</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>1.000000</R>
+						<G>0.764706</G>
+						<B>0.117647</B>
+					</Color3>
+					<token name="Material">272</token>
+					<token name="shape">0</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX176">
+				<Properties>
+					<string name="Name">TuftButton_1_2</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.3500</X>
+						<Y>0.3500</Y>
+						<Z>0.3500</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>12.9500</X>
+						<Y>5.5500</Y>
+						<Z>0.8200</Z>
+						<R00>1.000000</R00>
+						<R01>-0.000000</R01>
+						<R02>0.000000</R02>
+						<R10>0.000000</R10>
+						<R11>1.000000</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>1.000000</R>
+						<G>0.764706</G>
+						<B>0.117647</B>
+					</Color3>
+					<token name="Material">272</token>
+					<token name="shape">0</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX177">
+				<Properties>
+					<string name="Name">TuftButton_2_0</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.3500</X>
+						<Y>0.3500</Y>
+						<Z>0.3500</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>11.0500</X>
+						<Y>6.7000</Y>
+						<Z>0.8200</Z>
+						<R00>1.000000</R00>
+						<R01>-0.000000</R01>
+						<R02>0.000000</R02>
+						<R10>0.000000</R10>
+						<R11>1.000000</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>1.000000</R>
+						<G>0.764706</G>
+						<B>0.117647</B>
+					</Color3>
+					<token name="Material">272</token>
+					<token name="shape">0</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX178">
+				<Properties>
+					<string name="Name">TuftButton_2_1</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.3500</X>
+						<Y>0.3500</Y>
+						<Z>0.3500</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>12.0000</X>
+						<Y>6.7000</Y>
+						<Z>0.8200</Z>
+						<R00>1.000000</R00>
+						<R01>-0.000000</R01>
+						<R02>0.000000</R02>
+						<R10>0.000000</R10>
+						<R11>1.000000</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>1.000000</R>
+						<G>0.764706</G>
+						<B>0.117647</B>
+					</Color3>
+					<token name="Material">272</token>
+					<token name="shape">0</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX179">
+				<Properties>
+					<string name="Name">TuftButton_2_2</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.3500</X>
+						<Y>0.3500</Y>
+						<Z>0.3500</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>12.9500</X>
+						<Y>6.7000</Y>
+						<Z>0.8200</Z>
+						<R00>1.000000</R00>
+						<R01>-0.000000</R01>
+						<R02>0.000000</R02>
+						<R10>0.000000</R10>
+						<R11>1.000000</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>1.000000</R>
+						<G>0.764706</G>
+						<B>0.117647</B>
+					</Color3>
+					<token name="Material">272</token>
+					<token name="shape">0</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX180">
+				<Properties>
+					<string name="Name">EmblemRing</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>2.8000</X>
+						<Y>2.8000</Y>
+						<Z>0.4000</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>12.0000</X>
+						<Y>7.6000</Y>
+						<Z>1.1500</Z>
+						<R00>0.707107</R00>
+						<R01>-0.707107</R01>
+						<R02>0.000000</R02>
+						<R10>0.707107</R10>
+						<R11>0.707107</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>1.000000</R>
+						<G>0.764706</G>
+						<B>0.117647</B>
+					</Color3>
+					<token name="Material">272</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX181">
+				<Properties>
+					<string name="Name">SoccerBall</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>2.1000</X>
+						<Y>2.1000</Y>
+						<Z>2.1000</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>12.0000</X>
+						<Y>7.6000</Y>
+						<Z>1.1500</Z>
+						<R00>1.000000</R00>
+						<R01>-0.000000</R01>
+						<R02>0.000000</R02>
+						<R10>0.000000</R10>
+						<R11>1.000000</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>1.000000</R>
+						<G>1.000000</G>
+						<B>1.000000</B>
+					</Color3>
+					<token name="Material">272</token>
+					<token name="shape">0</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX182">
+				<Properties>
+					<string name="Name">Pentagon_Center</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.5500</X>
+						<Y>0.5500</Y>
+						<Z>0.1000</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>12.0000</X>
+						<Y>7.6000</Y>
+						<Z>0.0800</Z>
+						<R00>0.809017</R00>
+						<R01>-0.587785</R01>
+						<R02>0.000000</R02>
+						<R10>0.587785</R10>
+						<R11>0.809017</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>0.078431</R>
+						<G>0.078431</G>
+						<B>0.086275</B>
+					</Color3>
+					<token name="Material">272</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX183">
+				<Properties>
+					<string name="Name">CrownPeak_1</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.5500</X>
+						<Y>0.8000</Y>
+						<Z>0.4500</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>10.8000</X>
+						<Y>9.6200</Y>
+						<Z>1.1500</Z>
+						<R00>0.951057</R00>
+						<R01>0.309017</R01>
+						<R02>0.000000</R02>
+						<R10>-0.309017</R10>
+						<R11>0.951057</R11>
+						<R12>-0.000000</R12>
+						<R20>-0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>1.000000</R>
+						<G>0.764706</G>
+						<B>0.117647</B>
+					</Color3>
+					<token name="Material">272</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX184">
+				<Properties>
+					<string name="Name">CrownPeak_2</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.5500</X>
+						<Y>1.2000</Y>
+						<Z>0.4500</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>11.4000</X>
+						<Y>9.7800</Y>
+						<Z>1.1500</Z>
+						<R00>0.987688</R00>
+						<R01>0.156434</R01>
+						<R02>0.000000</R02>
+						<R10>-0.156434</R10>
+						<R11>0.987688</R11>
+						<R12>-0.000000</R12>
+						<R20>-0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>1.000000</R>
+						<G>0.764706</G>
+						<B>0.117647</B>
+					</Color3>
+					<token name="Material">272</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX185">
+				<Properties>
+					<string name="Name">CrownPeak_3</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.5500</X>
+						<Y>1.7000</Y>
+						<Z>0.4500</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>12.0000</X>
+						<Y>9.9800</Y>
+						<Z>1.1500</Z>
+						<R00>1.000000</R00>
+						<R01>-0.000000</R01>
+						<R02>0.000000</R02>
+						<R10>0.000000</R10>
+						<R11>1.000000</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>1.000000</R>
+						<G>0.764706</G>
+						<B>0.117647</B>
+					</Color3>
+					<token name="Material">272</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX186">
+				<Properties>
+					<string name="Name">CrownPeak_4</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.5500</X>
+						<Y>1.2000</Y>
+						<Z>0.4500</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>12.6000</X>
+						<Y>9.7800</Y>
+						<Z>1.1500</Z>
+						<R00>0.987688</R00>
+						<R01>-0.156434</R01>
+						<R02>0.000000</R02>
+						<R10>0.156434</R10>
+						<R11>0.987688</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>1.000000</R>
+						<G>0.764706</G>
+						<B>0.117647</B>
+					</Color3>
+					<token name="Material">272</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX187">
+				<Properties>
+					<string name="Name">CrownPeak_5</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.5500</X>
+						<Y>0.8000</Y>
+						<Z>0.4500</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>13.2000</X>
+						<Y>9.6200</Y>
+						<Z>1.1500</Z>
+						<R00>0.951057</R00>
+						<R01>-0.309017</R01>
+						<R02>0.000000</R02>
+						<R10>0.309017</R10>
+						<R11>0.951057</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>1.000000</R>
+						<G>0.764706</G>
+						<B>0.117647</B>
+					</Color3>
+					<token name="Material">272</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX188">
+				<Properties>
+					<string name="Name">CrownRubyGem</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.5500</X>
+						<Y>0.5500</Y>
+						<Z>0.2500</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>12.0000</X>
+						<Y>9.9000</Y>
+						<Z>0.9200</Z>
+						<R00>0.707107</R00>
+						<R01>-0.707107</R01>
+						<R02>0.000000</R02>
+						<R10>0.707107</R10>
+						<R11>0.707107</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>1.000000</R>
+						<G>0.117647</G>
+						<B>0.196078</B>
+					</Color3>
+					<token name="Material">288</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX189">
+				<Properties>
+					<string name="Name">Banner_Left</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.7000</X>
+						<Y>2.2000</Y>
+						<Z>0.0800</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>9.4000</X>
+						<Y>6.2000</Y>
+						<Z>1.2000</Z>
+						<R00>1.000000</R00>
+						<R01>-0.000000</R01>
+						<R02>0.000000</R02>
+						<R10>0.000000</R10>
+						<R11>1.000000</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>0.705882</R>
+						<G>0.078431</G>
+						<B>0.125490</B>
+					</Color3>
+					<token name="Material">272</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX190">
+				<Properties>
+					<string name="Name">BannerCrownEmblem_Left</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.4000</X>
+						<Y>0.3000</Y>
+						<Z>0.0400</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>9.4000</X>
+						<Y>6.6000</Y>
+						<Z>1.1400</Z>
+						<R00>1.000000</R00>
+						<R01>-0.000000</R01>
+						<R02>0.000000</R02>
+						<R10>0.000000</R10>
+						<R11>1.000000</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>1.000000</R>
+						<G>0.764706</G>
+						<B>0.117647</B>
+					</Color3>
+					<token name="Material">288</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX191">
+				<Properties>
+					<string name="Name">Banner_Right</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.7000</X>
+						<Y>2.2000</Y>
+						<Z>0.0800</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>14.6000</X>
+						<Y>6.2000</Y>
+						<Z>1.2000</Z>
+						<R00>1.000000</R00>
+						<R01>-0.000000</R01>
+						<R02>0.000000</R02>
+						<R10>0.000000</R10>
+						<R11>1.000000</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>0.705882</R>
+						<G>0.078431</G>
+						<B>0.125490</B>
+					</Color3>
+					<token name="Material">272</token>
+				</Properties>
+			</Item>
+			<Item class="Part" referent="RBX192">
+				<Properties>
+					<string name="Name">BannerCrownEmblem_Right</string>
+					<bool name="Anchored">true</bool>
+					<bool name="CanCollide">false</bool>
+					<bool name="CastShadow">true</bool>
+					<Vector3 name="size">
+						<X>0.4000</X>
+						<Y>0.3000</Y>
+						<Z>0.0400</Z>
+					</Vector3>
+					<CoordinateFrame name="CFrame">
+						<X>14.6000</X>
+						<Y>6.6000</Y>
+						<Z>1.1400</Z>
+						<R00>1.000000</R00>
+						<R01>-0.000000</R01>
+						<R02>0.000000</R02>
+						<R10>0.000000</R10>
+						<R11>1.000000</R11>
+						<R12>-0.000000</R12>
+						<R20>0.000000</R20>
+						<R21>0.000000</R21>
+						<R22>1.000000</R22>
+					</CoordinateFrame>
+					<Color3 name="Color">
+						<R>1.000000</R>
+						<G>0.764706</G>
+						<B>0.117647</B>
+					</Color3>
+					<token name="Material">288</token>
+				</Properties>
+			</Item>
+			<Item class="Script" referent="RBX194">
+				<Properties>
+					<string name="Name">RoyalEffectController</string>
+					<ProtectedString name="Source">local TweenService = game:GetService("TweenService")
+local model = script.Parent
+local ruby = model:FindFirstChild("CrownRubyGem")
+local frontRuby = model:FindFirstChild("FrontRubyGem")
+local info = TweenInfo.new(1.8, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true)
+if ruby and ruby:IsA("BasePart") then
+    TweenService:Create(ruby, info, { Color = Color3.fromRGB(255, 80, 100) }):Play()
+end
+if frontRuby and frontRuby:IsA("BasePart") then
+    TweenService:Create(frontRuby, info, { Color = Color3.fromRGB(255, 80, 100) }):Play()
+end</ProtectedString>
+				</Properties>
+			</Item>
+		</Item>
+	</Item>
+</roblox>

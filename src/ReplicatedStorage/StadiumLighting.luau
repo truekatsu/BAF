@@ -36,9 +36,9 @@ StadiumLighting.CONFIG = {
 	CYCLE_MINUTES = 12,      -- Real minutes for a full 24-hour cycle
 
 	-- Light Throw Specifications (per tower)
-	SPOT_BRIGHTNESS = 3.5,   -- Raised from 5.0 to 7.0 to overcome Future quadratic distance attenuation
-	SPOT_RANGE = 120,        -- Maximum possible in Roblox engine (clamped by engine to [0, 120]; was 110). PlazaFill covers the center (dist 165).
-	SPOT_ANGLE = 82,         -- Raised from 75 to 82 degrees to cover walkway bypasses and plaza
+	SPOT_BRIGHTNESS = 4.8,   -- Full stadium floodlight throw ensuring zero dead zones
+	SPOT_RANGE = 120,        -- Maximum possible in Roblox engine
+	SPOT_ANGLE = 86,         -- Full stadium coverage covering entire pitch and midfields
 	SPOT_COLOR = Color3.fromHex("#FFF4D6"), -- Warm stadium white
 	SHADOWS_ENABLED = true,  -- Selective shadow casting: only 2 diagonal key towers cast shadows to eliminate dark criss-cross cutouts
 	SHADOW_KEY_TOWERS = {
@@ -51,13 +51,13 @@ StadiumLighting.CONFIG = {
 	POINT_RANGE = 14,
 	POINT_BRIGHTNESS = 0.8,
 	BEAMS_ENABLED = true,
-	BEAM_TRANSPARENCY = 0.92,
+	BEAM_TRANSPARENCY = 0.95,
 	FLARE_MAX_DIST = 250,
 	FLARE_SIZE = 12,
 
 	-- Ground Glow Pool Configuration
-	GROUND_GLOW_SIZE = 60,
-	GROUND_GLOW_TRANSPARENCY = 0.95, -- Subtle additive ground glow fading smoothly outward
+	GROUND_GLOW_SIZE = 36,
+	GROUND_GLOW_TRANSPARENCY = 0.96, -- Subtle additive ground glow fading smoothly outward
 	PITCH_SURFACE_Y = 0.0,           -- Top of grass baseplate ground
 	WALKWAY_SURFACE_Y = 0.50,        -- Top of central walkway and plaza roundabout
 	PODIUM_TIER1_Y = 2.25,           -- Top of gold podium tier 1
@@ -74,11 +74,11 @@ StadiumLighting.CONFIG = {
 	PLAZA_FILL = {
 		HEIGHT = 25.5,                         -- Studs above ground
 		CENTER = Vector3.new(0, 25.5, -39),    -- Central plaza hub position
-		SPOT_RANGE = 60,
-		SPOT_ANGLE = 120,
-		SPOT_BRIGHTNESS = 0.6,
-		POINT_RANGE = 30,
-		POINT_BRIGHTNESS = 0.4,
+		SPOT_RANGE = 80,
+		SPOT_ANGLE = 130,
+		SPOT_BRIGHTNESS = 0.9,
+		POINT_RANGE = 45,
+		POINT_BRIGHTNESS = 0.6,
 		COLOR = Color3.fromHex("#FFF4D6"),
 	},
 
@@ -272,8 +272,10 @@ function StadiumLighting.buildGroundGlow(tower: Model, towerIdx: number?): { [st
 		)
 	end
 
-	-- 2. Walkway / Plaza Glow Overlays (conforms to walkway width & round plaza disc)
-	if hasWalkway then
+	local distToPlaza = (Vector3.new(groundHitPos.X, 0, groundHitPos.Z) - Vector3.new(0, 0, -39)).Magnitude
+
+	-- 2. Walkway / Plaza Glow Overlays (only if this tower specifically targets plaza center)
+	if hasWalkway and distToPlaza <= 30 then
 		local walkwayY = cfg.WALKWAY_SURFACE_Y + 0.040 + towerOffset
 		-- Circular Plaza overlay: perfectly matches Plaza_Roundabout cylinder
 		local plazaCF = CFrame.new(0, walkwayY, -39) * CFrame.Angles(0, 0, math.pi / 2)
@@ -306,7 +308,7 @@ function StadiumLighting.buildGroundGlow(tower: Model, towerIdx: number?): { [st
 	end
 
 	-- 3. Podium Tier 1 Glow Disc (Golden warm highlight, preserves gold surface)
-	if hasTier1 then
+	if hasTier1 and distToPlaza <= 20 then
 		local tier1Y = cfg.PODIUM_TIER1_Y + 0.035 + towerOffset
 		local t1CF = CFrame.new(0, tier1Y, -42) * CFrame.Angles(0, 0, math.pi / 2)
 		local t1Part = makeGlowPart(
@@ -325,7 +327,7 @@ function StadiumLighting.buildGroundGlow(tower: Model, towerIdx: number?): { [st
 	end
 
 	-- 4. Podium Tier 2 Glow Disc
-	if hasTier2 then
+	if hasTier2 and distToPlaza <= 15 then
 		local tier2Y = cfg.PODIUM_TIER2_Y + 0.035 + towerOffset
 		local t2CF = CFrame.new(0, tier2Y, -42) * CFrame.Angles(0, 0, math.pi / 2)
 		local t2Part = makeGlowPart(
@@ -544,15 +546,15 @@ function StadiumLighting.buildFloodlightLighting(tower: Model, towerIdx: number?
 		beam.Name = "Floodlight_Beam"
 		beam.Attachment0 = headAtt
 		beam.Attachment1 = groundAtt
-		beam.Width0 = 7.0
-		beam.Width1 = 36.0
+		beam.Width0 = 3.0
+		beam.Width1 = 14.0
 		beam.FaceCamera = true
-		beam.LightEmission = 0.5
+		beam.LightEmission = 0.12
 		beam.LightInfluence = 0.0
 		beam.Color = ColorSequence.new(cfg.SPOT_COLOR)
 		beam.Transparency = NumberSequence.new({
-			NumberSequenceKeypoint.new(0, cfg.BEAM_TRANSPARENCY),
-			NumberSequenceKeypoint.new(0.6, 0.96),
+			NumberSequenceKeypoint.new(0, 0.95),
+			NumberSequenceKeypoint.new(0.4, 0.975),
 			NumberSequenceKeypoint.new(1.0, 1.0),
 		})
 		beam.Enabled = false
