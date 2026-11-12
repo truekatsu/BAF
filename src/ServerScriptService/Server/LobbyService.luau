@@ -1142,7 +1142,7 @@ local function createSpinWheelStation(parent: Instance): Model
 		txtLbl.Position = UDim2.new(0, 0, 0.46, 0)
 		txtLbl.BackgroundTransparency = 1
 		txtLbl.Font = Enum.Font.FredokaOne
-		txtLbl.TextColor3 = if seg.id == 4 then Color3.fromHex("#FFD21F") else Color3.fromHex("#3DDC3D")
+		txtLbl.TextColor3 = Color3.new(1, 1, 1)
 		txtLbl.TextStrokeTransparency = 0
 		txtLbl.TextStrokeColor3 = Color3.new(0, 0, 0)
 		txtLbl.TextScaled = true

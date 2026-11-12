@@ -1829,6 +1829,17 @@ end
 
 
 
+function UITheme.getModalScale(): number
+	local camera = workspace.CurrentCamera
+	local vY = if camera then camera.ViewportSize.Y else 720
+	if vY <= 0 then vY = 720 end
+	if vY <= 500 then
+		return math.clamp(vY / 750, 0.44, 0.53)
+	else
+		return math.clamp(vY / 750, 0.55, 1.0)
+	end
+end
+
 function UITheme.openWindow(win: GuiObject)
 
 
@@ -1857,7 +1868,8 @@ function UITheme.openWindow(win: GuiObject)
 
 
 
-	uiScale.Scale = UITheme.CONFIG.WINDOW_OPEN_SCALE
+	local targetScale = UITheme.getModalScale()
+	uiScale.Scale = UITheme.CONFIG.WINDOW_OPEN_SCALE * targetScale
 
 
 
@@ -1865,7 +1877,7 @@ function UITheme.openWindow(win: GuiObject)
 
 
 
-		Scale = 1.0,
+		Scale = targetScale,
 
 
 
@@ -1913,11 +1925,12 @@ function UITheme.closeWindow(win: GuiObject, onComplete: (() -> ())?)
 
 
 
+	local targetScale = UITheme.getModalScale()
 	local tw = TweenService:Create(uiScale, TweenInfo.new(0.12, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
 
 
 
-		Scale = UITheme.CONFIG.WINDOW_OPEN_SCALE,
+		Scale = UITheme.CONFIG.WINDOW_OPEN_SCALE * targetScale,
 
 
 
@@ -1937,7 +1950,7 @@ function UITheme.closeWindow(win: GuiObject, onComplete: (() -> ())?)
 
 
 
-		uiScale.Scale = 1.0
+		uiScale.Scale = targetScale
 
 
 
@@ -1962,7 +1975,7 @@ end
 
 
 
-function UITheme.animateWindowOpen(modalWrap: GuiObject, modalBox: GuiObject)
+function UITheme.animateWindowOpen(modalWrap: GuiObject, modalBox: GuiObject, targetScaleOverride: number?)
 	modalWrap:SetAttribute("OpenedAt", os.clock())
 	modalWrap.Visible = true
 	if modalBox then
@@ -1984,13 +1997,14 @@ function UITheme.animateWindowOpen(modalWrap: GuiObject, modalBox: GuiObject)
 		uiScale.Parent = modalWrap
 	end
 
-	uiScale.Scale = 0.55
+	local targetScale = targetScaleOverride or UITheme.getModalScale()
+	uiScale.Scale = 0.55 * targetScale
 	TweenService:Create(uiScale, TweenInfo.new(0.28, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
-		Scale = 1.0,
+		Scale = targetScale,
 	}):Play()
 end
 
-function UITheme.animateWindowClose(modalWrap: GuiObject, modalBox: GuiObject, onComplete: (() -> ())?)
+function UITheme.animateWindowClose(modalWrap: GuiObject, modalBox: GuiObject, onComplete: (() -> ())?, targetScaleOverride: number?)
 	local backdrop = modalWrap:FindFirstChild("ModalBackdrop") or (modalWrap.Parent and modalWrap.Parent:FindFirstChild("ModalBackdrop"))
 	if backdrop and backdrop:IsA("GuiObject") then
 		TweenService:Create(backdrop, TweenInfo.new(0.20, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
@@ -1998,7 +2012,7 @@ function UITheme.animateWindowClose(modalWrap: GuiObject, modalBox: GuiObject, o
 		}):Play()
 	end
 
-	local uiScale = modalWrap:FindFirstChildOfClass("UIScale") or modalBox:FindFirstChildOfClass("UIScale")
+	local uiScale = modalWrap:FindFirstChildOfClass("UIScale") or (modalBox and modalBox:FindFirstChildOfClass("UIScale"))
 	if not uiScale then
 		modalWrap.Visible = false
 		if modalBox then modalBox.Visible = false end
@@ -2007,16 +2021,17 @@ function UITheme.animateWindowClose(modalWrap: GuiObject, modalBox: GuiObject, o
 		return
 	end
 
-	uiScale.Scale = 1.0
+	local targetScale = targetScaleOverride or (uiScale and uiScale.Scale) or UITheme.getModalScale()
+	uiScale.Scale = targetScale
 	local tw = TweenService:Create(uiScale, TweenInfo.new(0.20, Enum.EasingStyle.Back, Enum.EasingDirection.In), {
-		Scale = 0.45,
+		Scale = 0.45 * targetScale,
 	})
 	tw:Play()
 	tw.Completed:Connect(function()
 		modalWrap.Visible = false
 		if modalBox then modalBox.Visible = false end
 		if backdrop and backdrop:IsA("GuiObject") then backdrop.Visible = false end
-		uiScale.Scale = 1.0
+		uiScale.Scale = targetScale
 		if onComplete then onComplete() end
 	end)
 end
@@ -2640,10 +2655,17 @@ function UITheme.window(props: WindowProps): {
 
 
 	local uiScale = Instance.new("UIScale")
-
-
-
+	uiScale.Scale = UITheme.getModalScale()
 	uiScale.Parent = window
+
+	local cam = workspace.CurrentCamera
+	if cam then
+		cam:GetPropertyChangedSignal("ViewportSize"):Connect(function()
+			if window.Visible then
+				uiScale.Scale = UITheme.getModalScale()
+			end
+		end)
+	end
 
 
 
@@ -3384,172 +3406,75 @@ end
 
 
 function UITheme.priceBadge(button: GuiObject, price: number | string): Frame
-
-
-
 	local badge = Instance.new("Frame")
-
-
-
 	badge.Name = "PriceBadge"
-
-
-
-	badge.Size = UDim2.fromOffset(58, 24)
-
-
-
-	badge.Position = UDim2.new(1, -6, 0, -6)
-
-
-
+	badge.Size = UDim2.fromOffset(64, 26)
+	badge.Position = UDim2.new(1, -4, 0, -6)
 	badge.AnchorPoint = Vector2.new(1, 0)
-
-
-
-	badge.BackgroundTransparency = 1 -- NO background plate
-
-
-
+	badge.BackgroundColor3 = Color3.fromHex("#48C90E")
+	badge.BackgroundTransparency = 0
+	badge.ClipsDescendants = true
 	badge.ZIndex = button.ZIndex + 3
 
+	local corner = Instance.new("UICorner")
+	corner.CornerRadius = UDim.new(0.5, 0)
+	corner.Parent = badge
 
+	UITheme.applyStroke(badge, 2, UITheme.CONFIG.Colors.Outline)
+
+	local pad = Instance.new("UIPadding")
+	pad.PaddingLeft = UDim.new(0.08, 0)
+	pad.PaddingRight = UDim.new(0.08, 0)
+	pad.PaddingTop = UDim.new(0, 0)
+	pad.PaddingBottom = UDim.new(0, 0)
+	pad.Parent = badge
 
 	local list = Instance.new("UIListLayout")
-
-
-
 	list.FillDirection = Enum.FillDirection.Horizontal
-
-
-
-	list.HorizontalAlignment = Enum.HorizontalAlignment.Right
-
-
-
+	list.HorizontalAlignment = Enum.HorizontalAlignment.Center
 	list.VerticalAlignment = Enum.VerticalAlignment.Center
-
-
-
-	list.Padding = UDim.new(0, 2)
-
-
-
+	list.Padding = UDim.new(0.06, 0)
 	list.SortOrder = Enum.SortOrder.LayoutOrder
-
-
-
 	list.Parent = badge
 
-
-
 	local icon = Instance.new("ImageLabel")
-
-
-
 	icon.Name = "RobuxIcon"
-
-
-
-	icon.Size = UDim2.fromOffset(18, 18)
-
-
-
-	icon.BackgroundTransparency = 1
-
-
-
-	icon.Image = UITheme.Assets.RobuxHexagon
-
-
-
-	icon.ImageColor3 = UITheme.CONFIG.Colors.MoneyLime
-
-
-
-	icon.ScaleType = Enum.ScaleType.Fit
-
-
-
 	icon.LayoutOrder = 1
-
-
-
+	icon.Size = UDim2.new(1, 0, 0.75, 0)
+	icon.BackgroundTransparency = 1
+	icon.Image = UITheme.Assets.RobuxHexagon
+	icon.ImageColor3 = UITheme.CONFIG.Colors.White
+	icon.ScaleType = Enum.ScaleType.Fit
+	local iconAspect = Instance.new("UIAspectRatioConstraint")
+	iconAspect.AspectRatio = 1.0
+	iconAspect.DominantAxis = Enum.DominantAxis.Height
+	iconAspect.Parent = icon
 	icon.ZIndex = badge.ZIndex + 1
-
-
-
 	icon.Parent = badge
 
-
-
 	local priceLbl = Instance.new("TextLabel")
-
-
-
 	priceLbl.Name = "PriceNumber"
-
-
-
-	priceLbl.AutomaticSize = Enum.AutomaticSize.X
-
-
-
-	priceLbl.Size = UDim2.new(0, 0, 1, 0)
-
-
-
-	priceLbl.BackgroundTransparency = 1
-
-
-
-	priceLbl.Font = UITheme.CONFIG.Font
-
-
-
-	priceLbl.Text = tostring(price)
-
-
-
-	priceLbl.TextColor3 = UITheme.CONFIG.Colors.MoneyLime
-
-
-
-	priceLbl.TextScaled = false
-
-
-
-	priceLbl.TextSize = 16
-
-
-
 	priceLbl.LayoutOrder = 2
-
-
-
+	priceLbl.Size = UDim2.new(0.55, 0, 0.85, 0)
+	priceLbl.BackgroundTransparency = 1
+	priceLbl.Font = UITheme.CONFIG.Font
+	priceLbl.Text = tostring(price)
+	priceLbl.TextColor3 = UITheme.CONFIG.Colors.White
+	priceLbl.TextScaled = true
+	priceLbl.RichText = false
+	priceLbl.TextXAlignment = Enum.TextXAlignment.Center
+	priceLbl.TextYAlignment = Enum.TextYAlignment.Center
 	priceLbl.ZIndex = badge.ZIndex + 1
-
-
-
-	UITheme.applyTextStroke(priceLbl, UITheme.CONFIG.TEXT_STROKE_MEDIUM, UITheme.CONFIG.Colors.Outline)
-
-
-
+	local tc = Instance.new("UITextSizeConstraint")
+	tc.MinTextSize = 10
+	tc.MaxTextSize = 26
+	tc.Parent = priceLbl
+	UITheme.applyTextStroke(priceLbl, 2, UITheme.CONFIG.Colors.Outline)
 	priceLbl.Parent = badge
 
-
-
 	badge.Parent = button
-
-
-
 	return badge
-
-
-
 end
-
-
 
 -- Rainbow Text: ColorSequence gradient overlay
 

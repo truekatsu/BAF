@@ -26,6 +26,7 @@ export type Profile = {
 	Streak: number,
 	MatchesPlayed: number,
 	WheelSpins: number,
+	LastFirstSpinOfferDay: number?,
 	Luck: number,
 	InfRerolls: boolean,
 	ExtraSteals: number,
@@ -33,6 +34,8 @@ export type Profile = {
 	DoubleWins: boolean,
 	DoubleStreak: boolean,
 	DoubleLuck: boolean,
+	VIP: boolean?,
+	StarterPackOwned: boolean?,
 	EquippedTitle: string,
 	EquippedChair: string,
 	OwnedChairs: { [string]: boolean },
@@ -203,6 +206,7 @@ local function defaultProfile(): Profile
 		Streak = 0,
 		MatchesPlayed = 0,
 		WheelSpins = 1,
+		LastFirstSpinOfferDay = 0,
 		Luck = 1,
 		InfRerolls = false,
 		ExtraSteals = 0,
@@ -210,6 +214,8 @@ local function defaultProfile(): Profile
 		DoubleWins = false,
 		DoubleStreak = false,
 		DoubleLuck = false,
+		VIP = false,
+		StarterPackOwned = false,
 		EquippedTitle = "Benchwarmer",
 		EquippedChair = "wood",
 		OwnedChairs = { wood = true },
@@ -303,6 +309,7 @@ local function syncLeaderstats(player: Player, profile: Profile, toast: string?)
 	player:SetAttribute("Title", title)
 	player:SetAttribute("EquippedChair", profile.EquippedChair)
 	player:SetAttribute("LikedGame", profile.LikedGame == true)
+	player:SetAttribute("IsVIP", profile.VIP == true)
 	player:SetAttribute("SessionStart", profile.SessionJoinTime)
 	local obbyNextAt = if (profile.LastObbyClaim or 0) > 0
 		then (profile.LastObbyClaim or 0) + GameConfig.OBBY_COOLDOWN_SEC
@@ -504,10 +511,12 @@ local function grantShopItem(player: Player, itemKey: string): boolean
 	end
 	if itemKey == "starter_pack" then
 		grantBux(player, profile, 500)
-		profile.OwnedChairs["cyber_core"] = true
 		profile.OwnedChairs["crimson"] = true
-		profile.EquippedChair = "cyber_core"
-		syncLeaderstats(player, profile, "Starter Pack Unlocked: +$500 Bux & Cyber Core Chair!")
+		profile.EquippedChair = "crimson"
+		profile.StarterPackOwned = true
+		dirtyProfiles[player] = true
+		player:SetAttribute("EquippedChair", "crimson")
+		syncLeaderstats(player, profile, "Starter Pack Unlocked: +$500 Bux & Crimson Chair!")
 		return true
 	elseif itemKey == "skip_daily" then
 		profile.LastDailyClaim = 0
@@ -539,31 +548,34 @@ local function grantShopItem(player: Player, itemKey: string): boolean
 		syncLeaderstats(player, profile, "2x Luck Gamepass Activated: 2x Legendary Player Luck!")
 		return true
 	elseif itemKey == "vip" then
+		profile.VIP = true
 		profile.DoubleBux = true
-		profile.OwnedChairs["golden"] = true
-		profile.EquippedChair = "golden"
+		profile.OwnedChairs["vip_black_diamond"] = true
+		profile.EquippedChair = "vip_black_diamond"
+		player:SetAttribute("IsVIP", true)
+		player:SetAttribute("EquippedChair", "vip_black_diamond")
 		dirtyProfiles[player] = true
-		syncLeaderstats(player, profile, "VIP Activated: Golden Chair + 2x Bux!")
+		syncLeaderstats(player, profile, "VIP Activated: Black Diamond VIP Chair + 2x Bux!")
 		return true
 	elseif itemKey == "2x_bux" then
 		profile.DoubleBux = true
 		dirtyProfiles[player] = true
-		syncLeaderstats(player, profile, "2x Bux Gamepass Activated!")
+		syncLeaderstats(player, profile, "2x Bux Gamepass Activated: 2x Bux from Games!")
 		return true
 	elseif itemKey == "2x_wins" then
 		profile.DoubleWins = true
 		dirtyProfiles[player] = true
-		syncLeaderstats(player, profile, "2x Wins Gamepass Activated!")
+		syncLeaderstats(player, profile, "2x Wins Gamepass Activated: Double Wins!")
 		return true
 	elseif itemKey == "2x_streak" then
 		profile.DoubleStreak = true
 		dirtyProfiles[player] = true
-		syncLeaderstats(player, profile, "2x Streak Gamepass Activated!")
+		syncLeaderstats(player, profile, "2x Streak Gamepass Activated: Double Win Streak!")
 		return true
 	elseif itemKey == "inf_rerolls" then
 		profile.InfRerolls = true
 		dirtyProfiles[player] = true
-		syncLeaderstats(player, profile, "Infinite Rerolls Activated!")
+		syncLeaderstats(player, profile, "Infinite Rerolls Activated: Free Rerolls Forever!")
 		return true
 	elseif itemKey == "bux_300" then
 		grantBux(player, profile, 300)
@@ -580,6 +592,19 @@ local function grantShopItem(player: Player, itemKey: string): boolean
 	elseif itemKey == "bux_15000" then
 		grantBux(player, profile, 15000)
 		syncLeaderstats(player, profile, "+$15,000 Bux Added!")
+		return true
+	elseif itemKey == "spin_1" or itemKey == "spin_5" or itemKey == "spin_10" then
+		local item = (GameConfig.MONETIZATION :: any)[itemKey]
+		local count = if item and item.spins then item.spins else 1
+		profile.WheelSpins += count
+		dirtyProfiles[player] = true
+		syncLeaderstats(player, profile, `🎡 +{count} Wheel Spin{if count > 1 then "s" else ""} Added!`)
+		return true
+	elseif itemKey == "spin_first_offer" then
+		profile.LastFirstSpinOfferDay = math.floor(os.time() / 86400)
+		profile.WheelSpins += 1
+		dirtyProfiles[player] = true
+		syncLeaderstats(player, profile, "🎡 First Spin of Day (83% Off) Claimed! +1 Spin!")
 		return true
 	end
 	return false
@@ -722,12 +747,17 @@ function ProfileService.handleMetaAction(player: Player, action: unknown, arg: u
 
 	if action == "SpinWheel" then
 		if profile.WheelSpins <= 0 then
+			syncLeaderstats(player, profile, "🎡 No spins left! Play matches or get +5/+10 Spins!")
 			return
 		end
 		profile.WheelSpins -= 1
-		local roll = math.random(1, 100)
+		local totalWeight = 0
+		for _, seg in GameConfig.WHEEL_SEGMENTS do
+			totalWeight += seg.weight
+		end
+		local roll = math.random() * totalWeight
 		local acc = 0
-		local chosen = GameConfig.WHEEL_SEGMENTS[1]
+		local chosen = GameConfig.WHEEL_SEGMENTS[#GameConfig.WHEEL_SEGMENTS]
 		for _, seg in GameConfig.WHEEL_SEGMENTS do
 			acc += seg.weight
 			if roll <= acc then
@@ -735,18 +765,31 @@ function ProfileService.handleMetaAction(player: Player, action: unknown, arg: u
 				break
 			end
 		end
-		if chosen.bux > 0 then
+		local resultToast = chosen.toast
+		if chosen.bux and chosen.bux > 0 then
 			grantBux(player, profile, chosen.bux)
 		end
+		if chosen.spins and chosen.spins > 0 then
+			profile.WheelSpins += chosen.spins
+		end
 		if chosen.chair then
-			profile.OwnedChairs[chosen.chair] = true
-			profile.EquippedChair = chosen.chair
+			if profile.OwnedChairs[chosen.chair] then
+				local fallbackBux = chosen.dupBux or 100
+				if fallbackBux > 0 then
+					grantBux(player, profile, fallbackBux)
+					resultToast = `🎡 Already owned {chosen.oddsName}! +${fallbackBux} Bux!`
+				end
+			else
+				profile.OwnedChairs[chosen.chair] = true
+				profile.EquippedChair = chosen.chair
+				player:SetAttribute("EquippedChair", chosen.chair)
+			end
 		end
 		dirtyProfiles[player] = true
 		local nextSeq = ((player:GetAttribute("WheelSpinSeq") :: number?) or 0) + 1
 		player:SetAttribute("LastWheelSlice", chosen.id)
 		player:SetAttribute("WheelSpinSeq", nextSeq)
-		syncLeaderstats(player, profile, chosen.toast)
+		syncLeaderstats(player, profile, resultToast)
 		return
 	end
 
@@ -804,7 +847,41 @@ function ProfileService.handleMetaAction(player: Player, action: unknown, arg: u
 		if not item then
 			return
 		end
-		if item.id > 0 and not RunService:IsStudio() then
+		-- Prevent re-purchasing unique permanent perks if already owned
+		if arg == "starter_pack" and (profile.StarterPackOwned or (profile.OwnedChairs and profile.OwnedChairs["crimson"])) then
+			syncLeaderstats(player, profile, "You already own the Starter Pack!")
+			return
+		end
+		if arg == "vip" and profile.VIP then
+			syncLeaderstats(player, profile, "You already own VIP!")
+			return
+		end
+		if arg == "2x_bux" and profile.DoubleBux then
+			syncLeaderstats(player, profile, "You already own 2x Bux!")
+			return
+		end
+		if arg == "2x_wins" and profile.DoubleWins then
+			syncLeaderstats(player, profile, "You already own 2x Wins!")
+			return
+		end
+		if arg == "2x_streak" and profile.DoubleStreak then
+			syncLeaderstats(player, profile, "You already own 2x Streak!")
+			return
+		end
+		if arg == "2x_luck" and profile.DoubleLuck then
+			syncLeaderstats(player, profile, "You already own 2x Luck!")
+			return
+		end
+		if arg == "inf_rerolls" and profile.InfRerolls then
+			syncLeaderstats(player, profile, "You already own Infinite Rerolls!")
+			return
+		end
+		if arg == "spin_first_offer" and (profile.LastFirstSpinOfferDay or 0) == math.floor(os.time() / 86400) then
+			syncLeaderstats(player, profile, "You already claimed today's 83% Off Spin!")
+			return
+		end
+
+		if item.id and item.id > 0 then
 			pcall(function()
 				if item.kind == "GamePass" then
 					MarketplaceService:PromptGamePassPurchase(player, item.id)
@@ -886,11 +963,17 @@ local function loadPlayer(player: Player)
 	if data.EquippedChair == "emerald" then
 		data.EquippedChair = "crimson"
 	end
-	if data.OwnedChairs["cyber"] and not data.OwnedChairs["frostbite"] then
-		data.OwnedChairs["frostbite"] = true
+	if (data.OwnedChairs["cyber"] or data.OwnedChairs["frostbite"]) and not data.OwnedChairs["lucky_clover"] then
+		data.OwnedChairs["lucky_clover"] = true
 	end
-	if data.EquippedChair == "cyber" then
-		data.EquippedChair = "frostbite"
+	if data.EquippedChair == "cyber" or data.EquippedChair == "frostbite" then
+		data.EquippedChair = "lucky_clover"
+	end
+	if data.VIP or data.OwnedChairs["golden"] or data.OwnedChairs["vip"] then
+		data.OwnedChairs["vip_black_diamond"] = true
+	end
+	if data.EquippedChair == "golden" or data.EquippedChair == "vip" then
+		data.EquippedChair = "vip_black_diamond"
 	end
 	if not player:IsDescendantOf(Players) then
 		return
@@ -898,6 +981,23 @@ local function loadPlayer(player: Player)
 	profiles[player] = data
 	syncLeaderstats(player, data)
 	LeaderboardService.seedPlayerOnJoin(player, data.Wins, data.BestStreak, data.TotalCashEarned, data.PlaytimeSeconds)
+
+	-- Verify owned GamePasses asynchronously on join
+	task.spawn(function()
+		if player.UserId <= 0 then
+			return
+		end
+		for key, item in GameConfig.MONETIZATION :: any do
+			if item.kind == "GamePass" and item.id and item.id > 0 then
+				local ok, owns = pcall(function()
+					return MarketplaceService:UserOwnsGamePassAsync(player.UserId, item.id)
+				end)
+				if ok and owns and profiles[player] then
+					grantShopItem(player, key)
+				end
+			end
+		end
+	end)
 end
 
 local function saveAndRemovePlayer(player: Player)

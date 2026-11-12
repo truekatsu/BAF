@@ -49,6 +49,7 @@ local UITheme = require(Shared:WaitForChild("UITheme"))
 local VoteConfig = require(Shared:WaitForChild("VoteConfig"))
 
 local ShopDailyUI = require(script.Parent:WaitForChild("ShopDailyUI"))
+local WheelUI = require(script.Parent:WaitForChild("WheelUI"))
 
 local DAILY_COOLDOWN_SEC = 86400
 
@@ -528,7 +529,9 @@ screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
 screenGui.DisplayOrder = 50
 
-screenGui.IgnoreGuiInset = true
+screenGui.IgnoreGuiInset = false
+
+screenGui.ScreenInsets = Enum.ScreenInsets.DeviceSafeInsets
 
 screenGui.Parent = playerGui
 
@@ -595,332 +598,392 @@ end
 
 end
 
--- Top-Right Container for Daily Rewards & Quests (parented to screenGui so they remain visible on all screens)
-
+-- Top-Right Container for Daily Rewards & Quests (parented to lobbyHud so it hides during ingame match phases)
 local btnTopDaily: ImageButton
-
 local btnTopQuests: ImageButton
-
 local questBadge: TextLabel
-
 do
+	local topRightBar = Instance.new("Frame")
+	topRightBar.Name = "TopRightBar"
+	topRightBar.Size = UDim2.fromScale(1, 1)
+	topRightBar.Position = UDim2.fromScale(0.99, 0.02)
+	topRightBar.AnchorPoint = Vector2.new(1, 0)
+	topRightBar.BackgroundTransparency = 1
+	topRightBar.Active = false
+	topRightBar.ZIndex = 20
+	topRightBar.Parent = lobbyHud
 
-local topRightBar = Instance.new("Frame")
+	local topRightLayout = Instance.new("UIListLayout")
+	topRightLayout.FillDirection = Enum.FillDirection.Horizontal
+	topRightLayout.HorizontalAlignment = Enum.HorizontalAlignment.Right
+	topRightLayout.VerticalAlignment = Enum.VerticalAlignment.Top
+	topRightLayout.Padding = UDim.new(0.008, 0)
+	topRightLayout.SortOrder = Enum.SortOrder.LayoutOrder
+	topRightLayout.Parent = topRightBar
 
-topRightBar.Name = "TopRightBar"
+	local function makeTopButton(name: string, imageId: string, size: UDim2, layoutOrder: number): ImageButton
+		local btn = Instance.new("ImageButton")
+		btn.Name = name
+		btn.Size = size
+		btn.BackgroundTransparency = 1
+		btn.Image = imageId
+		btn.ScaleType = Enum.ScaleType.Fit
+		btn.LayoutOrder = layoutOrder
+		btn.ZIndex = 20
+		btn.Parent = topRightBar
 
-topRightBar.Size = UDim2.new(0, 300, 0, 42)
+		btn.Activated:Connect(function()
+			playSfx("click")
+		end)
 
-topRightBar.Position = UDim2.new(1, -16, 0, 14)
+		return btn
+	end
 
-topRightBar.AnchorPoint = Vector2.new(1, 0)
+	btnTopDaily = makeTopButton("BtnTopDaily", UITheme.Assets.BtnDaily, UDim2.fromScale(0.1, 0.06), 1)
+	btnTopQuests = makeTopButton("BtnTopQuests", UITheme.Assets.BtnQuests, UDim2.fromScale(0.1, 0.06), 2)
 
-topRightBar.BackgroundTransparency = 1
+	questBadge = Instance.new("TextLabel")
+	questBadge.Size = UDim2.fromScale(0.24, 0.65)
+	questBadge.Position = UDim2.fromScale(0.94, 0.12)
+	questBadge.AnchorPoint = Vector2.new(0.5, 0.5)
+	questBadge.BackgroundTransparency = 0
+	questBadge.BackgroundColor3 = Color3.fromHex("#E5252A")
+	questBadge.Font = UITheme.Fonts.Primary
+	questBadge.TextColor3 = Color3.new(1, 1, 1)
+	questBadge.TextStrokeTransparency = 0
+	questBadge.TextStrokeColor3 = UITheme.Colors.Black
+	questBadge.TextWrapped = false
+	questBadge.TextScaled = true
+	questBadge.Text = "0"
+	questBadge.ZIndex = 25
+	questBadge.Visible = false
+	questBadge.Parent = btnTopQuests
 
-topRightBar.ZIndex = 20
+	local qbAspect = Instance.new("UIAspectRatioConstraint")
+	qbAspect.AspectRatio = 1.0
+	qbAspect.DominantAxis = Enum.DominantAxis.Height
+	qbAspect.Parent = questBadge
 
-topRightBar.Parent = screenGui
+	local qbTextConstraint = Instance.new("UITextSizeConstraint")
+	qbTextConstraint.MinTextSize = 6
+	qbTextConstraint.MaxTextSize = 14
+	qbTextConstraint.Parent = questBadge
 
-local topRightLayout = Instance.new("UIListLayout")
+	local qbCorner = Instance.new("UICorner")
+	qbCorner.CornerRadius = UDim.new(0.5, 0)
+	qbCorner.Parent = questBadge
 
-topRightLayout.FillDirection = Enum.FillDirection.Horizontal
-
-topRightLayout.HorizontalAlignment = Enum.HorizontalAlignment.Right
-
-topRightLayout.VerticalAlignment = Enum.VerticalAlignment.Center
-
-topRightLayout.Padding = UDim.new(0, 10)
-
-topRightLayout.SortOrder = Enum.SortOrder.LayoutOrder
-
-topRightLayout.Parent = topRightBar
-
-local function makeTopButton(name: string, imageId: string, size: UDim2, layoutOrder: number): ImageButton
-
-	local btn = Instance.new("ImageButton")
-
-	btn.Name = name
-
-	btn.Size = size
-
-	btn.BackgroundTransparency = 1
-
-	btn.Image = imageId
-
-	btn.ScaleType = Enum.ScaleType.Fit
-
-	btn.LayoutOrder = layoutOrder
-
-	btn.ZIndex = 20
-
-	btn.Parent = topRightBar
-
-	UITheme.setupButtonHover(btn, 1.05, 0)
-
-	btn.Activated:Connect(function()
-
-		playSfx("click")
-
-		popGui(btn, 0.93)
-
-	end)
-
-	return btn
-
+	UITheme.applyStroke(questBadge, 1.5, UITheme.Colors.Black)
 end
 
-btnTopDaily = makeTopButton("BtnTopDaily", UITheme.Assets.BtnDaily, UDim2.fromOffset(144, 42), 1)
+-- Left Nav Group (FREE, SHOP, SKINS, TITLES, INDEX, PROFILE in 1 straight vertical column)
+local leftNavGroup = Instance.new("Frame")
+leftNavGroup.Name = "LeftNavGroup"
+leftNavGroup.AnchorPoint = Vector2.new(0, 0)
+leftNavGroup.Position = UDim2.new(0.01, 0, 0.02, 58)
+leftNavGroup.Size = UDim2.new(0.12, 0, 0.56, 0)
+leftNavGroup.BackgroundTransparency = 1
+leftNavGroup.ZIndex = 15
+leftNavGroup.Parent = lobbyHud
 
-btnTopQuests = makeTopButton("BtnTopQuests", UITheme.Assets.BtnQuests, UDim2.fromOffset(136, 42), 2)
-
-questBadge = makeLabel(btnTopQuests, "0", UDim2.fromOffset(22, 22), UDim2.new(1, -6, 0, 2), Color3.new(1, 1, 1))
-
-questBadge.AnchorPoint = Vector2.new(0.5, 0.5)
-
-questBadge.BackgroundTransparency = 0
-
-questBadge.BackgroundColor3 = Color3.fromHex("#E5252A")
-
-questBadge.ZIndex = 25
-
-questBadge.Visible = false
-
-UITheme.addCorner(questBadge, 11)
-
-UITheme.applyStroke(questBadge, 2, UITheme.Colors.Black)
-
-end
-
--- Left Vertical Nav Column (FREE, SHOP, SKINS, TITLES, INDEX, PROFILE)
+local leftNavLayout = Instance.new("UIListLayout")
+leftNavLayout.Name = "UIListLayout"
+leftNavLayout.FillDirection = Enum.FillDirection.Vertical
+leftNavLayout.HorizontalAlignment = Enum.HorizontalAlignment.Left
+leftNavLayout.VerticalAlignment = Enum.VerticalAlignment.Top
+leftNavLayout.SortOrder = Enum.SortOrder.LayoutOrder
+leftNavLayout.Padding = UDim.new(0.010, 0)
+leftNavLayout.Parent = leftNavGroup
 
 local btnNavFree: TextButton
-
 local btnNavShop: TextButton
-
 local btnNavSkins: TextButton
-
 local btnNavTitles: TextButton
-
 local btnNavIndex: TextButton
-
 local btnNavProfile: TextButton
+local freeBadge: TextLabel
 
 do
-
-	local NAV_BTN_SIZE = 84
-
-	local NAV_BTN_STEP = 90
-
-	local function makeNavButton(name: string, imageId: string, index: number, scaleX: number, scaleY: number, anchorX: number, anchorY: number): TextButton
-
+	local function makeNavButton(name: string, imageId: string, order: number, scaleX: number, scaleY: number, anchorX: number, anchorY: number): TextButton
 		local btn = Instance.new("TextButton")
-
 		btn.Name = name
-
-		btn.Size = UDim2.fromOffset(NAV_BTN_SIZE, NAV_BTN_SIZE)
-
-		btn.Position = UDim2.new(0, 16, 0.085, (index - 1) * NAV_BTN_STEP)
-
+		btn.LayoutOrder = order
+		btn.Size = UDim2.new(1, 0, 0.15, 0)
 		btn.BackgroundTransparency = 1
-
 		btn.Text = ""
+		btn.ZIndex = 16
+		btn.Parent = leftNavGroup
 
-		btn.Parent = lobbyHud
+		local aspect = Instance.new("UIAspectRatioConstraint")
+		aspect.AspectRatio = 1.0
+		aspect.DominantAxis = Enum.DominantAxis.Height
+		aspect.Parent = btn
+
+		local btnSizeConstraint = Instance.new("UISizeConstraint")
+		btnSizeConstraint.MinSize = Vector2.new(31, 31)
+		btnSizeConstraint.Parent = btn
+
+		local textConstraint = Instance.new("UITextSizeConstraint")
+		textConstraint.MinTextSize = 9
+		textConstraint.MaxTextSize = 22
+		textConstraint.Parent = btn
 
 		UITheme.setupButtonHover(btn, 1.06, 0)
 
 		local img = Instance.new("ImageLabel")
-
 		img.Name = "NavIcon"
-
 		img.Size = UDim2.fromScale(scaleX, scaleY)
-
 		img.AnchorPoint = Vector2.new(anchorX, anchorY)
-
 		img.Position = UDim2.fromScale(0.5, 0.5)
-
 		img.BackgroundTransparency = 1
-
 		img.Image = imageId
-
 		img.ScaleType = Enum.ScaleType.Stretch
-
 		img.ZIndex = btn.ZIndex + 1
-
 		img.Parent = btn
-
 		return btn
-
 	end
 
-	-- Compensate per-PNG transparent padding (557x557 canvas) so every icon frame renders at the exact 84x84 button size
-
 	btnNavFree = makeNavButton("BtnNavFree", UITheme.Assets.NavFreeIcon, 1, 557 / 444, 557 / 449, 277.5 / 557, 266.0 / 557)
-
 	btnNavShop = makeNavButton("BtnNavShop", UITheme.Assets.NavShopIcon, 2, 557 / 496, 557 / 506, 278.5 / 557, 282.5 / 557)
-
 	btnNavSkins = makeNavButton("BtnNavSkins", UITheme.Assets.NavSkinsIcon, 3, 557 / 477, 557 / 489, 278.0 / 557, 284.0 / 557)
-
 	btnNavTitles = makeNavButton("BtnNavTitles", UITheme.Assets.NavTitlesIcon, 4, 557 / 475, 557 / 475, 278.0 / 557, 278.0 / 557)
-
 	btnNavIndex = makeNavButton("BtnNavIndex", UITheme.Assets.NavIndexIcon, 5, 557 / 475, 557 / 475, 278.0 / 557, 278.0 / 557)
-
 	btnNavProfile = makeNavButton("BtnNavProfile", UITheme.Assets.NavProfileIcon, 6, 557 / 475, 557 / 475, 278.0 / 557, 278.0 / 557)
 
-	local badge = makeLabel(btnNavIndex, "0/152", UDim2.fromOffset(52, 20), UDim2.new(1, -40, 0, -6), Color3.new(1, 1, 1))
+	-- Free Badge attached to top-right of BtnNavFree
+	freeBadge = makeLabel(btnNavFree, "1", UDim2.new(0.40, 0, 0.40, 0), UDim2.new(1, 0, 0, 0), Color3.new(1, 1, 1))
+	freeBadge.AnchorPoint = Vector2.new(1, 0)
+	freeBadge.BackgroundTransparency = 0
+	freeBadge.BackgroundColor3 = Color3.fromHex("#E5252A")
+	freeBadge.ZIndex = btnNavFree.ZIndex + 4
+	freeBadge.TextScaled = true
+	local freeBadgeAspect = Instance.new("UIAspectRatioConstraint")
+	freeBadgeAspect.AspectRatio = 1.0
+	freeBadgeAspect.Parent = freeBadge
+	UITheme.addCorner(freeBadge, 8)
+	UITheme.applyStroke(freeBadge, 1.5, UITheme.Colors.Black)
 
+	-- Index Badge moved to top-right corner of Index button, small, TextScaled, Max 12, ZIndex above button
+	local badge = makeLabel(btnNavIndex, "0/152", UDim2.new(0.55, 0, 0.28, 0), UDim2.new(1, 0, 0, 0), Color3.new(1, 1, 1))
 	badge.Name = "IndexBadge"
-
+	badge.AnchorPoint = Vector2.new(1, 0)
 	badge.BackgroundTransparency = 0
-
 	badge.BackgroundColor3 = Color3.fromHex("#E5252A")
-
 	badge.ZIndex = btnNavIndex.ZIndex + 4
-
-	badge.TextSize = 11
-
+	badge.TextScaled = true
 	badge.Font = UITheme.Fonts.Body
+	local badgeTextConstraint = Instance.new("UITextSizeConstraint")
+	badgeTextConstraint.MinTextSize = 8
+	badgeTextConstraint.MaxTextSize = 12
+	badgeTextConstraint.Parent = badge
+	UITheme.addCorner(badge, 6)
+	UITheme.applyStroke(badge, 1.5, UITheme.Colors.Black)
+end
+-- Right Side: Starter Pack, 2X WIN, 2X, INF REROLLS stacked with UIListLayout
+local rightPromoGroup = Instance.new("Frame")
+rightPromoGroup.Name = "RightPromoGroup"
+rightPromoGroup.AnchorPoint = Vector2.new(1, 0)
+rightPromoGroup.Position = UDim2.new(0.99, 0, 0.37, 0)
+rightPromoGroup.Size = UDim2.new(0.14, 0, 0.34, 0)
+rightPromoGroup.BackgroundTransparency = 1
+rightPromoGroup.ZIndex = 15
+rightPromoGroup.Parent = lobbyHud
 
-	UITheme.addCorner(badge, 10)
+local rightPromoLayout = Instance.new("UIListLayout")
+rightPromoLayout.Name = "UIListLayout"
+rightPromoLayout.FillDirection = Enum.FillDirection.Vertical
+rightPromoLayout.HorizontalAlignment = Enum.HorizontalAlignment.Right
+rightPromoLayout.VerticalAlignment = Enum.VerticalAlignment.Center
+rightPromoLayout.Padding = UDim.new(0.14, 0)
+rightPromoLayout.SortOrder = Enum.SortOrder.LayoutOrder
+rightPromoLayout.Parent = rightPromoGroup
 
-	UITheme.applyStroke(badge, 2, UITheme.Colors.Black)
+local function createFloatingOfferSlot(parent: GuiObject, order: number, initialOfferIndex: number): FloatingOfferSlot
+	local container = Instance.new("ImageButton")
+	container.Name = "FloatingOfferSlot"
+	container.Size = UDim2.new(1, 0, 0.41, 0)
+	container.LayoutOrder = order
+	container.BackgroundTransparency = 1
+	container.AutoButtonColor = false
+	container.ZIndex = 15
+	container.Parent = parent
 
+	local aspect = Instance.new("UIAspectRatioConstraint")
+	aspect.AspectRatio = 1.0
+	aspect.DominantAxis = Enum.DominantAxis.Height
+	aspect.Parent = container
+
+	local uiScale = Instance.new("UIScale")
+	uiScale.Scale = 1
+	uiScale.Parent = container
+
+	local rays = Instance.new("ImageLabel")
+	rays.Name = "SunburstRays"
+	rays.Size = UDim2.fromScale(1, 1)
+	rays.Position = UDim2.fromScale(0.5, 0.5)
+	rays.AnchorPoint = Vector2.new(0.5, 0.5)
+	rays.BackgroundTransparency = 1
+	rays.Image = UITheme.Assets.SunburstTexture
+	rays.ImageTransparency = 0.15
+	rays.ScaleType = Enum.ScaleType.Fit
+	rays.ZIndex = container.ZIndex + 1
+	rays.Parent = container
+
+	local icon = Instance.new("ImageLabel")
+	icon.Name = "OfferIcon"
+	icon.Size = UDim2.fromScale(0.72, 0.72)
+	icon.Position = UDim2.fromScale(0.5, 0.5)
+	icon.AnchorPoint = Vector2.new(0.5, 0.5)
+	icon.BackgroundTransparency = 1
+	icon.ScaleType = Enum.ScaleType.Fit
+	icon.ZIndex = container.ZIndex + 5
+	icon.Parent = container
+
+	local valLbl = Instance.new("TextLabel")
+	valLbl.Name = "ValueTag"
+	valLbl.Size = UDim2.new(0.85, 0, 0.22, 0)
+	valLbl.Position = UDim2.new(0.82, 0, 0.08, 0)
+	valLbl.AnchorPoint = Vector2.new(0.5, 0.5)
+	valLbl.BackgroundTransparency = 1
+	valLbl.Font = UITheme.Fonts.Primary
+	valLbl.Text = "149 VALUE"
+	valLbl.TextColor3 = Color3.fromHex("#FFD700")
+	valLbl.TextScaled = true
+	valLbl.Visible = false
+	valLbl.ZIndex = icon.ZIndex + 3
+	UITheme.addTextConstraint(valLbl, 9, 13)
+	UITheme.applyTextStroke(valLbl, 2, UITheme.Colors.Black)
+	valLbl.Parent = icon
+
+	local strikeLine = Instance.new("Frame")
+	strikeLine.Name = "StrikeLine"
+	strikeLine.Size = UDim2.new(0.92, 0, 0, 2)
+	strikeLine.Position = UDim2.new(0.04, 0, 0.5, -1)
+	strikeLine.BackgroundColor3 = Color3.fromHex("#FFFFFF")
+	strikeLine.BorderSizePixel = 0
+	strikeLine.Rotation = -8
+	strikeLine.ZIndex = valLbl.ZIndex + 1
+	UITheme.applyStroke(strikeLine, 1, UITheme.Colors.Black)
+	strikeLine.Parent = valLbl
+
+	-- Robux Price Badge Pill (Centered above product icon, ClipsDescendants = true)
+	local pillBadge = Instance.new("Frame")
+	pillBadge.Name = "RobuxPill"
+	pillBadge.Size = UDim2.new(0.8, 0, 0.24, 0)
+	pillBadge.Position = UDim2.new(0.5, 0, 0.06, 0)
+	pillBadge.AnchorPoint = Vector2.new(0.5, 0.5)
+	pillBadge.BackgroundColor3 = Color3.fromHex("#48C90E")
+	pillBadge.ClipsDescendants = true
+	pillBadge.ZIndex = container.ZIndex + 2
+	local pillCorner = Instance.new("UICorner")
+	pillCorner.CornerRadius = UDim.new(0.5, 0)
+	pillCorner.Parent = pillBadge
+	UITheme.applyStroke(pillBadge, 2, UITheme.Colors.Black)
+	pillBadge.Parent = container
+
+	local pillPad = Instance.new("UIPadding")
+	pillPad.PaddingLeft = UDim.new(0.08, 0)
+	pillPad.PaddingRight = UDim.new(0.08, 0)
+	pillPad.PaddingTop = UDim.new(0, 0)
+	pillPad.PaddingBottom = UDim.new(0, 0)
+	pillPad.Parent = pillBadge
+
+	local pillList = Instance.new("UIListLayout")
+	pillList.FillDirection = Enum.FillDirection.Horizontal
+	pillList.HorizontalAlignment = Enum.HorizontalAlignment.Center
+	pillList.VerticalAlignment = Enum.VerticalAlignment.Center
+	pillList.Padding = UDim.new(0.06, 0)
+	pillList.SortOrder = Enum.SortOrder.LayoutOrder
+	pillList.Parent = pillBadge
+
+	local robuxIcon = Instance.new("ImageLabel")
+	robuxIcon.Name = "RobuxIcon"
+	robuxIcon.LayoutOrder = 1
+	robuxIcon.Size = UDim2.new(1, 0, 0.75, 0)
+	robuxIcon.BackgroundTransparency = 1
+	robuxIcon.Image = UITheme.Assets.Icon_Robux
+	local robuxAspect = Instance.new("UIAspectRatioConstraint")
+	robuxAspect.AspectRatio = 1.0
+	robuxAspect.DominantAxis = Enum.DominantAxis.Height
+	robuxAspect.Parent = robuxIcon
+	robuxIcon.ZIndex = pillBadge.ZIndex + 1
+	robuxIcon.Parent = pillBadge
+
+	local priceLbl = Instance.new("TextLabel")
+	priceLbl.Name = "PriceLabel"
+	priceLbl.LayoutOrder = 2
+	priceLbl.Size = UDim2.new(0.55, 0, 0.85, 0)
+	priceLbl.BackgroundTransparency = 1
+	priceLbl.Font = UITheme.Fonts.Primary
+	priceLbl.TextColor3 = UITheme.Colors.White
+	priceLbl.Text = "4"
+	priceLbl.TextScaled = true
+	priceLbl.RichText = false
+	priceLbl.TextXAlignment = Enum.TextXAlignment.Center
+	priceLbl.TextYAlignment = Enum.TextYAlignment.Center
+	priceLbl.ZIndex = pillBadge.ZIndex + 1
+	local priceConstraint = Instance.new("UITextSizeConstraint")
+	priceConstraint.MinTextSize = 10
+	priceConstraint.MaxTextSize = 26
+	priceConstraint.Parent = priceLbl
+	UITheme.applyTextStroke(priceLbl, 2, UITheme.Colors.Black)
+	priceLbl.Parent = pillBadge
+
+	local titleLbl = Instance.new("TextLabel")
+	titleLbl.Name = "TitleLabel"
+	titleLbl.Size = UDim2.new(1.1, 0, 0.28, 0)
+	titleLbl.Position = UDim2.new(0.5, 0, 0.98, 0)
+	titleLbl.AnchorPoint = Vector2.new(0.5, 1)
+	titleLbl.BackgroundTransparency = 1
+	titleLbl.Font = UITheme.Fonts.Primary
+	titleLbl.TextColor3 = UITheme.Colors.White
+	titleLbl.Text = "STARTER\nPACK"
+	titleLbl.TextScaled = true
+	titleLbl.ZIndex = container.ZIndex + 6
+	UITheme.addTextConstraint(titleLbl, 10, 14)
+	UITheme.applyTextStroke(titleLbl, 2.5, UITheme.Colors.Black)
+	titleLbl.Parent = container
+
+	local currentOffer = HUD_OFFERS[initialOfferIndex]
+
+	local function applyOffer(offer: any)
+		currentOffer = offer
+		rays.ImageColor3 = offer.color
+		icon.Image = offer.icon
+		priceLbl.Text = tostring(offer.price)
+		titleLbl.Text = offer.title
+		valLbl.Visible = (offer.value ~= nil)
+		if offer.value then
+			valLbl.Text = offer.value
+		end
+	end
+
+	applyOffer(currentOffer)
+
+	container.Activated:Connect(function()
+		local tDown = TweenService:Create(uiScale, TweenInfo.new(0.08, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { Scale = 0.9 })
+		tDown:Play()
+		tDown.Completed:Once(function()
+			local tUp = TweenService:Create(uiScale, TweenInfo.new(0.15, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Scale = 1.0 })
+			tUp:Play()
+		end)
+		Remotes.MetaAction:FireServer("BuyShopItem", currentOffer.id)
+	end)
+
+	return {
+		container = container,
+		rays = rays,
+		icon = icon,
+		uiScale = uiScale,
+		applyOffer = applyOffer,
+		getOffer = function() return currentOffer end,
+	}
 end
 
-local freeBadge = makeLabel(btnNavFree, "1", UDim2.fromOffset(26, 26), UDim2.new(1, -18, 0, -6), Color3.new(1, 1, 1))
-
-freeBadge.BackgroundTransparency = 0
-
-freeBadge.BackgroundColor3 = Color3.fromHex("#E5252A")
-
-freeBadge.ZIndex = btnNavFree.ZIndex + 4
-
-UITheme.addCorner(freeBadge, 13)
-
-UITheme.applyStroke(freeBadge, 2.5, UITheme.Colors.Black)
-
--- Right Promo Column (Starter Pack & 2x Streak)
-
-local btnPromoStarter: TextButton
-
-local btnPromoStreak: TextButton
-
-do
-
-	local bStarter = makeButton(lobbyHud, "", UDim2.fromOffset(88, 82), UDim2.new(1, -104, 0.48, 0), UITheme.Colors.LimeTop)
-
-	UITheme.styleButton(bStarter, "Lime", 10)
-
-	UITheme.addStuds(bStarter, 0.88, 20)
-
-	UITheme.createRobuxBadge(bStarter, 4, UDim2.fromOffset(58, 24), UDim2.new(0.5, -29, 0, -10))
-
-	UITheme.addPulse(bStarter, 1.0, 1.05, 1.2)
-
-	local sIcon = Instance.new("ImageLabel")
-
-	sIcon.Name = "StarterIcon"
-
-	sIcon.Size = UDim2.fromOffset(36, 36)
-
-	sIcon.Position = UDim2.new(0.5, -18, 0, 14)
-
-	sIcon.BackgroundTransparency = 1
-
-	sIcon.Image = UITheme.Assets.CashStack
-
-	sIcon.ScaleType = Enum.ScaleType.Fit
-
-	sIcon.ZIndex = bStarter.ZIndex + 3
-
-	sIcon.Parent = bStarter
-
-	local sLbl = Instance.new("TextLabel")
-
-	sLbl.Name = "BtnLabel"
-
-	sLbl.Size = UDim2.new(1, 0, 0, 26)
-
-	sLbl.Position = UDim2.new(0, 0, 1, -28)
-
-	sLbl.BackgroundTransparency = 1
-
-	sLbl.Font = UITheme.Fonts.Primary
-
-	sLbl.TextColor3 = UITheme.Colors.White
-
-	sLbl.Text = "STARTER PACK"
-
-	sLbl.TextScaled = true
-
-	UITheme.addTextConstraint(sLbl, 10, 13)
-
-	UITheme.applyTextStroke(sLbl, 2.5, UITheme.Colors.Black)
-
-	sLbl.ZIndex = bStarter.ZIndex + 3
-
-	sLbl.Parent = bStarter
-
-	btnPromoStarter = bStarter
-
-	local bStreak = makeButton(lobbyHud, "", UDim2.fromOffset(88, 82), UDim2.new(1, -104, 0.48, 96), UITheme.Colors.RedTop)
-
-	UITheme.styleButton(bStreak, "Red", 10)
-
-	UITheme.addStuds(bStreak, 0.88, 20)
-
-	UITheme.createRobuxBadge(bStreak, 30, UDim2.fromOffset(58, 24), UDim2.new(0.5, -29, 0, -10))
-
-	UITheme.addPulse(bStreak, 1.0, 1.05, 1.2)
-
-	local stIcon = Instance.new("ImageLabel")
-
-	stIcon.Name = "StreakIcon"
-
-	stIcon.Size = UDim2.fromOffset(36, 36)
-
-	stIcon.Position = UDim2.new(0.5, -18, 0, 14)
-
-	stIcon.BackgroundTransparency = 1
-
-	stIcon.Image = UITheme.Assets.FlameIcon
-
-	stIcon.ScaleType = Enum.ScaleType.Fit
-
-	stIcon.ZIndex = bStreak.ZIndex + 3
-
-	stIcon.Parent = bStreak
-
-	local stLbl = Instance.new("TextLabel")
-
-	stLbl.Name = "BtnLabel"
-
-	stLbl.Size = UDim2.new(1, 0, 0, 26)
-
-	stLbl.Position = UDim2.new(0, 0, 1, -28)
-
-	stLbl.BackgroundTransparency = 1
-
-	stLbl.Font = UITheme.Fonts.Primary
-
-	stLbl.TextColor3 = UITheme.Colors.White
-
-	stLbl.Text = "2X STREAK"
-
-	stLbl.TextScaled = true
-
-	UITheme.addTextConstraint(stLbl, 10, 14)
-
-	UITheme.applyTextStroke(stLbl, 2.5, UITheme.Colors.Black)
-
-	stLbl.ZIndex = bStreak.ZIndex + 3
-
-	stLbl.Parent = bStreak
-
-	btnPromoStreak = bStreak
-
-end
-
+local promoSlotTop = createFloatingOfferSlot(rightPromoGroup, 1, 1)
+local promoSlotBottom = createFloatingOfferSlot(rightPromoGroup, 2, 2)
+local btnPromoStarter = promoSlotTop.container
+local btnPromoStreak = promoSlotBottom.container
 -- Top-Left Currency & Friends Boost HUD (Modern Cartoon Style)
 local HUD: { [string]: any } = {}
 local friendsLabel: TextLabel
@@ -930,42 +993,59 @@ local btnAddCash: TextButton
 do
 	local currencyGroup = Instance.new("Frame")
 	currencyGroup.Name = "CurrencyGroup"
-	currencyGroup.Size = UDim2.new(0.24, 0, 0.11, 0)
-	currencyGroup.Position = UDim2.new(0.012, 0, 0.014, 0)
+	currencyGroup.Size = UDim2.new(0.20, 0, 0.15, 0)
+	currencyGroup.AnchorPoint = Vector2.new(0, 1)
+	currencyGroup.Position = UDim2.new(0.01, 0, 0.98, 0)
 	currencyGroup.BackgroundTransparency = 1
 	currencyGroup.ZIndex = 15
 	currencyGroup.Parent = lobbyHud
 
-	local hudSizeConstraint = Instance.new("UISizeConstraint")
-	hudSizeConstraint.MinSize = Vector2.new(220, 56)
-	hudSizeConstraint.MaxSize = Vector2.new(460, 110)
-	hudSizeConstraint.Parent = currencyGroup
+	local curScale = Instance.new("UIScale")
+	curScale.Scale = 0.75
+	curScale.Parent = currencyGroup
 
-	-- Row 1: Friends Boost
+	local curLayout = Instance.new("UIListLayout")
+	curLayout.Name = "CurLayout"
+	curLayout.FillDirection = Enum.FillDirection.Vertical
+	curLayout.HorizontalAlignment = Enum.HorizontalAlignment.Left
+	curLayout.VerticalAlignment = Enum.VerticalAlignment.Top
+	curLayout.Padding = UDim.new(0.04, 0)
+	curLayout.SortOrder = Enum.SortOrder.LayoutOrder
+	curLayout.Parent = currencyGroup
+
+	-- Row A: Friends Boost
 	local rowFriends = Instance.new("Frame")
 	rowFriends.Name = "Row_FriendsBoost"
-	rowFriends.Size = UDim2.new(1, 0, 0.44, 0)
-	rowFriends.Position = UDim2.new(0, 0, 0, 0)
+	rowFriends.Size = UDim2.new(1, 0, 0.42, 0)
+	rowFriends.LayoutOrder = 1
 	rowFriends.BackgroundTransparency = 1
 	rowFriends.ZIndex = 16
 	rowFriends.Parent = currencyGroup
 
+	local rowALayout = Instance.new("UIListLayout")
+	rowALayout.FillDirection = Enum.FillDirection.Horizontal
+	rowALayout.HorizontalAlignment = Enum.HorizontalAlignment.Left
+	rowALayout.VerticalAlignment = Enum.VerticalAlignment.Center
+	rowALayout.Padding = UDim.new(0.02, 0)
+	rowALayout.SortOrder = Enum.SortOrder.LayoutOrder
+	rowALayout.Parent = rowFriends
+
 	friendsLabel = Instance.new("TextLabel")
 	friendsLabel.Name = "FriendsLabel"
-	friendsLabel.Size = UDim2.new(0.80, 0, 0.90, 0)
-	friendsLabel.Position = UDim2.new(0, 0, 0.5, 0)
-	friendsLabel.AnchorPoint = Vector2.new(0, 0.5)
+	friendsLabel.LayoutOrder = 1
+	friendsLabel.Size = UDim2.new(0.78, 0, 1, 0)
 	friendsLabel.BackgroundTransparency = 1
 	friendsLabel.Font = Enum.Font.FredokaOne
 	friendsLabel.Text = "FRIENDS BOOST: +0%"
 	friendsLabel.TextScaled = true
 	friendsLabel.TextXAlignment = Enum.TextXAlignment.Left
+	friendsLabel.TextYAlignment = Enum.TextYAlignment.Center
 	friendsLabel.TextColor3 = Color3.fromRGB(255, 210, 31)
 	friendsLabel.ZIndex = 17
 
 	local friendsSizeConstraint = Instance.new("UITextSizeConstraint")
-	friendsSizeConstraint.MinTextSize = 14
-	friendsSizeConstraint.MaxTextSize = 36
+	friendsSizeConstraint.MinTextSize = 6
+	friendsSizeConstraint.MaxTextSize = 22
 	friendsSizeConstraint.Parent = friendsLabel
 
 	local friendsGradient = Instance.new("UIGradient")
@@ -974,23 +1054,19 @@ do
 	friendsGradient.Parent = friendsLabel
 
 	local friendsStroke = Instance.new("UIStroke")
-	friendsStroke.Thickness = 3
+	friendsStroke.Thickness = 2.5
 	friendsStroke.Color = Color3.fromRGB(70, 40, 0)
 	friendsStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Contextual
 	friendsStroke.LineJoinMode = Enum.LineJoinMode.Round
 	friendsStroke.Parent = friendsLabel
 
-	local friendsScale = Instance.new("UIScale")
-	friendsScale.Scale = 1
-	friendsScale.Parent = friendsLabel
 	friendsLabel.Parent = rowFriends
 
 	-- Yellow Plus Button (next to Friends Boost)
 	local btnAddFriend = Instance.new("TextButton")
 	btnAddFriend.Name = "BtnAddFriend"
-	btnAddFriend.Size = UDim2.new(0.18, 0, 1.30, 0)
-	btnAddFriend.Position = UDim2.new(0.82, 0, 0.5, 0)
-	btnAddFriend.AnchorPoint = Vector2.new(0, 0.5)
+	btnAddFriend.LayoutOrder = 2
+	btnAddFriend.Size = UDim2.new(0.2, 0, 0.85, 0)
 	btnAddFriend.BackgroundColor3 = Color3.fromRGB(255, 225, 60)
 	btnAddFriend.AutoButtonColor = false
 	btnAddFriend.Active = true
@@ -1003,6 +1079,7 @@ do
 
 	local friendBtnAspect = Instance.new("UIAspectRatioConstraint")
 	friendBtnAspect.AspectRatio = 1.0
+	friendBtnAspect.DominantAxis = Enum.DominantAxis.Height
 	friendBtnAspect.Parent = btnAddFriend
 
 	local friendBtnGradient = Instance.new("UIGradient")
@@ -1011,7 +1088,7 @@ do
 	friendBtnGradient.Parent = btnAddFriend
 
 	local friendBtnStroke = Instance.new("UIStroke")
-	friendBtnStroke.Thickness = 3
+	friendBtnStroke.Thickness = 2.5
 	friendBtnStroke.Color = Color3.fromRGB(70, 40, 0)
 	friendBtnStroke.LineJoinMode = Enum.LineJoinMode.Round
 	friendBtnStroke.Parent = btnAddFriend
@@ -1053,52 +1130,56 @@ do
 		end)
 	end)
 
-	-- Row 2: Cash Display (Original object name: CashPill, transparent background)
+	-- Row B: Cash Display (Original object name: CashPill, transparent background)
 	local cashPill = Instance.new("Frame")
 	cashPill.Name = "CashPill"
-	cashPill.Size = UDim2.new(1, 0, 0.52, 0)
-	cashPill.Position = UDim2.new(0, 0, 0.48, 0)
+	cashPill.Size = UDim2.new(1, 0, 0.54, 0)
+	cashPill.LayoutOrder = 2
 	cashPill.BackgroundTransparency = 1
 	cashPill.ZIndex = 16
 	cashPill.Parent = currencyGroup
 
+	local rowBLayout = Instance.new("UIListLayout")
+	rowBLayout.FillDirection = Enum.FillDirection.Horizontal
+	rowBLayout.HorizontalAlignment = Enum.HorizontalAlignment.Left
+	rowBLayout.VerticalAlignment = Enum.VerticalAlignment.Center
+	rowBLayout.Padding = UDim.new(0.03, 0)
+	rowBLayout.SortOrder = Enum.SortOrder.LayoutOrder
+	rowBLayout.Parent = cashPill
+
 	local cashIconImg = Instance.new("ImageLabel")
 	cashIconImg.Name = "CashIcon"
-	cashIconImg.Size = UDim2.new(0.24, 0, 1.30, 0)
-	cashIconImg.Position = UDim2.new(0, 0, 0.5, 0)
-	cashIconImg.AnchorPoint = Vector2.new(0, 0.5)
+	cashIconImg.LayoutOrder = 1
+	cashIconImg.Size = UDim2.new(1, 0, 0.85, 0)
 	cashIconImg.BackgroundTransparency = 1
 	cashIconImg.Image = UITheme.Assets.CashStack
 	cashIconImg.ScaleType = Enum.ScaleType.Fit
 	cashIconImg.ZIndex = cashPill.ZIndex + 2
 
 	local cashIconAspect = Instance.new("UIAspectRatioConstraint")
-	cashIconAspect.AspectRatio = 1.32
+	cashIconAspect.AspectRatio = 1.0
+	cashIconAspect.DominantAxis = Enum.DominantAxis.Height
 	cashIconAspect.Parent = cashIconImg
-
-	local cashIconStroke = Instance.new("UIStroke")
-	cashIconStroke.Thickness = 2
-	cashIconStroke.Color = Color3.fromRGB(20, 70, 10)
-	cashIconStroke.Parent = cashIconImg
 
 	cashIconImg.Parent = cashPill
 
 	cashLabel = Instance.new("TextLabel")
 	cashLabel.Name = "CashLabel"
-	cashLabel.Size = UDim2.new(0.56, 0, 0.95, 0)
-	cashLabel.Position = UDim2.new(0.23, 4, 0.5, 0)
-	cashLabel.AnchorPoint = Vector2.new(0, 0.5)
+	cashLabel.LayoutOrder = 2
+	cashLabel.Size = UDim2.new(0.5, 0, 1, 0)
 	cashLabel.BackgroundTransparency = 1
 	cashLabel.Font = Enum.Font.FredokaOne
 	cashLabel.Text = "$0"
 	cashLabel.TextScaled = true
+	cashLabel.TextTruncate = Enum.TextTruncate.None
 	cashLabel.TextXAlignment = Enum.TextXAlignment.Left
+	cashLabel.TextYAlignment = Enum.TextYAlignment.Center
 	cashLabel.TextColor3 = Color3.fromRGB(120, 255, 30)
 	cashLabel.ZIndex = cashPill.ZIndex + 3
 
 	local cashSizeConstraint = Instance.new("UITextSizeConstraint")
-	cashSizeConstraint.MinTextSize = 18
-	cashSizeConstraint.MaxTextSize = 48
+	cashSizeConstraint.MinTextSize = 8
+	cashSizeConstraint.MaxTextSize = 32
 	cashSizeConstraint.Parent = cashLabel
 
 	local cashGradient = Instance.new("UIGradient")
@@ -1107,7 +1188,7 @@ do
 	cashGradient.Parent = cashLabel
 
 	local cashStroke = Instance.new("UIStroke")
-	cashStroke.Thickness = 4
+	cashStroke.Thickness = 3
 	cashStroke.Color = Color3.fromRGB(15, 60, 10)
 	cashStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Contextual
 	cashStroke.LineJoinMode = Enum.LineJoinMode.Round
@@ -1125,20 +1206,16 @@ do
 	cashShadow.TextColor3 = Color3.fromRGB(15, 60, 10)
 	cashShadow.TextTransparency = 0.5
 	cashShadow.ZIndex = cashLabel.ZIndex - 1
+	cashSizeConstraint:Clone().Parent = cashShadow
 	cashShadow.Parent = cashLabel
-
-	local cashScale = Instance.new("UIScale")
-	cashScale.Scale = 1
-	cashScale.Parent = cashLabel
 
 	cashLabel.Parent = cashPill
 
-	-- Green Plus Button (next to money, slightly lower than yellow button)
+	-- Green Plus Button (next to money)
 	btnAddCash = Instance.new("TextButton")
 	btnAddCash.Name = "BtnAddCash"
-	btnAddCash.Size = UDim2.new(0.18, 0, 1.20, 0)
-	btnAddCash.Position = UDim2.new(0.82, 0, 0.58, 0)
-	btnAddCash.AnchorPoint = Vector2.new(0, 0.5)
+	btnAddCash.LayoutOrder = 3
+	btnAddCash.Size = UDim2.new(1, 0, 0.75, 0)
 	btnAddCash.BackgroundColor3 = Color3.fromRGB(90, 255, 40)
 	btnAddCash.AutoButtonColor = false
 	btnAddCash.Active = true
@@ -1151,6 +1228,7 @@ do
 
 	local cashBtnAspect = Instance.new("UIAspectRatioConstraint")
 	cashBtnAspect.AspectRatio = 1.0
+	cashBtnAspect.DominantAxis = Enum.DominantAxis.Height
 	cashBtnAspect.Parent = btnAddCash
 
 	local cashBtnGradient = Instance.new("UIGradient")
@@ -1195,38 +1273,10 @@ do
 
 	btnAddCash.Parent = cashPill
 
-	-- Dynamic Hugging Layout
-	local function updateLayoutPositions()
-		if rowFriends.AbsoluteSize.X > 0 and friendsLabel.TextBounds.X > 0 then
-			local gap = 8
-			local btnW = btnAddFriend.AbsoluteSize.X
-			local targetX = friendsLabel.TextBounds.X + gap
-			local maxX = rowFriends.AbsoluteSize.X - btnW
-			btnAddFriend.Position = UDim2.new(0, math.clamp(targetX, 40, math.max(40, maxX)), 0.5, 0)
-		end
-		if cashPill.AbsoluteSize.X > 0 and cashLabel.TextBounds.X > 0 then
-			local iconW = cashIconImg.AbsoluteSize.X
-			local gap = 8
-			local btnW = btnAddCash.AbsoluteSize.X
-			local targetX = iconW + cashLabel.TextBounds.X + gap
-			local maxX = cashPill.AbsoluteSize.X - btnW
-			btnAddCash.Position = UDim2.new(0, math.clamp(targetX, iconW + 40, math.max(iconW + 40, maxX)), 0.58, 0)
-		end
-	end
-
-	friendsLabel:GetPropertyChangedSignal("TextBounds"):Connect(updateLayoutPositions)
-	cashLabel:GetPropertyChangedSignal("TextBounds"):Connect(updateLayoutPositions)
-	currencyGroup:GetPropertyChangedSignal("AbsoluteSize"):Connect(updateLayoutPositions)
-
 	cashLabel:GetPropertyChangedSignal("Text"):Connect(function()
 		if cashShadow and cashShadow.Text ~= cashLabel.Text then
 			cashShadow.Text = cashLabel.Text
 		end
-		updateLayoutPositions()
-	end)
-
-	friendsLabel:GetPropertyChangedSignal("Text"):Connect(function()
-		updateLayoutPositions()
 	end)
 
 	-- Button Hover & Press Animation
@@ -1252,87 +1302,26 @@ do
 			end
 		end)
 
-		btn.InputBegan:Connect(function(input)
-			if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-				isPressed = true
-				TweenService:Create(scale, TweenInfo.new(0.08, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { Scale = 0.92 }):Play()
-			end
+		btn.MouseButton1Down:Connect(function()
+			isPressed = true
+			TweenService:Create(scale, TweenInfo.new(0.08, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { Scale = 0.95 }):Play()
 		end)
 
-		btn.InputEnded:Connect(function(input)
-			if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-				isPressed = false
-				local targetScale = if isHovered then 1.1 else 1.0
-				TweenService:Create(scale, TweenInfo.new(0.20, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Scale = targetScale }):Play()
-			end
+		btn.MouseButton1Up:Connect(function()
+			isPressed = false
+			local target = if isHovered then 1.1 else 1.0
+			TweenService:Create(scale, TweenInfo.new(0.12, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Scale = target }):Play()
 		end)
 	end
 
 	setupHudButtonAnim(btnAddFriend)
 	setupHudButtonAnim(btnAddCash)
 
-	-- Diagonal Shine Sweep Animation (every 4 seconds)
-	local function setupShineSweep(btn: TextButton)
-		local shineOverlay = Instance.new("Frame")
-		shineOverlay.Name = "ShineOverlay"
-		shineOverlay.Size = UDim2.fromScale(1, 1)
-		shineOverlay.BackgroundTransparency = 1
-		shineOverlay.ClipsDescendants = true
-		shineOverlay.ZIndex = btn.ZIndex + 3
-		local corner = Instance.new("UICorner")
-		corner.CornerRadius = UDim.new(0.2, 0)
-		corner.Parent = shineOverlay
-
-		local shineBar = Instance.new("Frame")
-		shineBar.Name = "ShineBar"
-		shineBar.Size = UDim2.fromScale(1, 1)
-		shineBar.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-		shineBar.BorderSizePixel = 0
-		shineBar.ZIndex = shineOverlay.ZIndex
-
-		local grad = Instance.new("UIGradient")
-		grad.Rotation = -45
-		grad.Offset = Vector2.new(-1, 0)
-		grad.Transparency = NumberSequence.new({
-			NumberSequenceKeypoint.new(0, 1),
-			NumberSequenceKeypoint.new(0.35, 1),
-			NumberSequenceKeypoint.new(0.5, 0.45),
-			NumberSequenceKeypoint.new(0.65, 1),
-			NumberSequenceKeypoint.new(1, 1),
-		})
-		grad.Parent = shineBar
-		shineBar.Parent = shineOverlay
-		shineOverlay.Parent = btn
-
-		task.spawn(function()
-			while btn.Parent do
-				task.wait(4.0)
-				if not btn.Parent then break end
-				grad.Offset = Vector2.new(-1, 0)
-				local tw = TweenService:Create(grad, TweenInfo.new(0.75, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-					Offset = Vector2.new(1, 0)
-				})
-				tw:Play()
-				tw.Completed:Wait()
-				grad.Offset = Vector2.new(-1, 0)
-			end
-		end)
-	end
-
-	setupShineSweep(btnAddFriend)
-	setupShineSweep(btnAddCash)
-
 	-- Value Pop & Count-Up Tween Animations
 	local lastObservedCash: number? = nil
 	local lastObservedBoost: number? = nil
 
 	local function popCashText()
-		cashScale.Scale = 1.0
-		local twPop = TweenService:Create(cashScale, TweenInfo.new(0.10, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Scale = 1.15 })
-		twPop:Play()
-		twPop.Completed:Connect(function()
-			TweenService:Create(cashScale, TweenInfo.new(0.10, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { Scale = 1.0 }):Play()
-		end)
 		local origColor = cashLabel.TextColor3
 		cashLabel.TextColor3 = Color3.fromRGB(220, 255, 180)
 		task.delay(0.12, function()
@@ -1341,12 +1330,6 @@ do
 	end
 
 	local function popFriendsText()
-		friendsScale.Scale = 1.0
-		local twPop = TweenService:Create(friendsScale, TweenInfo.new(0.10, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Scale = 1.15 })
-		twPop:Play()
-		twPop.Completed:Connect(function()
-			TweenService:Create(friendsScale, TweenInfo.new(0.10, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { Scale = 1.0 }):Play()
-		end)
 		local origColor = friendsLabel.TextColor3
 		friendsLabel.TextColor3 = Color3.fromRGB(255, 255, 180)
 		task.delay(0.12, function()
@@ -1360,7 +1343,6 @@ do
 			lastObservedCash = targetBux
 			cashLabel.Text = `$` .. tostring(targetBux)
 			if cashShadow then cashShadow.Text = cashLabel.Text end
-			updateLayoutPositions()
 			return
 		end
 
@@ -1383,13 +1365,11 @@ do
 				local rounded = math.floor(v)
 				cashLabel.Text = `$` .. tostring(rounded)
 				if cashShadow then cashShadow.Text = cashLabel.Text end
-				updateLayoutPositions()
 			end)
 			tw:Play()
 			tw.Completed:Connect(function()
 				cashLabel.Text = `$` .. tostring(targetBux)
 				if cashShadow then cashShadow.Text = cashLabel.Text end
-				updateLayoutPositions()
 				valObj:Destroy()
 				if activeCashTweenVal == valObj then
 					activeCashTweenVal = nil
@@ -1402,7 +1382,6 @@ do
 		if lastObservedBoost == nil then
 			lastObservedBoost = targetBoost
 			friendsLabel.Text = `FRIENDS BOOST: +{targetBoost}%`
-			updateLayoutPositions()
 			return
 		end
 
@@ -1410,12 +1389,9 @@ do
 			lastObservedBoost = targetBoost
 			popFriendsText()
 			friendsLabel.Text = `FRIENDS BOOST: +{targetBoost}%`
-			updateLayoutPositions()
 		end
 	end
 end
-
-
 -- Opponent Needed Notification Banner (3s wait broadcast to idle players)
 
 local activeAlertTableId: string? = nil
@@ -1575,28 +1551,35 @@ modalBackdrop.Visible = false
 modalBackdrop.Parent = screenGui
 
 local modalWrap = Instance.new("Frame")
-
 modalWrap.Name = "ModalWrap"
-
-modalWrap.Size = UDim2.fromOffset(800, 546)
-
+modalWrap.Size = UDim2.fromOffset(760, 480)
 modalWrap.AnchorPoint = Vector2.new(0.5, 0.5)
-
-modalWrap.Position = UDim2.fromScale(0.5, 0.50)
-
+modalWrap.Position = UDim2.fromScale(0.5, 0.5)
 modalWrap.BackgroundTransparency = 1
-
 modalWrap.ZIndex = 25
-
 modalWrap.Visible = false
-
 modalWrap.Parent = screenGui
+
+do
+	local modalWrapScale = Instance.new("UIScale")
+	modalWrapScale.Scale = UITheme.getModalScale()
+	modalWrapScale.Parent = modalWrap
+
+	local cam = workspace.CurrentCamera
+	if cam then
+		cam:GetPropertyChangedSignal("ViewportSize"):Connect(function()
+			if modalWrap.Visible then
+				modalWrapScale.Scale = UITheme.getModalScale()
+			end
+		end)
+	end
+end
 
 local modalBox = Instance.new("Frame")
 
 modalBox.Name = "ModalBox"
 
-modalBox.Size = UDim2.new(1, 0, 0, 480)
+modalBox.Size = UDim2.fromScale(1, 1)
 
 modalBox.BackgroundColor3 = Color3.fromHex("#10111A")
 
@@ -1609,12 +1592,6 @@ UITheme.applyStroke(modalBox, UITheme.CONFIG.WINDOW_STROKE_THICKNESS, UITheme.CO
 UITheme.studs(modalBox, UITheme.CONFIG.STUDS_PANEL_TRANSPARENCY)
 
 UITheme.addShadow(modalBox, 14, 6)
-
-local modalBoxScale = Instance.new("UIScale")
-
-modalBoxScale.Scale = 1.0
-
-modalBoxScale.Parent = modalBox
 
 modalBox.Parent = modalWrap
 
@@ -1739,6 +1716,8 @@ local questsHandler: any
 questsHandler = ShopDailyUI.initDailyQuest(screenGui, modalBackdrop, Remotes, UITheme, GameConfig)
 local questsWindow = questsHandler.window
 
+local wheelHandler = WheelUI.init(screenGui, modalBackdrop, Remotes, UITheme, GameConfig, playSfx)
+
 local pageIndex = Instance.new("Frame")
 
 pageIndex.Name = "PageIndex"
@@ -1750,18 +1729,6 @@ pageIndex.BackgroundTransparency = 1
 pageIndex.Visible = false
 
 pageIndex.Parent = modalBody
-
-local pageWheel = Instance.new("Frame")
-
-pageWheel.Name = "PageWheel"
-
-pageWheel.Size = UDim2.fromScale(1, 1)
-
-pageWheel.BackgroundTransparency = 1
-
-pageWheel.Visible = false
-
-pageWheel.Parent = modalBody
 
 local pageProfile = Instance.new("Frame")
 
@@ -1786,7 +1753,6 @@ local SHOW_REFRESH = false -- shortcut: set true if server adds QuestRefresh rem
 -- ============================================================
 
 -- Page 3: Chair Skins moved to dedicated SkinsWindow via ShopDailyUI.initChairSkins
-local wheelSpinBtn: TextButton? = nil
 local luckUpgradeBtn: TextButton? = nil
 local skinActionBtns: { [string]: TextButton } = {}
 local skinNameLabels: { [string]: TextLabel } = {}
@@ -1879,539 +1845,13 @@ end
 
 end -- Page 6 Index block
 
--- Build Page 7: SPIN WHEEL VIEW (Auto-opened by stepping into Lobby SpinWheelStation ring)
-
-local wheelSpinning = false
-
-local wheelCurrentRot = 0
-
 local lastHandledWheelSeq = (localPlayer:GetAttribute("WheelSpinSeq") :: number?) or 0
-
-local wheelRotVal = Instance.new("NumberValue")
-
-local wheelSpinsCountLbl: TextLabel
-
-local spinBtnLabel: TextLabel
 
 local refreshProfileGlobalRanks: () -> ()
 
 local updateProfilePage: (p: any, elapsed: number, disc: { [string]: boolean }, discCount: number, pct: number) -> ()
 
 do
-
-	local wheelOuterRim = Instance.new("Frame")
-
-wheelOuterRim.Name = "WheelOuterRim"
-
-wheelOuterRim.Size = UDim2.fromOffset(258, 258)
-
-wheelOuterRim.Position = UDim2.new(0.03, 0, 0.5, -129)
-
-wheelOuterRim.BackgroundColor3 = Color3.fromRGB(36, 41, 54)
-
-addCorner(wheelOuterRim, 129)
-
-addStroke(wheelOuterRim, Color3.new(0, 0, 0), 4)
-
-wheelOuterRim.Parent = pageWheel
-
-local wheelDiscGui = Instance.new("Frame")
-
-wheelDiscGui.Name = "WheelDisc"
-
-wheelDiscGui.Size = UDim2.fromOffset(230, 230)
-
-wheelDiscGui.AnchorPoint = Vector2.new(0.5, 0.5)
-
-wheelDiscGui.Position = UDim2.fromScale(0.5, 0.5)
-
-wheelDiscGui.BackgroundColor3 = Color3.fromRGB(24, 28, 38)
-
-wheelDiscGui.ClipsDescendants = true
-
-addCorner(wheelDiscGui, 115)
-
-wheelDiscGui.Parent = wheelOuterRim
-
-local wheelVp = Instance.new("ViewportFrame")
-
-wheelVp.Name = "WheelViewport"
-
-wheelVp.Size = UDim2.fromScale(1, 1)
-
-wheelVp.BackgroundTransparency = 1
-
-wheelVp.Ambient = Color3.new(1, 1, 1)
-
-wheelVp.LightColor = Color3.new(0, 0, 0)
-
-wheelVp.ZIndex = 26
-
-addCorner(wheelVp, 115)
-
-wheelVp.Parent = wheelDiscGui
-
-local wheelVpCam = Instance.new("Camera")
-
-wheelVpCam.FieldOfView = 18
-
-wheelVpCam.CFrame = CFrame.new(0, 0, 36.8)
-
-wheelVpCam.Parent = wheelVp
-
-wheelVp.CurrentCamera = wheelVpCam
-
-local wheel3DModel = Instance.new("Model")
-
-wheel3DModel.Name = "Wheel3D"
-
-local wheelPivot = Instance.new("Part")
-
-wheelPivot.Name = "Pivot"
-
-wheelPivot.Size = Vector3.new(0.2, 0.2, 0.2)
-
-wheelPivot.Transparency = 1
-
-wheelPivot.Anchored = true
-
-wheelPivot.CFrame = CFrame.new(0, 0, 0)
-
-wheelPivot.Parent = wheel3DModel
-
-wheel3DModel.PrimaryPart = wheelPivot
-
-wheel3DModel.Parent = wheelVp
-
-local wheelLabelsLayer = Instance.new("Frame")
-
-wheelLabelsLayer.Name = "WheelLabelsLayer"
-
-wheelLabelsLayer.Size = UDim2.fromOffset(230, 230)
-
-wheelLabelsLayer.AnchorPoint = Vector2.new(0.5, 0.5)
-
-wheelLabelsLayer.Position = UDim2.fromScale(0.5, 0.5)
-
-wheelLabelsLayer.BackgroundTransparency = 1
-
-wheelLabelsLayer.ZIndex = 27
-
-wheelLabelsLayer.Parent = wheelOuterRim
-
-do
-
-	local vpRadius = 6.2
-
-	local halfA = math.rad(22.5)
-
-	local wH = vpRadius * math.cos(halfA)
-
-	local wW = vpRadius * math.sin(halfA)
-
-	for i, seg in GameConfig.WHEEL_SEGMENTS do
-
-		local deg = (i - 1) * 45
-
-		local sliceCF = CFrame.Angles(0, 0, -math.rad(deg))
-
-		local segCol = Color3.fromHex(seg.color)
-
-		for _, side in { -1, 1 } do
-
-			local wp = Instance.new("WedgePart")
-
-			wp.Size = Vector3.new(0.2, wH, wW)
-
-			wp.CFrame = sliceCF
-
-				* CFrame.fromMatrix(
-
-					Vector3.new(side * wW * 0.5, wH * 0.5, 0),
-
-					Vector3.new(0, 0, -side),
-
-					Vector3.new(0, -1, 0),
-
-					Vector3.new(-side, 0, 0)
-
-				)
-
-			wp.Anchored = true
-
-			wp.Color = segCol
-
-			wp.Material = Enum.Material.SmoothPlastic
-
-			wp.Parent = wheel3DModel
-
-		end
-
-		local spoke = Instance.new("Part")
-
-		spoke.Size = Vector3.new(0.14, vpRadius, 0.26)
-
-		spoke.CFrame = CFrame.Angles(0, 0, -math.rad(deg + 22.5)) * CFrame.new(0, vpRadius * 0.5, 0.06)
-
-		spoke.Anchored = true
-
-		spoke.Color = Color3.fromRGB(22, 25, 34)
-
-		spoke.Material = Enum.Material.SmoothPlastic
-
-		spoke.Parent = wheel3DModel
-
-		local lRad = math.rad(deg)
-
-		local lx = 115 + math.sin(lRad) * 69
-
-		local ly = 115 - math.cos(lRad) * 69
-
-		local lblBox = Instance.new("Frame")
-
-		lblBox.Name = `SliceLabel_{i}`
-
-		lblBox.Size = UDim2.fromOffset(58, 52)
-
-		lblBox.AnchorPoint = Vector2.new(0.5, 0.5)
-
-		lblBox.Position = UDim2.fromOffset(lx, ly)
-
-		lblBox.Rotation = deg
-
-		lblBox.BackgroundTransparency = 1
-
-		lblBox.ZIndex = 28
-
-		lblBox.Parent = wheelLabelsLayer
-
-		local pIcon = Instance.new("ImageLabel")
-
-		pIcon.Name = "SliceIcon"
-
-		pIcon.Size = UDim2.fromOffset(20, 20)
-
-		pIcon.Position = UDim2.new(0.5, -10, 0, 2)
-
-		pIcon.BackgroundTransparency = 1
-
-		pIcon.Image = if seg.id == 4 then UITheme.Assets.CrownIcon else UITheme.Assets.CashStack
-
-		pIcon.ScaleType = Enum.ScaleType.Fit
-
-		pIcon.ZIndex = 29
-
-		pIcon.Parent = lblBox
-
-		local pTxt = Instance.new("TextLabel")
-
-		pTxt.Name = "SliceText"
-
-		pTxt.Size = UDim2.new(1, 0, 0, 26)
-
-		pTxt.Position = UDim2.new(0, 0, 0, 24)
-
-		pTxt.BackgroundTransparency = 1
-
-		pTxt.Font = UITheme.Fonts.Primary
-
-		pTxt.TextColor3 = if seg.id == 4 then UITheme.Colors.NoticeYellow else UITheme.Colors.White
-
-		pTxt.Text = seg.label
-
-		pTxt.TextScaled = true
-
-		UITheme.addTextConstraint(pTxt, 10, 14)
-
-		UITheme.applyTextStroke(pTxt, 2, UITheme.Colors.Black)
-
-		pTxt.ZIndex = 29
-
-		pTxt.Parent = lblBox
-
-		local bulbRad = math.rad(deg + 22.5 - 90)
-
-		local bx = 129 + math.cos(bulbRad) * 121
-
-		local by = 129 + math.sin(bulbRad) * 121
-
-		local bulb = Instance.new("Frame")
-
-		bulb.Size = UDim2.fromOffset(10, 10)
-
-		bulb.AnchorPoint = Vector2.new(0.5, 0.5)
-
-		bulb.Position = UDim2.fromOffset(bx, by)
-
-		bulb.BackgroundColor3 = Color3.fromRGB(255, 214, 58)
-
-		bulb.BorderSizePixel = 0
-
-		bulb.ZIndex = 30
-
-		addCorner(bulb, 5)
-
-		bulb.Parent = wheelOuterRim
-
-	end
-
-end
-
-	wheelRotVal.Changed:Connect(function(v)
-
-		wheelLabelsLayer.Rotation = v
-
-		wheel3DModel:PivotTo(CFrame.Angles(0, 0, -math.rad(v)))
-
-	end)
-
-	local wheelHubCap = Instance.new("Frame")
-
-	wheelHubCap.Size = UDim2.fromOffset(48, 48)
-
-	wheelHubCap.AnchorPoint = Vector2.new(0.5, 0.5)
-
-	wheelHubCap.Position = UDim2.fromScale(0.5, 0.5)
-
-	wheelHubCap.BackgroundColor3 = Color3.fromHex("#C81E2B")
-
-	wheelHubCap.ZIndex = 31
-
-	addCorner(wheelHubCap, 24)
-
-	addStroke(wheelHubCap, Color3.fromRGB(32, 36, 48), 5)
-
-	wheelHubCap.Parent = wheelOuterRim
-
-	local pointerClip = Instance.new("Frame")
-
-	pointerClip.Size = UDim2.fromOffset(38, 24)
-
-	pointerClip.AnchorPoint = Vector2.new(0.5, 0)
-
-	pointerClip.Position = UDim2.new(0.5, 0, 0, -6)
-
-	pointerClip.BackgroundTransparency = 1
-
-	pointerClip.ClipsDescendants = true
-
-	pointerClip.ZIndex = 32
-
-	pointerClip.Parent = wheelOuterRim
-
-	local pointerDiamond = Instance.new("Frame")
-
-	pointerDiamond.Size = UDim2.fromOffset(26, 26)
-
-	pointerDiamond.AnchorPoint = Vector2.new(0.5, 0.5)
-
-	pointerDiamond.Position = UDim2.fromOffset(19, 2)
-
-	pointerDiamond.Rotation = 45
-
-	pointerDiamond.BackgroundColor3 = Color3.fromHex("#DC2626")
-
-	pointerDiamond.ZIndex = 32
-
-	addStroke(pointerDiamond, Color3.fromRGB(20, 22, 30), 2)
-
-	pointerDiamond.Parent = pointerClip
-
-	local wheelRightPane = Instance.new("Frame")
-
-	wheelRightPane.Size = UDim2.new(0.50, 0, 0.94, 0)
-
-	wheelRightPane.Position = UDim2.new(0.48, 0, 0.03, 0)
-
-	wheelRightPane.BackgroundTransparency = 1
-
-	wheelRightPane.Parent = pageWheel
-
-	local wheelSpinsPlate = Instance.new("Frame")
-
-	wheelSpinsPlate.Name = "WheelSpinsPlate"
-
-	wheelSpinsPlate.Size = UDim2.new(1, 0, 0, 42)
-
-	wheelSpinsPlate.Position = UDim2.new(0, 0, 0, 0)
-
-	wheelSpinsPlate.BackgroundColor3 = UITheme.Colors.CardBg
-
-	UITheme.addCorner(wheelSpinsPlate, 10)
-
-	UITheme.applyStroke(wheelSpinsPlate, 3, UITheme.Colors.GoldBottom)
-
-	UITheme.addStuds(wheelSpinsPlate, 0.90, 20)
-
-	UITheme.addBevel(wheelSpinsPlate, 10)
-
-	UITheme.addShadow(wheelSpinsPlate, 10, 3)
-
-	wheelSpinsPlate.Parent = wheelRightPane
-
-	wheelSpinsCountLbl = Instance.new("TextLabel")
-
-	wheelSpinsCountLbl.Name = "SpinsCountText"
-
-	wheelSpinsCountLbl.Size = UDim2.new(0.92, 0, 0.8, 0)
-
-	wheelSpinsCountLbl.Position = UDim2.new(0.04, 0, 0.1, 0)
-
-	wheelSpinsCountLbl.BackgroundTransparency = 1
-
-	wheelSpinsCountLbl.Font = UITheme.Fonts.Titles
-
-	wheelSpinsCountLbl.TextColor3 = UITheme.Colors.NoticeYellow
-
-	wheelSpinsCountLbl.Text = "🎟️ AVAILABLE SPINS: 1"
-
-	wheelSpinsCountLbl.TextScaled = true
-
-	UITheme.applyTextStroke(wheelSpinsCountLbl, 2.5, UITheme.Colors.Black)
-
-	wheelSpinsCountLbl.Parent = wheelSpinsPlate
-
-	local wheelOddsList = {
-
-		{ text = "$150 — 45%", col = Color3.fromHex("#1D7BF6"), icon = UITheme.Assets.CashStack },
-
-		{ text = "$350 — 30%", col = Color3.fromHex("#22C55E"), icon = UITheme.Assets.CashStack },
-
-		{ text = "$750 — 17%", col = Color3.fromHex("#F59E0B"), icon = UITheme.Assets.CashStack },
-
-		{ text = "CYBER CHAIR + $500 — 8%", col = Color3.fromHex("#FF2E93"), icon = UITheme.Assets.CrownIcon },
-
-	}
-
-	for idx, item in wheelOddsList do
-
-		local row = Instance.new("Frame")
-
-		row.Name = `OddsRow_{idx}`
-
-		row.Size = UDim2.new(1, 0, 0, 42)
-
-		row.Position = UDim2.new(0, 0, 0, 48 + (idx - 1) * 46)
-
-		row.BackgroundColor3 = UITheme.Colors.CardBg
-
-		UITheme.addCorner(row, 8)
-
-		UITheme.applyStroke(row, 3, item.col)
-
-		UITheme.addStuds(row, 0.90, 20)
-
-		UITheme.addBevel(row, 8)
-
-		UITheme.addShadow(row, 8, 3)
-
-		row.Parent = wheelRightPane
-
-		local rIcon = Instance.new("ImageLabel")
-
-		rIcon.Name = "RowIcon"
-
-		rIcon.Size = UDim2.fromOffset(24, 24)
-
-		rIcon.Position = UDim2.new(0, 10, 0.5, -12)
-
-		rIcon.BackgroundTransparency = 1
-
-		rIcon.Image = item.icon
-
-		rIcon.ScaleType = Enum.ScaleType.Fit
-
-		rIcon.ZIndex = row.ZIndex + 2
-
-		rIcon.Parent = row
-
-		local rTxt = Instance.new("TextLabel")
-
-		rTxt.Name = "RowText"
-
-		rTxt.Size = UDim2.new(1, -44, 0.8, 0)
-
-		rTxt.Position = UDim2.new(0, 40, 0.1, 0)
-
-		rTxt.BackgroundTransparency = 1
-
-		rTxt.Font = UITheme.Fonts.Primary
-
-		rTxt.TextColor3 = UITheme.Colors.White
-
-		rTxt.TextXAlignment = Enum.TextXAlignment.Left
-
-		rTxt.Text = item.text
-
-		rTxt.TextScaled = true
-
-		UITheme.addTextConstraint(rTxt, 11, 16)
-
-		UITheme.applyTextStroke(rTxt, 2.5, UITheme.Colors.Black)
-
-		rTxt.ZIndex = row.ZIndex + 2
-
-		rTxt.Parent = row
-
-	end
-
-	local btnDoSpinWheel = Instance.new("TextButton")
-
-	btnDoSpinWheel.Name = "BtnDoSpinWheel"
-
-	btnDoSpinWheel.Size = UDim2.new(1, 0, 0, 56)
-
-	btnDoSpinWheel.Position = UDim2.new(0, 0, 1, -58)
-
-	btnDoSpinWheel.Text = ""
-
-	UITheme.styleButton(btnDoSpinWheel, "Lime", 10)
-
-	UITheme.addStuds(btnDoSpinWheel, 0.85, 20)
-
-	UITheme.addPulse(btnDoSpinWheel, 1.0, 1.04, 1.2)
-
-	UITheme.addShineSweep(btnDoSpinWheel, 3.0)
-
-	spinBtnLabel = Instance.new("TextLabel")
-
-	spinBtnLabel.Name = "BtnLabel"
-
-	spinBtnLabel.Size = UDim2.new(0.92, 0, 0.8, 0)
-
-	spinBtnLabel.Position = UDim2.new(0.04, 0, 0.1, 0)
-
-	spinBtnLabel.BackgroundTransparency = 1
-
-	spinBtnLabel.Font = UITheme.Fonts.Primary
-
-	spinBtnLabel.TextColor3 = UITheme.Colors.White
-
-	spinBtnLabel.Text = "🎡 SPIN WHEEL (1)"
-
-	spinBtnLabel.TextScaled = true
-
-	UITheme.addTextConstraint(spinBtnLabel, 14, 22)
-
-	UITheme.applyTextStroke(spinBtnLabel, 3, UITheme.Colors.Black)
-
-	spinBtnLabel.ZIndex = btnDoSpinWheel.ZIndex + 3
-
-	spinBtnLabel.Parent = btnDoSpinWheel
-
-	btnDoSpinWheel.Parent = wheelRightPane
-
-	btnDoSpinWheel.Activated:Connect(function()
-
-		if wheelSpinning then
-
-			return
-
-		end
-
-		Remotes.MetaAction:FireServer("SpinWheel")
-
-	end)
 
 	-- ============================================================
 
@@ -2997,9 +2437,18 @@ local function closeAllModals(except: string?)
 	if except ~= "FREE" and freeRewardsWindow and freeRewardsWindow.Visible then
 		freeRewardsWindow.Visible = false
 	end
+	if except ~= "WHEEL" and wheelHandler.isOpen() then
+		wheelHandler.window.Visible = false
+	end
 	if except ~= "WRAP" and modalWrap.Visible then
 		modalWrap.Visible = false
 	end
+end
+
+local function openWheel()
+	closeAllModals("WHEEL")
+	modalBackdrop.Visible = true
+	wheelHandler.open()
 end
 
 local function openShop()
@@ -3077,22 +2526,24 @@ local function openModal(kind: "FREE" | "QUESTS" | "SKINS" | "TITLES" | "SHOP" |
 	elseif kind == "FREE" then
 		openFreeTab("DAILY")
 		return
+	elseif kind == "WHEEL" then
+		openWheel()
+		return
 	end
 
 	closeAllModals("WRAP")
+	pageIndex.Visible = (kind == "INDEX")
+	pageProfile.Visible = (kind == "PROFILE")
+
+	local targetScale = UITheme.getModalScale()
+
 	modalBackdrop.Visible = true
 	modalBox.Visible = true
 	modalWrap.Visible = true
-	UITheme.animateWindowOpen(modalWrap, modalBox)
-
-	pageIndex.Visible = (kind == "INDEX")
-	pageWheel.Visible = (kind == "WHEEL")
-	pageProfile.Visible = (kind == "PROFILE")
+	UITheme.animateWindowOpen(modalWrap, modalBox, targetScale)
 
 	if kind == "INDEX" then
 		UITheme.styleHeader(modalHeader, "Magenta", "CARD INDEX (152 FOOTBALLERS)")
-	elseif kind == "WHEEL" then
-		UITheme.styleHeader(modalHeader, "Purple", "PRIZE SPIN WHEEL")
 	elseif kind == "PROFILE" then
 		UITheme.styleHeader(modalHeader, "Blue", "PLAYER PROFILE & STATS TRACKER")
 		refreshProfileGlobalRanks()
@@ -3105,13 +2556,22 @@ btnCloseModal.Activated:Connect(function()
 end)
 
 modalBackdrop.Activated:Connect(function()
-	local openedAt = modalWrap:GetAttribute("OpenedAt") or 0
+	if wheelHandler.isSpinning() then
+		return
+	end
+	local openedAt = math.max(
+		(modalWrap:GetAttribute("OpenedAt") :: number?) or 0,
+		(wheelHandler.window:GetAttribute("OpenedAt") :: number?) or 0
+	)
 	if os.clock() - openedAt < 0.25 then
 		return
 	end
 	modalBackdrop.Visible = false
 	if modalWrap.Visible then
 		UITheme.animateWindowClose(modalWrap, modalBox)
+	end
+	if wheelHandler.isOpen() then
+		wheelHandler.close()
 	end
 	if shopWindow.Visible then
 		closeShop()
@@ -3288,240 +2748,290 @@ local showdownToken = 0
 local cachedProfile: any = nil
 
 local overlay = Instance.new("Frame")
-
 overlay.Size = UDim2.fromScale(1, 1)
-
+overlay.Position = UDim2.fromScale(0, 0)
 overlay.BackgroundColor3 = Color3.fromRGB(10, 14, 24)
-
 overlay.BackgroundTransparency = 0.35
-
+overlay.ZIndex = 1
 overlay.Visible = false
-
 overlay.Parent = screenGui
 
-local modeSubLabel = makeLabel(overlay, "DEFAULT MODE", UDim2.new(0.4, 0, 0, 20), UDim2.new(0.30, 0, 0, 8), Color3.new(1, 1, 1))
-
-local headerLabel = makeLabel(overlay, "BUILD A FOOTBALLER", UDim2.new(0.6, 0, 0, 44), UDim2.new(0.2, 0, 0, 24), Color3.new(1, 1, 1))
-
-local winnerNameLabel = makeLabel(overlay, "", UDim2.new(0.5, 0, 0, 42), UDim2.new(0.25, 0, 0, 64), Color3.new(1, 1, 1))
-
-winnerNameLabel.Visible = false
-
-local timerLabel = makeLabel(overlay, "15", UDim2.new(0.2, 0, 0, 42), UDim2.new(0.4, 0, 0, 66), Color3.new(1, 1, 1))
-
--- ============================================================
-
--- 2A. SEATED WAITING SCREEN ("INVITE FRIENDS", "LEAVE" + "FIGHT WITH AI -> PLAY!")
-
--- ============================================================
-
-local waitingWrap = Instance.new("Frame")
-
-waitingWrap.Name = "WaitingWrap"
-
-waitingWrap.Size = UDim2.fromScale(1, 1)
-
-waitingWrap.BackgroundTransparency = 1
-
-waitingWrap.Visible = false
-
-waitingWrap.Parent = overlay
-
-local btnWaitInvite = makeButton(waitingWrap, "", UDim2.fromOffset(232, 48), UDim2.new(0.50, -116, 0.70, 0), Color3.fromHex("#FFD21F"))
+-- Fixed 16:9 (886x496) Design Root for the Build a Footballer screen
+local layoutRoot = Instance.new("Frame")
+layoutRoot.Name = "LayoutRoot"
+layoutRoot.AnchorPoint = Vector2.new(0.5, 0.5)
+layoutRoot.Position = UDim2.fromScale(0.5, 0.5)
+layoutRoot.Size = UDim2.fromScale(1, 1)
+layoutRoot.BackgroundTransparency = 1
+layoutRoot.ClipsDescendants = false
+layoutRoot.ZIndex = 2
+layoutRoot.Parent = overlay
 
 do
-
-	local ink = Color3.fromRGB(15, 17, 22)
-
-	local iconWrap = Instance.new("Frame")
-
-	iconWrap.Name = "UserPlusIcon"
-
-	iconWrap.Size = UDim2.fromOffset(30, 26)
-
-	iconWrap.Position = UDim2.new(0, 14, 0.5, -13)
-
-	iconWrap.BackgroundTransparency = 1
-
-	iconWrap.Parent = btnWaitInvite
-
-	local headDot = Instance.new("Frame")
-
-	headDot.Name = "Head"
-
-	headDot.Size = UDim2.fromOffset(11, 11)
-
-	headDot.Position = UDim2.fromOffset(5, 1)
-
-	headDot.BackgroundColor3 = ink
-
-	headDot.BorderSizePixel = 0
-
-	headDot.Parent = iconWrap
-
-	local hc = Instance.new("UICorner")
-
-	hc.CornerRadius = UDim.new(1, 0)
-
-	hc.Parent = headDot
-
-	local bodyClip = Instance.new("Frame")
-
-	bodyClip.Name = "ShouldersClip"
-
-	bodyClip.Size = UDim2.fromOffset(21, 12)
-
-	bodyClip.Position = UDim2.fromOffset(0, 12)
-
-	bodyClip.BackgroundTransparency = 1
-
-	bodyClip.ClipsDescendants = true
-
-	bodyClip.Parent = iconWrap
-
-	local dome = Instance.new("Frame")
-
-	dome.Name = "Shoulders"
-
-	dome.Size = UDim2.fromOffset(21, 24)
-
-	dome.Position = UDim2.fromOffset(0, 0)
-
-	dome.BackgroundColor3 = ink
-
-	dome.BorderSizePixel = 0
-
-	dome.Parent = bodyClip
-
-	local dc = Instance.new("UICorner")
-
-	dc.CornerRadius = UDim.new(1, 0)
-
-	dc.Parent = dome
-
-	local plusH = Instance.new("Frame")
-
-	plusH.Name = "PlusH"
-
-	plusH.Size = UDim2.fromOffset(11, 3)
-
-	plusH.Position = UDim2.fromOffset(19, 12)
-
-	plusH.BackgroundColor3 = ink
-
-	plusH.BorderSizePixel = 0
-
-	plusH.Parent = iconWrap
-
-	local phc = Instance.new("UICorner")
-
-	phc.CornerRadius = UDim.new(1, 0)
-
-	phc.Parent = plusH
-
-	local plusV = Instance.new("Frame")
-
-	plusV.Name = "PlusV"
-
-	plusV.Size = UDim2.fromOffset(3, 11)
-
-	plusV.Position = UDim2.fromOffset(23, 8)
-
-	plusV.BackgroundColor3 = ink
-
-	plusV.BorderSizePixel = 0
-
-	plusV.Parent = iconWrap
-
-	local pvc = Instance.new("UICorner")
-
-	pvc.CornerRadius = UDim.new(1, 0)
-
-	pvc.Parent = plusV
-
-	local inviteLbl = makeLabel(btnWaitInvite, "INVITE FRIENDS", UDim2.new(1, -62, 0, 28), UDim2.new(0, 50, 0.5, -14), Color3.new(1, 1, 1))
-
-	inviteLbl.Name = "InviteLabel"
-
+	local layoutAspect = Instance.new("UIAspectRatioConstraint")
+	layoutAspect.AspectRatio = 1.786
+	layoutAspect.AspectType = Enum.AspectType.FitWithinMaxSize
+	layoutAspect.DominantAxis = Enum.DominantAxis.Width
+	layoutAspect.Parent = layoutRoot
 end
 
-btnWaitInvite.Activated:Connect(function()
+local MatchUi = {}
 
-	pcall(function()
+function MatchUi.label(parent: Instance, text: string, size: UDim2, pos: UDim2?, color: Color3?, maxTextSize: number, strokeThickness: number, zIdx: number): TextLabel
+	local lbl = Instance.new("TextLabel")
+	lbl.Size = size
+	if pos then
+		lbl.Position = pos
+	end
+	lbl.BackgroundTransparency = 1
+	lbl.Font = UITheme.Fonts.Primary
+	lbl.TextColor3 = color or UITheme.Colors.White
+	lbl.TextStrokeTransparency = 1
+	lbl.TextWrapped = false
+	lbl.TextScaled = true
+	lbl.Text = text
+	lbl.ZIndex = zIdx
 
-		SocialService:PromptGameInvite(localPlayer)
+	local sc = Instance.new("UITextSizeConstraint")
+	sc.MinTextSize = 6
+	sc.MaxTextSize = maxTextSize
+	sc.Parent = lbl
 
+	local st = Instance.new("UIStroke")
+	st.Color = UITheme.Colors.Black
+	st.Thickness = strokeThickness
+	st.ApplyStrokeMode = Enum.ApplyStrokeMode.Contextual
+	st.LineJoinMode = Enum.LineJoinMode.Round
+	st.Parent = lbl
+
+	lbl.Parent = parent
+	return lbl
+end
+
+function MatchUi.corner(parent: Instance, scaleRadius: number)
+	local c = Instance.new("UICorner")
+	c.CornerRadius = UDim.new(scaleRadius, 0)
+	c.Parent = parent
+	return c
+end
+
+local modeSubLabel: TextLabel
+local headerLabel: TextLabel
+local timerLabel: TextLabel
+do
+	local titleGroup = Instance.new("Frame")
+	titleGroup.Name = "TitleGroup"
+	titleGroup.AnchorPoint = Vector2.new(0.5, 0)
+	titleGroup.Position = UDim2.fromScale(0.5, 0)
+	titleGroup.Size = UDim2.fromScale(0.40, 0.14)
+	titleGroup.BackgroundTransparency = 1
+	titleGroup.ZIndex = 10
+	titleGroup.Parent = layoutRoot
+
+	local titleList = Instance.new("UIListLayout")
+	titleList.FillDirection = Enum.FillDirection.Vertical
+	titleList.HorizontalAlignment = Enum.HorizontalAlignment.Center
+	titleList.VerticalAlignment = Enum.VerticalAlignment.Top
+	titleList.SortOrder = Enum.SortOrder.LayoutOrder
+	titleList.Padding = UDim.new(0, 0)
+	titleList.Parent = titleGroup
+
+	modeSubLabel = MatchUi.label(titleGroup, "DEFAULT MODE", UDim2.fromScale(1, 0.25), nil, Color3.new(1, 1, 1), 18, 1.5, 10)
+	modeSubLabel.LayoutOrder = 1
+	headerLabel = MatchUi.label(titleGroup, "BUILD A FOOTBALLER", UDim2.fromScale(1, 0.45), nil, Color3.new(1, 1, 1), 36, 2, 10)
+	headerLabel.LayoutOrder = 2
+	timerLabel = MatchUi.label(titleGroup, "15", UDim2.fromScale(1, 0.30), nil, Color3.new(1, 1, 1), 28, 2, 10)
+	timerLabel.LayoutOrder = 3
+end
+
+local winnerNameLabel = MatchUi.label(layoutRoot, "", UDim2.fromScale(0.50, 0.07), UDim2.fromScale(0.50, 0.14), Color3.new(1, 1, 1), 28, 2, 10)
+winnerNameLabel.AnchorPoint = Vector2.new(0.5, 0)
+winnerNameLabel.Visible = false
+
+-- ============================================================
+-- 2A. SEATED WAITING SCREEN ("INVITE FRIENDS", "LEAVE" + "FIGHT WITH AI -> PLAY!")
+-- ============================================================
+local waitingWrap = Instance.new("Frame")
+waitingWrap.Name = "WaitingWrap"
+waitingWrap.Size = UDim2.fromScale(1, 1)
+waitingWrap.BackgroundTransparency = 1
+waitingWrap.Visible = false
+waitingWrap.Parent = layoutRoot
+
+do
+	local queueButtons = Instance.new("Frame")
+	queueButtons.Name = "QueueButtons"
+	queueButtons.BackgroundTransparency = 1
+	queueButtons.AnchorPoint = Vector2.new(0.5, 1)
+	queueButtons.Position = UDim2.fromScale(0.5, 0.97)
+	-- Step 4: raised from 0.34 to 0.40 so mobile buttons maximize tap area without enlarging text
+	queueButtons.Size = UDim2.fromScale(0.40, 0)
+	queueButtons.ZIndex = 5
+	queueButtons.Parent = waitingWrap
+
+	local qbAspect = Instance.new("UIAspectRatioConstraint")
+	qbAspect.AspectRatio = 2.83
+	qbAspect.AspectType = Enum.AspectType.ScaleWithParentSize
+	qbAspect.DominantAxis = Enum.DominantAxis.Width
+	qbAspect.Parent = queueButtons
+
+	local qbSize = Instance.new("UISizeConstraint")
+	qbSize.MinSize = Vector2.new(220, 78)
+	qbSize.MaxSize = Vector2.new(420, 150)
+	qbSize.Parent = queueButtons
+
+	local function makeQueueLabel(parent: Instance, text: string, size: UDim2, pos: UDim2?, color: Color3, minSz: number, maxSz: number): TextLabel
+		local lbl = MatchUi.label(parent, text, size, pos, color, maxSz, 1.5, 8)
+		lbl.TextTruncate = Enum.TextTruncate.AtEnd
+		local tc = lbl:FindFirstChildOfClass("UITextSizeConstraint") :: UITextSizeConstraint?
+		if tc then tc.MinTextSize = minSz end
+		return lbl
+	end
+
+	local function makeQueueBtn(text: string, pos: UDim2, size: UDim2, bg: Color3, maxTextSz: number): TextButton
+		local btn = Instance.new("TextButton")
+		btn.Position = pos
+		btn.Size = size
+		btn.BackgroundColor3 = bg
+		btn.BorderSizePixel = 0
+		btn.AutoButtonColor = false
+		btn.Active = true
+		btn.Font = UITheme.Fonts.Primary
+		btn.Text = text
+		btn.TextColor3 = UITheme.Colors.White
+		btn.TextTransparency = 1
+		btn.TextStrokeTransparency = 1
+		btn.TextWrapped = false
+		btn.TextScaled = true
+		btn.ZIndex = 6
+		MatchUi.corner(btn, 0.2)
+		UITheme.applyStroke(btn, 2, UITheme.Colors.Black)
+
+		local pad = Instance.new("UIPadding")
+		pad.PaddingLeft = UDim.new(0.06, 0)
+		pad.PaddingRight = UDim.new(0.06, 0)
+		pad.Parent = btn
+
+		local tc = Instance.new("UITextSizeConstraint")
+		tc.MinTextSize = 8
+		tc.MaxTextSize = maxTextSz
+		tc.Parent = btn
+
+		if text ~= "" then
+			local lbl = makeQueueLabel(btn, text, UDim2.fromScale(1, 1), nil, Color3.new(1, 1, 1), 8, maxTextSz)
+			btn:GetPropertyChangedSignal("Text"):Connect(function()
+				lbl.Text = btn.Text
+			end)
+		end
+
+		btn.Activated:Connect(function()
+			playSfx("click")
+		end)
+		btn.Parent = queueButtons
+		return btn
+	end
+
+	local btnWaitInvite = makeQueueBtn("", UDim2.fromScale(0, 0.23), UDim2.fromScale(0.54, 0.35), Color3.fromHex("#FFD21F"), 16)
+	do
+		local btnList = Instance.new("UIListLayout")
+		btnList.FillDirection = Enum.FillDirection.Horizontal
+		btnList.HorizontalAlignment = Enum.HorizontalAlignment.Center
+		btnList.VerticalAlignment = Enum.VerticalAlignment.Center
+		btnList.SortOrder = Enum.SortOrder.LayoutOrder
+		btnList.Padding = UDim.new(0.04, 0)
+		btnList.Parent = btnWaitInvite
+
+		local ink = Color3.fromRGB(15, 17, 22)
+		local iconWrap = Instance.new("Frame")
+		iconWrap.Name = "UserPlusIcon"
+		iconWrap.LayoutOrder = 1
+		iconWrap.Size = UDim2.fromScale(0.22, 0.70)
+		iconWrap.BackgroundTransparency = 1
+		iconWrap.ZIndex = 7
+		iconWrap.Parent = btnWaitInvite
+
+		local iconAspect = Instance.new("UIAspectRatioConstraint")
+		iconAspect.AspectRatio = 1
+		iconAspect.AspectType = Enum.AspectType.FitWithinMaxSize
+		iconAspect.DominantAxis = Enum.DominantAxis.Height
+		iconAspect.Parent = iconWrap
+
+		local function makeIconPart(parent: Instance, name: string, size: UDim2, pos: UDim2, rounded: boolean, transparent: boolean?): Frame
+			local f = Instance.new("Frame")
+			f.Name = name
+			f.Size = size
+			f.Position = pos
+			f.BackgroundColor3 = ink
+			f.BackgroundTransparency = if transparent then 1 else 0
+			f.BorderSizePixel = 0
+			f.ZIndex = 7
+			f.Parent = parent
+			if rounded then
+				MatchUi.corner(f, 1)
+			end
+			return f
+		end
+
+		makeIconPart(iconWrap, "Head", UDim2.fromScale(0.367, 0.367), UDim2.fromScale(0.167, 0.10), true)
+		local bodyClip = makeIconPart(iconWrap, "ShouldersClip", UDim2.fromScale(0.70, 0.40), UDim2.fromScale(0, 0.467), false, true)
+		bodyClip.ClipsDescendants = true
+		makeIconPart(bodyClip, "Shoulders", UDim2.fromScale(1, 2), UDim2.fromScale(0, 0), true)
+		makeIconPart(iconWrap, "PlusH", UDim2.fromScale(0.367, 0.10), UDim2.fromScale(0.633, 0.467), true)
+		makeIconPart(iconWrap, "PlusV", UDim2.fromScale(0.10, 0.367), UDim2.fromScale(0.767, 0.333), true)
+
+		local inviteLbl = makeQueueLabel(btnWaitInvite, "INVITE FRIENDS", UDim2.fromScale(0.78, 0.80), nil, Color3.new(1, 1, 1), 8, 16)
+		inviteLbl.Name = "InviteLabel"
+		inviteLbl.LayoutOrder = 2
+	end
+	btnWaitInvite.Activated:Connect(function()
+		pcall(function()
+			SocialService:PromptGameInvite(localPlayer)
+		end)
 	end)
 
-end)
+	local btnWaitLeave = makeQueueBtn("LEAVE", UDim2.fromScale(0, 0.70), UDim2.fromScale(0.54, 0.30), Color3.fromHex("#E5252A"), 16)
+	btnWaitLeave.Activated:Connect(function()
+		Remotes.MatchAction:FireServer("LeaveTable")
+	end)
 
-local btnWaitLeave = makeButton(waitingWrap, "LEAVE", UDim2.fromOffset(232, 46), UDim2.new(0.50, -116, 0.785, 0), Color3.fromHex("#E5252A"))
-
-btnWaitLeave.Activated:Connect(function()
-
-	Remotes.MatchAction:FireServer("LeaveTable")
-
-end)
-
-local aiBox = Instance.new("Frame")
-
-aiBox.Size = UDim2.fromOffset(190, 118)
-
-aiBox.Position = UDim2.new(0.50, 130, 0.68, 0)
-
-aiBox.BackgroundTransparency = 1
-
-aiBox.Parent = waitingWrap
-
-makeLabel(aiBox, "TIRED OF WAITING?", UDim2.new(1, 0, 0, 22), UDim2.new(0, 0, 0, 0), Color3.new(1, 1, 1))
-
-makeLabel(aiBox, "FIGHT WITH AI", UDim2.new(1, 0, 0, 26), UDim2.new(0, 0, 0, 20), Color3.fromHex("#FFA500"))
-
-local btnPlayBotNow = makeButton(aiBox, "PLAY!", UDim2.new(0.86, 0, 0, 52), UDim2.new(0.07, 0, 0, 52), Color3.fromHex("#22C55E"))
-
-btnPlayBotNow.Activated:Connect(function()
-
-	Remotes.MatchAction:FireServer("PlayBotNow")
-
-end)
+	makeQueueLabel(queueButtons, "TIRED OF WAITING?", UDim2.fromScale(0.40, 0.15), UDim2.fromScale(0.60, 0), Color3.new(1, 1, 1), 7, 12)
+	makeQueueLabel(queueButtons, "FIGHT WITH AI", UDim2.fromScale(0.40, 0.16), UDim2.fromScale(0.60, 0.15), Color3.fromHex("#FFA500"), 7, 13)
+	local btnPlayBotNow = makeQueueBtn("PLAY!", UDim2.fromScale(0.60, 0.475), UDim2.fromScale(0.40, 0.36), Color3.fromHex("#22C55E"), 20)
+	btnPlayBotNow.Activated:Connect(function()
+		Remotes.MatchAction:FireServer("PlayBotNow")
+	end)
+end
 
 -- ============================================================
-
 -- 2B. INTRO SCREEN ("<Player> VS <BOT> / DEFAULT MODE") & COUNTDOWN ("3, 2, 1, GO!")
-
 -- ============================================================
-
 local introWrap = Instance.new("Frame")
-
 introWrap.Name = "IntroWrap"
-
 introWrap.Size = UDim2.fromScale(1, 1)
-
 introWrap.BackgroundTransparency = 1
-
 introWrap.Visible = false
+introWrap.Parent = layoutRoot
 
-introWrap.Parent = overlay
+local function makeIntroLabel(text: string, size: UDim2, centerY: number, color: Color3, maxText: number, strokeThick: number): TextLabel
+	local lbl = MatchUi.label(introWrap, text, size, UDim2.fromScale(0.5, centerY), color, maxText, strokeThick, 4)
+	lbl.AnchorPoint = Vector2.new(0.5, 0.5)
+	lbl.TextTruncate = Enum.TextTruncate.AtEnd
+	local tc = lbl:FindFirstChildOfClass("UITextSizeConstraint") :: UITextSizeConstraint?
+	if tc then tc.MinTextSize = 8 end
+	return lbl
+end
 
-local introMyName = makeLabel(introWrap, "Player", UDim2.new(0.6, 0, 0, 54), UDim2.new(0.2, 0, 0.34, 0), Color3.fromHex("#1E6FFF"))
-
-local introVs = makeLabel(introWrap, "VS", UDim2.new(0.3, 0, 0, 48), UDim2.new(0.35, 0, 0.43, 0), Color3.fromHex("#FFA500"))
-
-local introOppName = makeLabel(introWrap, "BOT", UDim2.new(0.6, 0, 0, 56), UDim2.new(0.2, 0, 0.51, 0), Color3.fromHex("#FF2E93"))
-
-local introMode = makeLabel(introWrap, "DEFAULT MODE", UDim2.new(0.4, 0, 0, 32), UDim2.new(0.3, 0, 0.61, 0), Color3.new(1, 1, 1))
+local introMyName = makeIntroLabel("Player", UDim2.fromScale(0.65, 0.085), 0.3455, Color3.fromHex("#1E6FFF"), 72, 2.5)
+local introVs = makeIntroLabel("VS", UDim2.fromScale(0.35, 0.070), 0.451, Color3.fromHex("#FFA500"), 60, 2.5)
+local introOppName = makeIntroLabel("BOT", UDim2.fromScale(0.65, 0.085), 0.5565, Color3.fromHex("#FF2E93"), 72, 2.5)
+local introMode = makeIntroLabel("DEFAULT MODE", UDim2.fromScale(0.55, 0.050), 0.652, Color3.new(1, 1, 1), 42, 2)
 
 local countdownWrap = Instance.new("Frame")
-
 countdownWrap.Name = "CountdownWrap"
-
 countdownWrap.Size = UDim2.fromScale(1, 1)
-
 countdownWrap.BackgroundTransparency = 1
-
 countdownWrap.Visible = false
-
-countdownWrap.Parent = overlay
+countdownWrap.Parent = layoutRoot
 
 local countdownBigLabel = makeLabel(countdownWrap, "3", UDim2.fromOffset(220, 140), UDim2.new(0.5, -110, 0.44, -70), Color3.new(1, 1, 1))
 
@@ -3605,699 +3115,702 @@ local function createFaceViewport(parent: Instance): ViewportFrame
 
 end
 
-local function createBuildCard(parent: Instance, posScale: UDim2)
-
+function MatchUi.createCard(parent: Instance, posScale: UDim2)
 	local frame = Instance.new("Frame")
-
-	frame.Size = UDim2.fromOffset(186, 214)
-
-	frame.AnchorPoint = Vector2.new(0.5, 0.5)
-
+	frame.Size = UDim2.fromScale(0.139, 0.29)
+	frame.AnchorPoint = Vector2.new(0, 0)
 	frame.Position = posScale
-
 	frame.BackgroundColor3 = Color3.fromRGB(28, 34, 48)
-
 	frame.ClipsDescendants = true
-
-	addCorner(frame, 14)
-
+	frame.ZIndex = 6
+	MatchUi.corner(frame, 0.08)
 	local stroke = Instance.new("UIStroke")
-
-	stroke.Thickness = 4
-
+	stroke.Thickness = 2.5
 	stroke.Color = Color3.new(0, 0, 0)
-
+	stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 	stroke.Parent = frame
-
 	frame.Parent = parent
 
 	local grad = Instance.new("UIGradient")
-
-	grad.Color = ColorSequence.new(Color3.fromRGB(75, 88, 115), Color3.fromRGB(22, 26, 36))
-
+	grad.Color = ColorSequence.new({
+		ColorSequenceKeypoint.new(0.00, Color3.fromRGB(75, 88, 115)),
+		ColorSequenceKeypoint.new(0.58, Color3.fromRGB(22, 26, 36)),
+		ColorSequenceKeypoint.new(0.62, Color3.fromRGB(10, 12, 18)),
+		ColorSequenceKeypoint.new(1.00, Color3.fromRGB(10, 12, 18)),
+	})
 	grad.Rotation = 90
-
 	grad.Parent = frame
 
+	local cardContent = Instance.new("Frame")
+	cardContent.Name = "CardContent"
+	cardContent.Size = UDim2.fromScale(1, 1)
+	cardContent.BackgroundTransparency = 1
+	cardContent.ZIndex = 7
+	cardContent.Parent = frame
+
+	local cardPad = Instance.new("UIPadding")
+	cardPad.PaddingTop = UDim.new(0.03, 0)
+	cardPad.PaddingBottom = UDim.new(0.03, 0)
+	cardPad.PaddingLeft = UDim.new(0.04, 0)
+	cardPad.PaddingRight = UDim.new(0.04, 0)
+	cardPad.Parent = cardContent
+
+	local cardList = Instance.new("UIListLayout")
+	cardList.FillDirection = Enum.FillDirection.Vertical
+	cardList.HorizontalAlignment = Enum.HorizontalAlignment.Center
+	cardList.VerticalAlignment = Enum.VerticalAlignment.Top
+	cardList.SortOrder = Enum.SortOrder.LayoutOrder
+	cardList.Padding = UDim.new(0.01, 0)
+	cardList.Parent = cardContent
+
+	local posHeader = Instance.new("Frame")
+	posHeader.Name = "PosHeader"
+	posHeader.LayoutOrder = 1
+	posHeader.Size = UDim2.fromScale(1, 0.11)
+	posHeader.BackgroundTransparency = 1
+	posHeader.ZIndex = 7
+	posHeader.Parent = cardContent
+
+	local posTag = MatchUi.label(posHeader, "ST", UDim2.fromScale(0.30, 1), UDim2.fromScale(0, 0), Color3.new(1, 1, 1), 14, 1.5, 8)
+	posTag.BackgroundTransparency = 0.25
+	posTag.BackgroundColor3 = Color3.fromRGB(12, 15, 24)
+	MatchUi.corner(posTag, 0.25)
+
 	-- Real 3D Footballer Viewport inside the card (hair, face, skin, club shirt & club shorts)
-
 	local viewport = Instance.new("ViewportFrame")
-
 	viewport.Name = "ModelViewport"
-
-	viewport.Size = UDim2.new(1, 0, 0.65, 0)
-
-	viewport.Position = UDim2.new(0, 0, 0, 0)
-
+	viewport.LayoutOrder = 2
+	viewport.Size = UDim2.fromScale(0.95, 0.50)
 	viewport.BackgroundTransparency = 1
-
 	viewport.LightColor = Color3.new(1, 1, 1)
-
 	viewport.Ambient = Color3.fromRGB(185, 192, 208)
-
 	viewport.LightDirection = Vector3.new(-0.45, -0.75, 0.65)
-
-	viewport.Parent = frame
+	viewport.ZIndex = 7
+	viewport.Parent = cardContent
 
 	local vpCam = Instance.new("Camera")
-
 	vpCam.FieldOfView = 36
-
 	vpCam.CFrame = CFrame.lookAt(Vector3.new(0.90, 0.84, -7.75), Vector3.new(0, 0.66, 0))
-
 	vpCam.Parent = viewport
-
 	viewport.CurrentCamera = vpCam
 
-	local posTag = makeLabel(frame, "ST", UDim2.fromOffset(36, 20), UDim2.fromOffset(8, 8), Color3.new(1, 1, 1))
+	-- Real Full Name, Real Club - Real Country, Rarity
+	local nameLbl = MatchUi.label(cardContent, "William Saliba", UDim2.fromScale(0.96, 0.14), nil, Color3.new(1, 1, 1), 20, 2, 8)
+	nameLbl.LayoutOrder = 3
+	nameLbl.TextTruncate = Enum.TextTruncate.AtEnd
 
-	posTag.BackgroundTransparency = 0.25
+	local clubLbl = MatchUi.label(cardContent, "Arsenal - France", UDim2.fromScale(0.96, 0.10), nil, Color3.fromRGB(205, 212, 225), 13, 1.5, 8)
+	clubLbl.LayoutOrder = 4
+	clubLbl.TextTruncate = Enum.TextTruncate.AtEnd
 
-	posTag.BackgroundColor3 = Color3.fromRGB(12, 15, 24)
-
-	posTag.ZIndex = 4
-
-	addCorner(posTag, 6)
-
-	-- Bottom Dark Overlay (Real Full Name, Real Club - Real Country, Rarity)
-
-	local bottomBox = Instance.new("Frame")
-
-	bottomBox.Size = UDim2.new(1, 0, 0.38, 0)
-
-	bottomBox.Position = UDim2.new(0, 0, 0.62, 0)
-
-	bottomBox.BackgroundColor3 = Color3.fromRGB(10, 12, 18)
-
-	bottomBox.BackgroundTransparency = 0.10
-
-	bottomBox.BorderSizePixel = 0
-
-	bottomBox.ZIndex = 3
-
-	bottomBox.Parent = frame
-
-	local nameLbl = makeLabel(bottomBox, "William Saliba", UDim2.new(0.92, 0, 0, 26), UDim2.new(0.04, 0, 0, 4), Color3.new(1, 1, 1))
-
-	nameLbl.ZIndex = 4
-
-	local clubLbl = makeLabel(bottomBox, "Arsenal - France", UDim2.new(0.94, 0, 0, 19), UDim2.new(0.03, 0, 0, 31), Color3.fromRGB(205, 212, 225))
-
-	clubLbl.ZIndex = 4
-
-	local rarityLbl = makeLabel(bottomBox, "Legendary", UDim2.new(0.92, 0, 0, 22), UDim2.new(0.04, 0, 0, 52), GameConfig.RARITY_COLORS.Legendary)
-
-	rarityLbl.ZIndex = 4
+	local rarityLbl = MatchUi.label(cardContent, "Legendary", UDim2.fromScale(0.96, 0.11), nil, GameConfig.RARITY_COLORS.Legendary, 15, 1.5, 8)
+	rarityLbl.LayoutOrder = 5
 
 	local dimVeil = Instance.new("Frame")
-
 	dimVeil.Size = UDim2.fromScale(1, 1)
-
 	dimVeil.BackgroundColor3 = Color3.new(0, 0, 0)
-
 	dimVeil.BackgroundTransparency = 0.42
-
 	dimVeil.Visible = false
-
-	dimVeil.ZIndex = 6
-
+	dimVeil.ZIndex = 9
 	dimVeil.Parent = frame
 
 	return {
-
 		frame = frame,
-
 		stroke = stroke,
-
 		viewport = viewport,
-
 		mount = { model = nil, modelId = nil } :: ViewportMount,
-
 		posTag = posTag,
-
 		kitColor = Color3.fromHex("#1E6FFF"),
-
 		nameLbl = nameLbl,
-
 		clubLbl = clubLbl,
-
 		rarityLbl = rarityLbl,
-
 		dimVeil = dimVeil,
-
 		lastId = nil :: string?,
-
 	}
-
 end
 
-local function setCardSilhouette(widget: any, randomCard: any)
-
+function MatchUi.setSilhouette(widget: any, randomCard: any)
 	widget.frame.Visible = true
-
 	widget.dimVeil.Visible = false
-
 	widget.viewport.ImageColor3 = Color3.fromRGB(8, 10, 16)
-
 	widget.posTag.Text = "?"
-
 	widget.stroke.Color = Color3.new(0, 0, 0)
-
 	if randomCard then
-
 		mountViewportModel(widget.viewport, widget.mount, randomCard.id)
-
 		widget.nameLbl.Text = Footballers.getDisplayName(randomCard)
-
 		widget.clubLbl.Text = `{randomCard.club} - {randomCard.country}`
-
 		widget.rarityLbl.Text = randomCard.rarity
-
 		widget.rarityLbl.TextColor3 = GameConfig.RARITY_COLORS[randomCard.rarity] or Color3.new(1, 1, 1)
-
 	end
-
 end
 
-local function populateBuildCard(widget: any, card: any, isMine: boolean?, isDimmed: boolean?)
-
+function MatchUi.populateCard(widget: any, card: any, isMine: boolean?, isDimmed: boolean?)
 	if not card then
-
 		widget.frame.Visible = false
-
 		widget.lastId = nil
-
 		return
-
 	end
-
 	widget.frame.Visible = true
-
 	widget.dimVeil.Visible = isDimmed == true
-
 	if widget.lastId ~= card.id then
-
 		widget.lastId = card.id
-
-		popGui(widget.frame, 0.84)
-
 		if isMine then
-
 			playSfx(if card.rarity == "Mythic" or card.rarity == "Legendary" then "rare" else "roll")
-
 		end
-
 	end
-
 	local col = GameConfig.RARITY_COLORS[card.rarity] or Color3.new(1, 1, 1)
-
 	mountViewportModel(widget.viewport, widget.mount, card.id)
-
 	widget.viewport.ImageColor3 = Color3.new(1, 1, 1)
-
 	widget.kitColor = Color3.fromHex(card.kitColor)
-
 	widget.stroke.Color = Color3.new(0, 0, 0)
-
 	widget.posTag.Text = card.pos
-
 	widget.nameLbl.Text = Footballers.getDisplayName(card)
-
 	widget.clubLbl.Text = `{card.club} - {card.country}`
-
 	widget.rarityLbl.Text = card.rarity
-
 	widget.rarityLbl.TextColor3 = col
-
 end
 
 local buildCenterWrap = Instance.new("Frame")
-
 buildCenterWrap.Size = UDim2.fromScale(1, 1)
-
 buildCenterWrap.BackgroundTransparency = 1
+buildCenterWrap.ZIndex = 3
+buildCenterWrap.Parent = layoutRoot
 
-buildCenterWrap.Parent = overlay
+local buildMyAvatar: ImageLabel
+local buildOppAvatar: ImageLabel
+do
+	local function createMiniAvatarBox(parent: Instance, pos: UDim2, size: UDim2, _borderCol: Color3)
+		local img = Instance.new("ImageLabel")
+		img.Size = size
+		img.AnchorPoint = Vector2.new(0, 0)
+		img.Position = pos
+		img.BackgroundTransparency = 1
+		img.ScaleType = Enum.ScaleType.Fit
+		img.ZIndex = 4
+		img.Parent = parent
+		return img
+	end
 
-local function createMiniAvatarBox(parent: Instance, pos: UDim2, _borderCol: Color3)
-
-	local img = Instance.new("ImageLabel")
-
-	img.Size = UDim2.fromOffset(108, 108)
-
-	img.AnchorPoint = Vector2.new(0.5, 0.5)
-
-	img.Position = pos
-
-	img.BackgroundTransparency = 1
-
-	img.ScaleType = Enum.ScaleType.Fit
-
-	img.Parent = parent
-
-	return img
-
+	buildMyAvatar = createMiniAvatarBox(buildCenterWrap, UDim2.fromScale(0.38, 0.17), UDim2.fromScale(0.077, 0.10), Color3.fromHex("#1E6FFF"))
+	buildOppAvatar = createMiniAvatarBox(buildCenterWrap, UDim2.fromScale(0.55, 0.17), UDim2.fromScale(0.08, 0.10), Color3.fromHex("#E5252A"))
 end
 
-local buildMyAvatar = createMiniAvatarBox(buildCenterWrap, UDim2.fromScale(0.415, 0.21), Color3.fromHex("#1E6FFF"))
+local myCardWidget = MatchUi.createCard(buildCenterWrap, UDim2.fromScale(0.35, 0.31))
+local oppCardWidget = MatchUi.createCard(buildCenterWrap, UDim2.fromScale(0.519, 0.31))
+local vsCenterLabel = MatchUi.label(buildCenterWrap, "VS", UDim2.fromScale(0.050, 0.075), UDim2.fromScale(0.505, 0.455), Color3.fromHex("#FFD21F"), 32, 2, 10)
+vsCenterLabel.AnchorPoint = Vector2.new(0.5, 0.5)
 
-local buildOppAvatar = createMiniAvatarBox(buildCenterWrap, UDim2.fromScale(0.585, 0.21), Color3.fromHex("#E5252A"))
+local rolledInfoLabel = MatchUi.label(layoutRoot, "ROLLING...", UDim2.fromScale(0.30, 0.06), UDim2.fromScale(0.5, 0.665), Color3.new(1, 1, 1), 26, 2, 10)
+rolledInfoLabel.AnchorPoint = Vector2.new(0.5, 0)
+rolledInfoLabel.TextTruncate = Enum.TextTruncate.AtEnd
 
-local myCardWidget = createBuildCard(buildCenterWrap, UDim2.fromScale(0.415, 0.46))
-
-local oppCardWidget = createBuildCard(buildCenterWrap, UDim2.fromScale(0.585, 0.46))
-
-local vsCenterLabel = makeLabel(buildCenterWrap, "VS", UDim2.fromOffset(52, 40), UDim2.new(0.5, -26, 0.46, -20), Color3.fromHex("#FFD21F"))
-
-local rolledInfoLabel = makeLabel(overlay, "ROLLING...", UDim2.new(0.46, 0, 0, 32), UDim2.new(0.27, 0, 0.68, 0), Color3.new(1, 1, 1))
-
-local luckBtn = makeButton(buildCenterWrap, "      LUCK: 1x [→1.5x $750]", UDim2.fromOffset(216, 30), UDim2.new(0.5, -108, 0.74, 0), Color3.fromHex("#22C55E"))
-
-UITheme.styleButton(luckBtn, "Lime", 6)
-
-UITheme.addStuds(luckBtn, 0.88, 16)
+local luckBtn = Instance.new("TextButton")
+luckBtn.Size = UDim2.fromScale(0.155, 0.04)
+luckBtn.AnchorPoint = Vector2.new(0.5, 0)
+luckBtn.Position = UDim2.fromScale(0.5, 0.74)
+luckBtn.BackgroundColor3 = UITheme.Colors.LimeTop
+luckBtn.Font = UITheme.Fonts.Primary
+luckBtn.TextColor3 = Color3.new(1, 1, 1)
+luckBtn.TextTransparency = 1
+luckBtn.TextStrokeTransparency = 1
+luckBtn.TextWrapped = false
+luckBtn.TextScaled = true
+luckBtn.AutoButtonColor = false
+luckBtn.ClipsDescendants = true
+luckBtn.Text = "      LUCK: 1x [→1.5x $750]"
+luckBtn.ZIndex = 12
+MatchUi.corner(luckBtn, 0.25)
+UITheme.applyStroke(luckBtn, 2, UITheme.Colors.Black)
+UITheme.applyGradient(luckBtn, UITheme.Colors.LimeTop, UITheme.Colors.LimeBottom, 90)
+luckBtn.Parent = buildCenterWrap
 
 do
+	local luckStuds = Instance.new("ImageLabel")
+	luckStuds.Name = "Studs"
+	luckStuds.Size = UDim2.fromScale(1, 1)
+	luckStuds.BackgroundTransparency = 1
+	luckStuds.Image = UITheme.Assets.StudsTexture
+	luckStuds.ImageTransparency = 0.88
+	luckStuds.ImageColor3 = UITheme.Colors.LimeTop
+	luckStuds.ScaleType = Enum.ScaleType.Tile
+	luckStuds.TileSize = UDim2.fromScale(0.08, 0.80)
+	luckStuds.ZIndex = 12
+	luckStuds.Parent = luckBtn
 
 	local matchClover = Instance.new("ImageLabel")
-
 	matchClover.Name = "Icon_Clover"
-
-	matchClover.Size = UDim2.fromOffset(24, 24)
-
-	matchClover.Position = UDim2.new(0, 6, 0.5, -12)
-
+	matchClover.Size = UDim2.fromScale(0.14, 0.85)
+	matchClover.AnchorPoint = Vector2.new(0, 0.5)
+	matchClover.Position = UDim2.fromScale(0.03, 0.5)
 	matchClover.BackgroundTransparency = 1
-
 	matchClover.Image = UITheme.Assets.CloverIcon
-
 	matchClover.ScaleType = Enum.ScaleType.Fit
-
-	matchClover.ZIndex = luckBtn.ZIndex + 3
-
+	matchClover.ZIndex = 14
+	local cloverAspect = Instance.new("UIAspectRatioConstraint")
+	cloverAspect.AspectRatio = 1.0
+	cloverAspect.DominantAxis = Enum.DominantAxis.Height
+	cloverAspect.Parent = matchClover
 	matchClover.Parent = luckBtn
 
+	local luckTextLbl = MatchUi.label(luckBtn, "LUCK: 1x [→1.5x $750]", UDim2.fromScale(0.81, 0.90), UDim2.fromScale(0.98, 0.5), Color3.new(1, 1, 1), 14, 1.5, 14)
+	luckTextLbl.Name = "LuckLabel"
+	luckTextLbl.AnchorPoint = Vector2.new(1, 0.5)
+
+	local function syncLuckText()
+		luckTextLbl.Text = string.gsub(luckBtn.Text, "^%s+", "")
+	end
+	syncLuckText()
+	luckBtn:GetPropertyChangedSignal("Text"):Connect(syncLuckText)
 end
-
 luckBtn.Activated:Connect(function()
-
+	playSfx("click")
 	Remotes.MatchAction:FireServer("UpgradeLuck")
-
 end)
 
 -- Left (My 6 Attribute Slots) & Right (Opponent 6 Attribute Slots) matching Section 7.2 & 7.3
-
 type SlotRow = {
-
 	rowFrame: Frame,
-
 	squareBtn: TextButton,
-
 	plusLabel: TextLabel,
-
 	miniPortrait: Frame,
-
 	faceViewport: ViewportFrame,
-
 	faceMount: ViewportMount,
-
 	titleLabel: TextLabel,
-
 	subLabel: TextLabel,
-
 	scoreBadge: TextLabel,
-
 	stealTag: TextButton?,
-
 }
-
 local mySlotRows: { [string]: SlotRow } = {}
-
 local oppSlotRows: { [string]: SlotRow } = {}
 
-local leftHeader = makeLabel(overlay, "YOU", UDim2.new(0.26, 0, 0, 26), UDim2.new(0.03, 0, 0.14, 0), Color3.fromHex("#1E6FFF"))
+local leftStatPanel = Instance.new("Frame")
+leftStatPanel.Name = "LeftStatPanel"
+leftStatPanel.Position = UDim2.fromScale(0.12, 0.16)
+leftStatPanel.Size = UDim2.fromScale(0.19, 0.58)
+leftStatPanel.BackgroundTransparency = 1
+leftStatPanel.ClipsDescendants = false
+leftStatPanel.ZIndex = 8
+leftStatPanel.Parent = layoutRoot
 
-leftHeader.Visible = false
+do
+	local leftList = Instance.new("UIListLayout")
+	leftList.FillDirection = Enum.FillDirection.Vertical
+	leftList.HorizontalAlignment = Enum.HorizontalAlignment.Right
+	leftList.VerticalAlignment = Enum.VerticalAlignment.Top
+	leftList.SortOrder = Enum.SortOrder.LayoutOrder
+	leftList.Padding = UDim.new(0.01, 0)
+	leftList.Parent = leftStatPanel
+end
 
-local rightHeader = makeLabel(overlay, "OPPONENT", UDim2.new(0.26, 0, 0, 26), UDim2.new(0.71, 0, 0.14, 0), Color3.fromHex("#E5252A"))
+local rightStatPanel = Instance.new("Frame")
+rightStatPanel.Name = "RightStatPanel"
+rightStatPanel.Position = UDim2.fromScale(0.70, 0.16)
+rightStatPanel.Size = UDim2.fromScale(0.19, 0.58)
+rightStatPanel.BackgroundTransparency = 1
+rightStatPanel.ClipsDescendants = false
+rightStatPanel.ZIndex = 8
+rightStatPanel.Parent = layoutRoot
 
-rightHeader.Visible = false
+do
+	local rightList = Instance.new("UIListLayout")
+	rightList.FillDirection = Enum.FillDirection.Vertical
+	rightList.HorizontalAlignment = Enum.HorizontalAlignment.Left
+	rightList.VerticalAlignment = Enum.VerticalAlignment.Top
+	rightList.SortOrder = Enum.SortOrder.LayoutOrder
+	rightList.Padding = UDim.new(0.01, 0)
+	rightList.Parent = rightStatPanel
+end
 
-local function animateCardFlyToSlot(targetSquare: GuiObject)
+do
+	local leftHeader = MatchUi.label(layoutRoot, "YOU", UDim2.fromScale(0.26, 0.05), UDim2.fromScale(0.03, 0.14), Color3.fromHex("#1E6FFF"), 22, 2, 10)
+	leftHeader.Visible = false
+	local rightHeader = MatchUi.label(layoutRoot, "OPPONENT", UDim2.fromScale(0.26, 0.05), UDim2.fromScale(0.71, 0.14), Color3.fromHex("#E5252A"), 22, 2, 10)
+	rightHeader.Visible = false
+end
 
+function MatchUi.flyToSlot(targetSquare: GuiObject)
 	if not myCardWidget.frame.Visible then
-
 		return
-
 	end
-
 	local clone = Instance.new("Frame")
-
-	clone.Size = UDim2.fromOffset(186, 214)
-
+	clone.Size = myCardWidget.frame.Size
 	clone.AnchorPoint = Vector2.new(0.5, 0.5)
-
-	clone.Position = myCardWidget.frame.Position
-
+	clone.Position = UDim2.fromScale(
+		myCardWidget.frame.Position.X.Scale + myCardWidget.frame.Size.X.Scale * 0.5,
+		myCardWidget.frame.Position.Y.Scale + myCardWidget.frame.Size.Y.Scale * 0.5
+	)
 	clone.BackgroundColor3 = myCardWidget.kitColor
-
 	clone.ZIndex = 25
-
-	addCorner(clone, 12)
-
+	MatchUi.corner(clone, 0.08)
 	addStroke(clone, Color3.new(1, 1, 1), 3)
-
-	clone.Parent = overlay
+	clone.Parent = layoutRoot
 
 	local absPos = targetSquare.AbsolutePosition
-
 	local absSize = targetSquare.AbsoluteSize
-
-	local targetCenter = absPos + absSize * 0.5
-
-	local vp = overlay.AbsoluteSize
-
-	local destScale = if vp.X > 0 and vp.Y > 0
-
-		then UDim2.fromScale(targetCenter.X / vp.X, targetCenter.Y / vp.Y)
-
-		else UDim2.fromScale(0.265, 0.4)
+	local rootPos = layoutRoot.AbsolutePosition
+	local rootSize = layoutRoot.AbsoluteSize
+	local targetCenter = absPos + absSize * 0.5 - rootPos
+	local destScale = if rootSize.X > 0 and rootSize.Y > 0
+		then UDim2.fromScale(targetCenter.X / rootSize.X, targetCenter.Y / rootSize.Y)
+		else UDim2.fromScale(0.28, 0.40)
+	local destSize = if rootSize.X > 0 and rootSize.Y > 0
+		then UDim2.fromScale(absSize.X / rootSize.X, absSize.Y / rootSize.Y)
+		else UDim2.fromScale(0.045, 0.08)
 
 	local tw = TweenService:Create(clone, TweenInfo.new(0.32, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-
 		Position = destScale,
-
-		Size = UDim2.fromOffset(48, 48),
-
+		Size = destSize,
 		BackgroundTransparency = 0.2,
-
 	})
-
 	tw:Play()
-
 	tw.Completed:Connect(function()
-
 		clone:Destroy()
-
 	end)
-
 end
 
 for idx, attr in GameConfig.ATTRIBUTES do
-
-	local yPos = 0.18 + (idx - 1) * 0.092
-
 	local icon = ATTR_ICONS[attr] or ""
-
 	local fullLabel = GameConfig.ATTRIBUTE_LABELS[attr] or attr
 
-	-- LEFT ROW (YOUR SLOTS): Right-aligned [FullLabel + Icon] + Subtitle on left, 48x48 [+] Square at x = 0.25
-
+	-- LEFT ROW (YOUR SLOTS): Right-aligned [TextBlock] + [Square Slot Button]
 	local myWrap = Instance.new("Frame")
-
-	myWrap.Size = UDim2.new(0.275, 0, 0, 52)
-
-	myWrap.Position = UDim2.new(0.02, 0, yPos, 0)
-
+	myWrap.LayoutOrder = idx
+	myWrap.Size = UDim2.fromScale(1, 0.16)
 	myWrap.BackgroundTransparency = 1
+	myWrap.ClipsDescendants = false
+	myWrap.ZIndex = 8
+	myWrap.Parent = leftStatPanel
 
-	myWrap.Parent = overlay
+	local myRowLayout = Instance.new("UIListLayout")
+	myRowLayout.FillDirection = Enum.FillDirection.Horizontal
+	myRowLayout.HorizontalAlignment = Enum.HorizontalAlignment.Right
+	myRowLayout.VerticalAlignment = Enum.VerticalAlignment.Center
+	myRowLayout.SortOrder = Enum.SortOrder.LayoutOrder
+	myRowLayout.Padding = UDim.new(0.035, 0)
+	myRowLayout.Parent = myWrap
 
-	local myTitle = makeLabel(myWrap, `{fullLabel} {icon}`, UDim2.new(1, -60, 0, 28), UDim2.new(0, 0, 0, 2), Color3.new(1, 1, 1))
+	local myTextBlock = Instance.new("TextButton")
+	myTextBlock.LayoutOrder = 1
+	myTextBlock.Size = UDim2.fromScale(0.75, 1)
+	myTextBlock.BackgroundTransparency = 1
+	myTextBlock.Text = ""
+	myTextBlock.AutoButtonColor = false
+	myTextBlock.ZIndex = 8
+	myTextBlock.Parent = myWrap
 
+	local myTextLayout = Instance.new("UIListLayout")
+	myTextLayout.FillDirection = Enum.FillDirection.Vertical
+	myTextLayout.HorizontalAlignment = Enum.HorizontalAlignment.Right
+	myTextLayout.VerticalAlignment = Enum.VerticalAlignment.Center
+	myTextLayout.SortOrder = Enum.SortOrder.LayoutOrder
+	myTextLayout.Padding = UDim.new(0, 0)
+	myTextLayout.Parent = myTextBlock
+
+	local myTitle = MatchUi.label(myTextBlock, `{fullLabel} {icon}`, UDim2.fromScale(1, 0.55), nil, Color3.new(1, 1, 1), 22, 2, 9)
+	myTitle.LayoutOrder = 1
 	myTitle.TextXAlignment = Enum.TextXAlignment.Right
 
-	local mySub = makeLabel(myWrap, "Please Select...", UDim2.new(1, -60, 0, 18), UDim2.new(0, 0, 0, 30), Color3.fromRGB(200, 208, 222))
-
+	local mySub = MatchUi.label(myTextBlock, "Please Select...", UDim2.fromScale(1, 0.45), nil, Color3.fromRGB(200, 208, 222), 15, 1.5, 9)
+	mySub.LayoutOrder = 2
 	mySub.TextXAlignment = Enum.TextXAlignment.Right
+	mySub.TextTruncate = Enum.TextTruncate.AtEnd
 
-	local mySq = makeButton(myWrap, "", UDim2.fromOffset(48, 48), UDim2.new(1, -48, 0.5, -24), GameConfig.UI_COLORS.SlotSquare)
-
+	local mySq = Instance.new("TextButton")
+	mySq.LayoutOrder = 2
+	mySq.Size = UDim2.fromScale(0.25, 0.80)
+	mySq.BackgroundColor3 = GameConfig.UI_COLORS.SlotSquare
 	mySq.BackgroundTransparency = 0.25
+	mySq.Text = ""
+	mySq.AutoButtonColor = false
+	mySq.ClipsDescendants = false
+	mySq.ZIndex = 9
+	MatchUi.corner(mySq, 0.18)
+	UITheme.applyStroke(mySq, 2, UITheme.Colors.Black)
+	local mySqAspect = Instance.new("UIAspectRatioConstraint")
+	mySqAspect.AspectRatio = 1.0
+	mySqAspect.DominantAxis = Enum.DominantAxis.Height
+	mySqAspect.Parent = mySq
+	mySq.Parent = myWrap
 
-	local myPlus = makeLabel(mySq, "+", UDim2.new(0.8, 0, 0.8, 0), UDim2.new(0.1, 0, 0.1, 0), Color3.new(1, 1, 1))
+	local myPlus = MatchUi.label(mySq, "+", UDim2.fromScale(0.8, 0.8), UDim2.fromScale(0.1, 0.1), Color3.new(1, 1, 1), 28, 2, 10)
 
 	local myMini = Instance.new("Frame")
-
-	myMini.Size = UDim2.new(1, -6, 1, -6)
-
-	myMini.Position = UDim2.fromOffset(3, 3)
-
+	myMini.Size = UDim2.fromScale(0.86, 0.86)
+	myMini.AnchorPoint = Vector2.new(0.5, 0.5)
+	myMini.Position = UDim2.fromScale(0.5, 0.5)
 	myMini.BackgroundColor3 = Color3.fromHex("#1E6FFF")
-
 	myMini.ClipsDescendants = true
-
 	myMini.Visible = false
-
-	addCorner(myMini, 8)
-
+	myMini.ZIndex = 10
+	MatchUi.corner(myMini, 0.16)
 	myMini.Parent = mySq
-
 	local myFaceVp = createFaceViewport(myMini)
+	myFaceVp.ZIndex = 11
+	MatchUi.corner(myFaceVp, 0.16)
 
-	addCorner(myFaceVp, 8)
-
-	local myBadge = makeLabel(mySq, "84", UDim2.fromOffset(34, 24), UDim2.new(1, -18, 1, -14), Color3.fromHex("#FFD21F"))
-
+	local myBadge = MatchUi.label(mySq, "84", UDim2.fromScale(0.65, 0.48), UDim2.fromScale(0.95, 0.88), Color3.fromHex("#FFD21F"), 18, 1.5, 12)
+	myBadge.AnchorPoint = Vector2.new(0.5, 0.5)
 	myBadge.BackgroundTransparency = 0
-
 	myBadge.BackgroundColor3 = Color3.fromRGB(16, 20, 30)
-
-	myBadge.ZIndex = 5
-
 	myBadge.Visible = false
-
-	addCorner(myBadge, 6)
-
-	addStroke(myBadge, Color3.new(0, 0, 0), 2)
-
-	-- Make entire row clickable for easy placement
-
-	local rowClick = Instance.new("TextButton")
-
-	rowClick.Size = UDim2.new(1, -52, 1, 0)
-
-	rowClick.BackgroundTransparency = 1
-
-	rowClick.Text = ""
-
-	rowClick.Parent = myWrap
+	MatchUi.corner(myBadge, 0.25)
 
 	local function triggerPlace()
-
 		if currentPhase == "Build" and currentSubPhase == "Selecting" and not currentPlacedThisRound and myPlus.Visible then
-
+			playSfx("click")
 			currentPlacedThisRound = true
-
-			animateCardFlyToSlot(mySq)
-
+			MatchUi.flyToSlot(mySq)
 			Remotes.MatchAction:FireServer("PlaceSlot", attr)
-
 		end
-
 	end
-
 	mySq.Activated:Connect(triggerPlace)
-
-	rowClick.Activated:Connect(triggerPlace)
+	myTextBlock.Activated:Connect(triggerPlace)
 
 	mySlotRows[attr] = {
-
 		rowFrame = myWrap,
-
 		squareBtn = mySq,
-
 		plusLabel = myPlus,
-
 		miniPortrait = myMini,
-
 		faceViewport = myFaceVp,
-
 		faceMount = { model = nil, modelId = nil },
-
 		titleLabel = myTitle,
-
 		subLabel = mySub,
-
 		scoreBadge = myBadge,
-
 		stealTag = nil,
-
 	}
 
-	-- RIGHT ROW (OPPONENT SLOTS): Mirrored! 48x48 Square on left, Left-aligned [Icon + FullLabel] + Subtitle on right
-
+	-- RIGHT ROW (OPPONENT SLOTS): Mirrored! [Square Slot Button] on left, Left-aligned [TextBlock] on right
 	local oppWrap = Instance.new("Frame")
-
-	oppWrap.Size = UDim2.new(0.275, 0, 0, 52)
-
-	oppWrap.Position = UDim2.new(0.705, 0, yPos, 0)
-
+	oppWrap.LayoutOrder = idx
+	oppWrap.Size = UDim2.fromScale(1, 0.16)
 	oppWrap.BackgroundTransparency = 1
+	oppWrap.ClipsDescendants = false
+	oppWrap.ZIndex = 8
+	oppWrap.Parent = rightStatPanel
 
-	oppWrap.Parent = overlay
+	local oppRowLayout = Instance.new("UIListLayout")
+	oppRowLayout.FillDirection = Enum.FillDirection.Horizontal
+	oppRowLayout.HorizontalAlignment = Enum.HorizontalAlignment.Left
+	oppRowLayout.VerticalAlignment = Enum.VerticalAlignment.Center
+	oppRowLayout.SortOrder = Enum.SortOrder.LayoutOrder
+	oppRowLayout.Padding = UDim.new(0.035, 0)
+	oppRowLayout.Parent = oppWrap
 
-	local oppSq = makeButton(oppWrap, "", UDim2.fromOffset(48, 48), UDim2.new(0, 0, 0.5, -24), GameConfig.UI_COLORS.SlotSquare)
-
+	local oppSq = Instance.new("TextButton")
+	oppSq.LayoutOrder = 1
+	oppSq.Size = UDim2.fromScale(0.25, 0.80)
+	oppSq.BackgroundColor3 = GameConfig.UI_COLORS.SlotSquare
 	oppSq.BackgroundTransparency = 0.25
-
+	oppSq.Text = ""
 	oppSq.AutoButtonColor = false
+	oppSq.ClipsDescendants = false
+	oppSq.ZIndex = 9
+	MatchUi.corner(oppSq, 0.18)
+	UITheme.applyStroke(oppSq, 2, UITheme.Colors.Black)
+	local oppSqAspect = Instance.new("UIAspectRatioConstraint")
+	oppSqAspect.AspectRatio = 1.0
+	oppSqAspect.DominantAxis = Enum.DominantAxis.Height
+	oppSqAspect.Parent = oppSq
+	oppSq.Parent = oppWrap
 
-	local oppPlus = makeLabel(oppSq, "", UDim2.fromScale(1, 1), UDim2.new(), Color3.new(1, 1, 1))
+	local oppPlus = MatchUi.label(oppSq, "", UDim2.fromScale(1, 1), UDim2.fromScale(0, 0), Color3.new(1, 1, 1), 24, 2, 10)
 
 	local oppMini = Instance.new("Frame")
-
-	oppMini.Size = UDim2.new(1, -6, 1, -6)
-
-	oppMini.Position = UDim2.fromOffset(3, 3)
-
+	oppMini.Size = UDim2.fromScale(0.86, 0.86)
+	oppMini.AnchorPoint = Vector2.new(0.5, 0.5)
+	oppMini.Position = UDim2.fromScale(0.5, 0.5)
 	oppMini.BackgroundColor3 = Color3.fromHex("#E5252A")
-
 	oppMini.ClipsDescendants = true
-
 	oppMini.Visible = false
-
-	addCorner(oppMini, 8)
-
+	oppMini.ZIndex = 10
+	MatchUi.corner(oppMini, 0.16)
 	oppMini.Parent = oppSq
-
 	local oppFaceVp = createFaceViewport(oppMini)
+	oppFaceVp.ZIndex = 11
+	MatchUi.corner(oppFaceVp, 0.16)
 
-	addCorner(oppFaceVp, 8)
-
-	local oppBadge = makeLabel(oppSq, "80", UDim2.fromOffset(34, 24), UDim2.new(0, -14, 1, -14), Color3.fromHex("#FFD21F"))
-
+	local oppBadge = MatchUi.label(oppSq, "80", UDim2.fromScale(0.65, 0.48), UDim2.fromScale(0.05, 0.88), Color3.fromHex("#FFD21F"), 18, 1.5, 12)
+	oppBadge.AnchorPoint = Vector2.new(0.5, 0.5)
 	oppBadge.BackgroundTransparency = 0
-
 	oppBadge.BackgroundColor3 = Color3.fromRGB(16, 20, 30)
-
-	oppBadge.ZIndex = 5
-
 	oppBadge.Visible = false
+	MatchUi.corner(oppBadge, 0.25)
 
-	addCorner(oppBadge, 6)
-
-	addStroke(oppBadge, Color3.new(0, 0, 0), 2)
-
-	local stealTag = makeButton(oppSq, "STEAL", UDim2.new(1.16, 0, 0, 20), UDim2.new(-0.08, 0, 1, -16), GameConfig.UI_COLORS.Steal)
-
-	stealTag.ZIndex = 6
-
+	local stealTag = Instance.new("TextButton")
+	stealTag.Size = UDim2.fromScale(1.16, 0.44)
+	stealTag.AnchorPoint = Vector2.new(0.5, 0.5)
+	stealTag.Position = UDim2.fromScale(0.5, 0.88)
+	stealTag.BackgroundColor3 = GameConfig.UI_COLORS.Steal
+	stealTag.Font = UITheme.Fonts.Primary
+	stealTag.TextColor3 = Color3.new(1, 1, 1)
+	stealTag.TextStrokeTransparency = 0
+	stealTag.TextStrokeColor3 = UITheme.Colors.Black
+	stealTag.TextWrapped = false
+	stealTag.TextScaled = true
+	stealTag.AutoButtonColor = false
+	stealTag.Text = "STEAL"
+	stealTag.ZIndex = 12
 	stealTag.Visible = false
+	MatchUi.corner(stealTag, 0.25)
+	UITheme.applyStroke(stealTag, 1.5, UITheme.Colors.Black)
+	local stealTagTextConstraint = Instance.new("UITextSizeConstraint")
+	stealTagTextConstraint.MinTextSize = 6
+	stealTagTextConstraint.MaxTextSize = 13
+	stealTagTextConstraint.Parent = stealTag
+	stealTag.Parent = oppSq
 
 	stealTag.Activated:Connect(function()
-
+		playSfx("click")
 		Remotes.MatchAction:FireServer("Steal", attr, attr)
-
 	end)
-
 	oppSq.Activated:Connect(function()
-
 		if stealTag.Visible then
-
+			playSfx("click")
 			Remotes.MatchAction:FireServer("Steal", attr, attr)
-
 		end
-
 	end)
 
-	local oppTitle = makeLabel(oppWrap, `{icon} {fullLabel}`, UDim2.new(1, -60, 0, 28), UDim2.new(0, 60, 0, 2), Color3.new(1, 1, 1))
+	local oppTextBlock = Instance.new("Frame")
+	oppTextBlock.LayoutOrder = 2
+	oppTextBlock.Size = UDim2.fromScale(0.75, 1)
+	oppTextBlock.BackgroundTransparency = 1
+	oppTextBlock.ZIndex = 8
+	oppTextBlock.Parent = oppWrap
 
+	local oppTextLayout = Instance.new("UIListLayout")
+	oppTextLayout.FillDirection = Enum.FillDirection.Vertical
+	oppTextLayout.HorizontalAlignment = Enum.HorizontalAlignment.Left
+	oppTextLayout.VerticalAlignment = Enum.VerticalAlignment.Center
+	oppTextLayout.SortOrder = Enum.SortOrder.LayoutOrder
+	oppTextLayout.Padding = UDim.new(0, 0)
+	oppTextLayout.Parent = oppTextBlock
+
+	local oppTitle = MatchUi.label(oppTextBlock, `{icon} {fullLabel}`, UDim2.fromScale(1, 0.55), nil, Color3.new(1, 1, 1), 22, 2, 9)
+	oppTitle.LayoutOrder = 1
 	oppTitle.TextXAlignment = Enum.TextXAlignment.Left
 
-	local oppSub = makeLabel(oppWrap, "Selecting...", UDim2.new(1, -60, 0, 18), UDim2.new(0, 60, 0, 30), Color3.fromRGB(200, 208, 222))
-
+	local oppSub = MatchUi.label(oppTextBlock, "Selecting...", UDim2.fromScale(1, 0.45), nil, Color3.fromRGB(200, 208, 222), 15, 1.5, 9)
+	oppSub.LayoutOrder = 2
 	oppSub.TextXAlignment = Enum.TextXAlignment.Left
+	oppSub.TextTruncate = Enum.TextTruncate.AtEnd
 
 	oppSlotRows[attr] = {
-
 		rowFrame = oppWrap,
-
 		squareBtn = oppSq,
-
 		plusLabel = oppPlus,
-
 		miniPortrait = oppMini,
-
 		faceViewport = oppFaceVp,
-
 		faceMount = { model = nil, modelId = nil },
-
 		titleLabel = oppTitle,
-
 		subLabel = oppSub,
-
 		scoreBadge = oppBadge,
-
 		stealTag = stealTag,
-
 	}
-
 end
 
 -- 5 Bottom Action Buttons (Build phase)
-
 local actionBar = Instance.new("Frame")
-
-actionBar.Size = UDim2.new(0.76, 0, 0, 56)
-
-actionBar.Position = UDim2.new(0.12, 0, 0.83, 0)
-
+actionBar.AnchorPoint = Vector2.new(0.5, 0)
+actionBar.Position = UDim2.fromScale(0.5, 0.82)
+actionBar.Size = UDim2.fromScale(0.77, 0.09)
 actionBar.BackgroundTransparency = 1
+actionBar.ZIndex = 12
+actionBar.Parent = layoutRoot
 
-actionBar.Parent = overlay
+local btnReroll: TextButton
+local btnSteal: TextButton
+do
+	local actionList = Instance.new("UIListLayout")
+	actionList.FillDirection = Enum.FillDirection.Horizontal
+	actionList.HorizontalAlignment = Enum.HorizontalAlignment.Center
+	actionList.VerticalAlignment = Enum.VerticalAlignment.Center
+	actionList.SortOrder = Enum.SortOrder.LayoutOrder
+	actionList.Padding = UDim.new(0.022, 0)
+	actionList.Parent = actionBar
 
-local btnRevealAll = makeButton(actionBar, "👁️ REVEAL ALL\nR$29", UDim2.new(0.18, 0, 1, 0), UDim2.new(0.00, 0, 0, 0), GameConfig.UI_COLORS.RevealAll)
+	local function makeActionButton(text: string, layoutOrder: number, bg: Color3): TextButton
+		local btn = Instance.new("TextButton")
+		btn.LayoutOrder = layoutOrder
+		btn.Size = UDim2.fromScale(0.18, 1)
+		btn.BackgroundColor3 = bg
+		btn.Font = UITheme.Fonts.Primary
+		btn.TextColor3 = UITheme.Colors.White
+		btn.TextTransparency = 1
+		btn.TextStrokeTransparency = 1
+		btn.TextWrapped = false
+		btn.TextScaled = true
+		btn.AutoButtonColor = false
+		btn.Text = text
+		btn.ZIndex = 12
+		MatchUi.corner(btn, 0.18)
+		UITheme.applyStroke(btn, 2.5, UITheme.Colors.Black)
 
-local btnSeeBest = makeButton(actionBar, "🔍 SEE BEST\nR$9", UDim2.new(0.18, 0, 1, 0), UDim2.new(0.205, 0, 0, 0), GameConfig.UI_COLORS.SeeBest)
+		local pad = Instance.new("UIPadding")
+		pad.PaddingTop = UDim.new(0.04, 0)
+		pad.PaddingBottom = UDim.new(0.04, 0)
+		pad.PaddingLeft = UDim.new(0.04, 0)
+		pad.PaddingRight = UDim.new(0.04, 0)
+		pad.Parent = btn
 
-local btnReroll = makeButton(actionBar, "🎲 REROLL (2)\nR$19", UDim2.new(0.18, 0, 1, 0), UDim2.new(0.41, 0, 0, 0), GameConfig.UI_COLORS.Reroll)
+		local list = Instance.new("UIListLayout")
+		list.FillDirection = Enum.FillDirection.Vertical
+		list.HorizontalAlignment = Enum.HorizontalAlignment.Center
+		list.VerticalAlignment = Enum.VerticalAlignment.Center
+		list.SortOrder = Enum.SortOrder.LayoutOrder
+		list.Padding = UDim.new(0, 0)
+		list.Parent = btn
 
-local btnSteal = makeButton(actionBar, "😈 STEAL (1)\nR$39", UDim2.new(0.18, 0, 1, 0), UDim2.new(0.615, 0, 0, 0), GameConfig.UI_COLORS.Steal)
+		local line1 = MatchUi.label(btn, "", UDim2.fromScale(1, 0.55), nil, UITheme.Colors.White, 22, 2, 13)
+		line1.Name = "ActionName"
+		line1.LayoutOrder = 1
 
-local btnShuffle = makeButton(actionBar, "🔀 SHUFFLE\nFREE", UDim2.new(0.18, 0, 1, 0), UDim2.new(0.82, 0, 0, 0), GameConfig.UI_COLORS.Shuffle)
+		local line2 = MatchUi.label(btn, "", UDim2.fromScale(1, 0.45), nil, UITheme.Colors.White, 18, 1.5, 13)
+		line2.Name = "ActionPrice"
+		line2.LayoutOrder = 2
 
-btnRevealAll.Activated:Connect(function()
-
-	Remotes.MatchAction:FireServer("RevealAll")
-
-end)
-
-btnSeeBest.Activated:Connect(function()
-
-	Remotes.MatchAction:FireServer("SeeBest")
-
-end)
-
-btnReroll.Activated:Connect(function()
-
-	Remotes.MatchAction:FireServer("Reroll")
-
-end)
-
-btnShuffle.Activated:Connect(function()
-
-	Remotes.MatchAction:FireServer("Shuffle")
-
-end)
-
-btnSteal.Activated:Connect(function()
-
-	for _, attr in GameConfig.ATTRIBUTES do
-
-		local sBtn = oppSlotRows[attr].stealTag
-
-		if sBtn and sBtn.Visible then
-
-			Remotes.MatchAction:FireServer("Steal", attr, attr)
-
-			break
-
+		local function syncButtonLines()
+			local parts = string.split(btn.Text, "\n")
+			line1.Text = parts[1] or ""
+			line2.Text = parts[2] or ""
 		end
+		syncButtonLines()
+		btn:GetPropertyChangedSignal("Text"):Connect(syncButtonLines)
 
+		btn.Activated:Connect(function()
+			playSfx("click")
+		end)
+		btn.Parent = actionBar
+		return btn
 	end
 
-end)
+	local btnRevealAll = makeActionButton("👁️ REVEAL ALL\nR$29", 1, GameConfig.UI_COLORS.RevealAll)
+	local btnSeeBest = makeActionButton("🔍 SEE BEST\nR$9", 2, GameConfig.UI_COLORS.SeeBest)
+	btnReroll = makeActionButton("🎲 REROLL (2)\nR$19", 3, GameConfig.UI_COLORS.Reroll)
+	btnSteal = makeActionButton("😈 STEAL (1)\nR$39", 4, GameConfig.UI_COLORS.Steal)
+	local btnShuffle = makeActionButton("🔀 SHUFFLE\nFREE", 5, GameConfig.UI_COLORS.Shuffle)
+
+	btnRevealAll.Activated:Connect(function()
+		Remotes.MatchAction:FireServer("RevealAll")
+	end)
+	btnSeeBest.Activated:Connect(function()
+		Remotes.MatchAction:FireServer("SeeBest")
+	end)
+	btnReroll.Activated:Connect(function()
+		Remotes.MatchAction:FireServer("Reroll")
+	end)
+	btnShuffle.Activated:Connect(function()
+		Remotes.MatchAction:FireServer("Shuffle")
+	end)
+	btnSteal.Activated:Connect(function()
+		for _, attr in GameConfig.ATTRIBUTES do
+			local sBtn = oppSlotRows[attr].stealTag
+			if sBtn and sBtn.Visible then
+				Remotes.MatchAction:FireServer("Steal", attr, attr)
+				break
+			end
+		end
+	end)
+end
 
 -- ============================================================
 
@@ -4313,7 +3826,7 @@ showdownWrap.BackgroundTransparency = 1
 
 showdownWrap.Visible = false
 
-showdownWrap.Parent = overlay
+showdownWrap.Parent = layoutRoot
 
 local function createPortraitCard(parent: Instance, pos: UDim2, _bgCol: Color3)
 
@@ -4403,7 +3916,7 @@ winnerWrap.BackgroundTransparency = 1
 
 winnerWrap.Visible = false
 
-winnerWrap.Parent = overlay
+winnerWrap.Parent = layoutRoot
 
 local winPortraitCard, winPortraitImg, winPortraitName = createPortraitCard(winnerWrap, UDim2.fromScale(0.50, 0.36), Color3.fromHex("#1E6FFF"))
 
@@ -4779,193 +4292,11 @@ end)
 
 -- Post-Match VICTORY! (3s) Summary Modal Popup (parented to screenGui so it displays cleanly on return to Lobby or on demand)
 
-local resultPopup = Instance.new("Frame")
-
-resultPopup.Size = UDim2.fromOffset(620, 360)
-
-resultPopup.AnchorPoint = Vector2.new(0.5, 0.5)
-
-resultPopup.Position = UDim2.fromScale(0.5, 0.50)
-
-resultPopup.BackgroundColor3 = Color3.fromRGB(24, 28, 40)
-
-resultPopup.Visible = false
-
-resultPopup.ZIndex = 28
-
-addCorner(resultPopup, 16)
-
-addStroke(resultPopup, Color3.new(0, 0, 0), 4)
-
-resultPopup.Parent = screenGui
-
-local resultHeader = Instance.new("Frame")
-
-resultHeader.Size = UDim2.new(1, 0, 0, 54)
-
-resultHeader.BackgroundColor3 = Color3.fromHex("#F59E0B")
-
-resultHeader.ZIndex = 28
-
-addCorner(resultHeader, 16)
-
-addStroke(resultHeader, Color3.new(0, 0, 0), 3)
-
-resultHeader.Parent = resultPopup
-
-local resultTitle = makeLabel(resultHeader, "VICTORY! (3s)", UDim2.new(0.8, 0, 0.8, 0), UDim2.new(0.04, 0, 0.1, 0), Color3.new(1, 1, 1))
-
-resultTitle.TextXAlignment = Enum.TextXAlignment.Left
-
-resultTitle.ZIndex = 29
-
-local btnCloseResultPopup = makeButton(resultHeader, "X", UDim2.fromOffset(40, 40), UDim2.new(1, -48, 0, 7), Color3.fromHex("#E5252A"))
-
-btnCloseResultPopup.ZIndex = 29
-
-btnCloseResultPopup.Activated:Connect(function()
-
-	resultPopup.Visible = false
-
-end)
-
-local function makeSummaryCard(pos: UDim2, size: UDim2, titleText: string, bg: Color3)
-
-	local c = Instance.new("Frame")
-
-	c.Size = size
-
-	c.Position = pos
-
-	c.BackgroundColor3 = bg
-
-	c.ZIndex = 29
-
-	addCorner(c, 10)
-
-	addStroke(c, Color3.new(0, 0, 0), 2)
-
-	c.Parent = resultPopup
-
-	local t = makeLabel(c, titleText, UDim2.new(0.92, 0, 0.28, 0), UDim2.new(0.04, 0, 0.06, 0), Color3.new(1, 1, 1))
-
-	t.ZIndex = 30
-
-	local v = makeLabel(c, "", UDim2.new(0.92, 0, 0.44, 0), UDim2.new(0.04, 0, 0.42, 0), Color3.fromHex("#FFD21F"))
-
-	v.ZIndex = 30
-
-	return c, v
-
-end
-
-local _, sumBuxVal = makeSummaryCard(UDim2.new(0.025, 0, 0, 66), UDim2.new(0.225, 0, 0, 118), "CASH EARNED", Color3.fromRGB(30, 75, 46))
-
-sumBuxVal.TextColor3 = Color3.fromHex("#3DDC3D")
-
-local sumWinsCard, sumWinsVal = makeSummaryCard(UDim2.new(0.266, 0, 0, 66), UDim2.new(0.225, 0, 0, 118), "WINS", Color3.fromRGB(28, 56, 98))
-
-do
-
-	local sumTrophy = Instance.new("ImageLabel")
-
-	sumTrophy.Name = "Icon_Trophy"
-
-	sumTrophy.Size = UDim2.fromOffset(26, 26)
-
-	sumTrophy.Position = UDim2.new(1, -30, 0, 4)
-
-	sumTrophy.BackgroundTransparency = 1
-
-	sumTrophy.Image = UITheme.Assets.TrophyIcon
-
-	sumTrophy.ScaleType = Enum.ScaleType.Fit
-
-	sumTrophy.ZIndex = sumWinsCard.ZIndex + 2
-
-	sumTrophy.Parent = sumWinsCard
-
-end
-
-local _, sumStreakVal = makeSummaryCard(UDim2.new(0.507, 0, 0, 66), UDim2.new(0.225, 0, 0, 118), "WIN STREAK", Color3.fromRGB(98, 42, 28))
-
-local sumQuestCard, sumQuestVal = makeSummaryCard(UDim2.new(0.748, 0, 0, 66), UDim2.new(0.225, 0, 0, 118), "FINISH A MATCH", Color3.fromRGB(58, 36, 92))
-
-sumQuestVal.Size = UDim2.new(0.92, 0, 0.28, 0)
-
-sumQuestVal.Position = UDim2.new(0.04, 0, 0.34, 0)
-
-sumQuestVal.Text = "🎡 +1 SPIN"
-
-local btnSumClaimQuest = makeButton(sumQuestCard, "CLAIM!", UDim2.new(0.84, 0, 0.28, 0), UDim2.new(0.08, 0, 0.66, 0), Color3.fromHex("#22C55E"))
-
-btnSumClaimQuest.ZIndex = 30
-
-btnSumClaimQuest.Activated:Connect(function()
-
-	Remotes.MetaAction:FireServer("ClaimQuest", "finish_match")
-
-	btnSumClaimQuest.Text = "CLAIMED ✓"
-
-	btnSumClaimQuest.BackgroundColor3 = Color3.fromRGB(95, 100, 115)
-
-end)
-
-local _, sumPlay30Val = makeSummaryCard(UDim2.new(0.025, 0, 0, 196), UDim2.new(0.305, 0, 0, 112), "PLAY FOR 30 MINUTES", Color3.fromRGB(36, 44, 62))
-
-local _, sumNextPtVal = makeSummaryCard(UDim2.new(0.347, 0, 0, 196), UDim2.new(0.305, 0, 0, 112), "NEXT: PLAYTIME BUX", Color3.fromRGB(36, 44, 62))
-
-local _, sumNextSkinVal = makeSummaryCard(UDim2.new(0.669, 0, 0, 196), UDim2.new(0.305, 0, 0, 112), "NEXT CHAIR SKIN", Color3.fromRGB(36, 44, 62))
-
-local sumFooterLabel = makeLabel(resultPopup, "1 MATCH PLAYED • 1 WON", UDim2.new(0.8, 0, 0, 26), UDim2.new(0.1, 0, 1, -34), Color3.new(1, 1, 1))
-
-sumFooterLabel.ZIndex = 30
-
-local popupCountdownToken = 0
-
 local lastDidWin = true
 
 local pendingSummaryPopup = false
 
-local function showSummaryPopupWithCountdown(didWin: boolean)
-
-	popupCountdownToken += 1
-
-	local myToken = popupCountdownToken
-
-	resultPopup.Visible = true
-
-	popGui(resultPopup, 0.85)
-
-	local baseTitle = if didWin then "VICTORY!" else "DEFEAT!"
-
-	resultHeader.BackgroundColor3 = if didWin then Color3.fromHex("#F59E0B") else Color3.fromHex("#E5252A")
-
-	task.spawn(function()
-
-		for sec = 3, 1, -1 do
-
-			if popupCountdownToken ~= myToken or not resultPopup.Visible then
-
-				return
-
-			end
-
-			resultTitle.Text = `{baseTitle} ({sec}s)`
-
-			task.wait(1)
-
-		end
-
-		if popupCountdownToken == myToken then
-
-			resultPopup.Visible = false
-
-		end
-
-	end)
-
-end
+local summaryUI = ShopDailyUI.initSummaryPopup(screenGui, Remotes, UITheme, playSfx)
 
 -- Helper to populate a slot row in Build, Showdown, or Winner mode
 
@@ -5081,8 +4412,8 @@ local function refreshWinnerInspection(animateSlam: boolean?)
 
 	winAvgValLbl.Text = if eval then tostring(eval.avgScore) else "0.0"
 
+	leftStatPanel.Visible = true
 	for idx, attr in GameConfig.ATTRIBUTES do
-
 		local row = mySlotRows[attr]
 
 		row.rowFrame.Visible = true
@@ -5144,29 +4475,20 @@ end)
 -- ============================================================
 
 local function setMyColumnVisible(vis: boolean)
-
+	leftStatPanel.Visible = vis
 	for _, attr in GameConfig.ATTRIBUTES do
-
 		mySlotRows[attr].rowFrame.Visible = vis
-
 	end
-
 end
 
 local function setOppColumnVisible(vis: boolean)
-
+	rightStatPanel.Visible = vis
 	for _, attr in GameConfig.ATTRIBUTES do
-
 		oppSlotRows[attr].rowFrame.Visible = vis
-
 		if not vis and oppSlotRows[attr].stealTag then
-
 			oppSlotRows[attr].stealTag.Visible = false
-
 		end
-
 	end
-
 end
 
 local function refreshObbyPrompt(now: number)
@@ -5257,23 +4579,7 @@ local function refreshMetaUI()
 
 	if HUD.updateFriends then HUD.updateFriends(boostPct) else friendsLabel.Text = `FRIENDS BOOST: +{boostPct}%` end
 
-	if wheelSpinBtn then
-		local wSpinLbl = wheelSpinBtn:FindFirstChild("BtnLabel") :: TextLabel?
-		if wSpinLbl then
-			wSpinLbl.Text = `🎡 SPIN WHEEL ({p.WheelSpins})`
-		else
-			wheelSpinBtn.Text = `🎡 SPIN WHEEL ({p.WheelSpins})`
-		end
-		UITheme.styleButton(wheelSpinBtn, if p.WheelSpins > 0 then "Purple" else "Gray", 8)
-	end
-
-	wheelSpinsCountLbl.Text = `🎟️ AVAILABLE SPINS: {p.WheelSpins}`
-
-	local doSpinBtn = spinBtnLabel.Parent :: TextButton
-
-	spinBtnLabel.Text = if wheelSpinning then "🎡 SPINNING..." else `🎡 SPIN WHEEL ({p.WheelSpins})`
-
-	UITheme.styleButton(doSpinBtn, if p.WheelSpins > 0 and not wheelSpinning then "Lime" else "Gray", 10)
+	wheelHandler.update(p, now)
 
 	if luckUpgradeBtn then
 		local curLuck = p.Luck or 1
@@ -5418,13 +4724,23 @@ local function refreshMetaUI()
 
 	local minsPlayed = math.min(30, math.floor(elapsed / 60))
 
-	sumPlay30Val.Text = `{minsPlayed}/30 MIN`
+	summaryUI.sumPlay30Val.Text = tostring(minsPlayed) .. "/30 MIN"
 
-	sumNextPtVal.Text = if readyPlaytimeCount > 0 then "READY TO CLAIM!" else `{formatMMSS(nextPtRem)} LEFT`
+	summaryUI.sumPlay30Fill.Size = UDim2.fromScale(math.clamp(elapsed / 1800, 0, 1), 1)
 
-	sumNextSkinVal.Text = if nextSkinNeeded > 0 then `\${nextSkinNeeded} MORE` else "READY / UNLOCKED!"
+	local ptReady = readyPlaytimeCount > 0
 
-	sumFooterLabel.Text = `{p.MatchesPlayed or 1} MATCH PLAYED • {p.Wins or 0} WON`
+	summaryUI.sumNextPtVal.Text = if ptReady then "READY TO CLAIM!" else formatMMSS(nextPtRem) .. " LEFT"
+
+	summaryUI.sumNextPtVal.TextColor3 = if ptReady then UITheme.CONFIG.Colors.MoneyLime else UITheme.CONFIG.Colors.DescriptionGold
+
+	local skinReady = nextSkinNeeded <= 0
+
+	summaryUI.sumNextSkinVal.Text = if not skinReady then "$" .. tostring(nextSkinNeeded) .. " MORE" else "READY / UNLOCKED!"
+
+	summaryUI.sumNextSkinVal.TextColor3 = if skinReady then UITheme.CONFIG.Colors.MoneyLime else UITheme.CONFIG.Colors.DescriptionGold
+
+	summaryUI.sumFooterLabel.Text = tostring(p.MatchesPlayed or 1) .. " MATCH PLAYED \u{2022} " .. tostring(p.Wins or 0) .. " WON"
 
 end
 
@@ -6064,9 +5380,9 @@ local function setupWheelZone()
 
 				insideWheelZone = false
 
-				if modalWrap.Visible and pageWheel.Visible and not wheelSpinning then
+				if wheelHandler.isOpen() and not wheelHandler.isSpinning() then
 
-					modalWrap.Visible = false
+					wheelHandler.close()
 
 				end
 
@@ -6174,29 +5490,7 @@ Remotes.ProfileUpdate.OnClientEvent:Connect(function(profile: any, _title: strin
 
 		local sliceIdx = (localPlayer:GetAttribute("LastWheelSlice") :: number?) or 1
 
-		wheelSpinning = true
-
-		refreshMetaUI()
-
-		playSfx("roll")
-
-		local targetMod = (360 - ((sliceIdx - 1) * 45)) % 360
-
-		local baseTurns = math.floor(wheelCurrentRot / 360) * 360 + 1440
-
-		wheelCurrentRot = baseTurns + targetMod
-
-		local tw = TweenService:Create(wheelRotVal, TweenInfo.new(2.2, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
-
-			Value = wheelCurrentRot,
-
-		})
-
-		tw:Play()
-
-		task.delay(2.25, function()
-
-			wheelSpinning = false
+		wheelHandler.playSpinAnimation(sliceIdx, function()
 
 			refreshMetaUI()
 
@@ -6207,6 +5501,8 @@ Remotes.ProfileUpdate.OnClientEvent:Connect(function(profile: any, _title: strin
 			end
 
 		end)
+
+		refreshMetaUI()
 
 		return
 
@@ -6280,6 +5576,8 @@ Remotes.MatchState.OnClientEvent:Connect(function(state: any)
 
 	setBgmPhase(state.phase)
 
+	game:GetService("ProximityPromptService").Enabled = (state.phase == "Idle")
+
 	refreshAllSpectateBillboards()
 
 	if state.phase == "Idle" then
@@ -6304,7 +5602,7 @@ Remotes.MatchState.OnClientEvent:Connect(function(state: any)
 
 			pendingSummaryPopup = false
 
-			showSummaryPopupWithCountdown(lastDidWin)
+			summaryUI.show(lastDidWin)
 
 		end
 
@@ -6606,9 +5904,9 @@ Remotes.MatchState.OnClientEvent:Connect(function(state: any)
 
 					local rB = Footballers.All[math.random(1, #Footballers.All)]
 
-					setCardSilhouette(myCardWidget, rA)
+					MatchUi.setSilhouette(myCardWidget, rA)
 
-					setCardSilhouette(oppCardWidget, rB)
+					MatchUi.setSilhouette(oppCardWidget, rB)
 
 					task.wait(0.12)
 
@@ -6620,9 +5918,9 @@ Remotes.MatchState.OnClientEvent:Connect(function(state: any)
 
 			rollingToken += 1
 
-			populateBuildCard(myCardWidget, myB.currentRoll, true, myB.placedThisRound == true)
+			MatchUi.populateCard(myCardWidget, myB.currentRoll, true, myB.placedThisRound == true)
 
-			populateBuildCard(oppCardWidget, oppB.currentRoll, false, oppB.placedThisRound == true)
+			MatchUi.populateCard(oppCardWidget, oppB.currentRoll, false, oppB.placedThisRound == true)
 
 			if myB.placedThisRound then
 
@@ -6646,7 +5944,7 @@ Remotes.MatchState.OnClientEvent:Connect(function(state: any)
 
 		luckBtn.Text = if nextLuck then `      LUCK: {curLuck}x [→{nextLuck.luck}x ${nextLuck.cost}]` else `      LUCK: {curLuck}x [MAX]`
 
-		btnReroll.Text = if myB.infRerolls then "🎲 REROLL (INF)\nR$19" else `🎲 REROLL ({myB.rerollsLeft})\nR$19`
+		btnReroll.Text = if myB.infRerolls then "🎲 REROLL (INF)\nFREE" else if myB.rerollsLeft > 0 then `🎲 REROLL ({myB.rerollsLeft})\nFREE` else "🎲 REROLL (0)\nLOCKED"
 
 		btnSteal.Text = `😈 STEAL ({myB.stealsLeft})\nR$39`
 
@@ -6902,7 +6200,7 @@ Remotes.MatchState.OnClientEvent:Connect(function(state: any)
 
 				-- Reset soccer ball to center at each stat row, then animate toward the loser
 
-				local yPos = 0.18 + (idx - 1) * 0.092
+				local yPos = 0.16 + (idx - 1) * 0.098
 
 				sdClashSpark.Rotation = 0
 
@@ -7074,15 +6372,17 @@ Remotes.MatchState.OnClientEvent:Connect(function(state: any)
 
 		local r = state.reward
 
-		sumBuxVal.Text = if r then `+${r.buxEarned}` else "+$25"
+		summaryUI.setReward(
 
-		sumWinsVal.Text = if r then `+{r.winsEarned}` else "+0"
+			if r then (r.buxEarned or 0) else 25,
 
-		sumStreakVal.Text = if r then `🔥 {r.newStreak}` else "0"
+			if r then (r.winsEarned or 0) else 0,
 
-		btnSumClaimQuest.Text = "CLAIM!"
+			if r then (r.newStreak or 0) else 0
 
-		btnSumClaimQuest.BackgroundColor3 = Color3.fromHex("#22C55E")
+		)
+
+		summaryUI.setQuestClaimState(true)
 
 		refreshMetaUI()
 

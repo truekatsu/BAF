@@ -86,8 +86,8 @@ local GameConfig = {
 		{ id = "stadium", name = "Stadium Blue", cost = 300, color = Color3.fromHex("#1E6FFF"), mat = Enum.Material.SmoothPlastic },
 		{ id = "cyber_core", name = "Cyber Core Chair", cost = 3500, color = Color3.fromRGB(18, 20, 32), mat = Enum.Material.Metal },
 		{ id = "crimson", name = "Crimson Chair", cost = 6000, color = Color3.fromRGB(150, 15, 25), mat = Enum.Material.WoodPlanks },
-		{ id = "frostbite", name = "Frostbite Chair", cost = 10000, color = Color3.fromRGB(120, 210, 255), mat = Enum.Material.Glass },
-		{ id = "golden", name = "Football Throne", cost = 15000, color = Color3.fromRGB(255, 195, 30), mat = Enum.Material.SmoothPlastic },
+		{ id = "lucky_clover", name = "Lucky Clover Chair", cost = 10000, color = Color3.fromRGB(16, 160, 75), mat = Enum.Material.SmoothPlastic },
+		{ id = "vip_black_diamond", name = "Black Diamond VIP", cost = 25000, color = Color3.fromRGB(30, 30, 35), mat = Enum.Material.DiamondPlate },
 	}),
 
 	DAILY_REWARDS = table.freeze({
@@ -97,7 +97,7 @@ local GameConfig = {
 		{ day = 4, label = "500 BUX", bux = 500, spins = 0, chair = nil },
 		{ day = 5, label = "1000 BUX", bux = 1000, spins = 0, chair = nil },
 		{ day = 6, label = "2 SPINS", bux = 0, spins = 2, chair = nil },
-		{ day = 7, label = "FOOTBALL THRONE", bux = 2500, spins = 0, chair = "golden" },
+		{ day = 7, label = "VIP CHAIR", bux = 2500, spins = 0, chair = "vip_black_diamond" },
 	}),
 
 	PLAYTIME_REWARDS = table.freeze({
@@ -120,14 +120,14 @@ local GameConfig = {
 	OBBY_COOLDOWN_SEC = 14400,
 
 	WHEEL_SEGMENTS = table.freeze({
-		{ id = 1, label = "$350", icon = "💵", color = "#C5E61A", weight = 10, bux = 350, chair = nil, toast = "🎡 Wheel Prize: +$350!" },
-		{ id = 2, label = "$150", icon = "💵", color = "#1D7BF6", weight = 23, bux = 150, chair = nil, toast = "🎡 Wheel Prize: +$150!" },
-		{ id = 3, label = "$350", icon = "💵", color = "#CBD5E1", weight = 10, bux = 350, chair = nil, toast = "🎡 Wheel Prize: +$350!" },
-		{ id = 4, label = "GRAND\nPRIZE", icon = "🪑", color = "#C85A6E", weight = 8, bux = 500, chair = "frostbite", toast = "🎡 JACKPOT! Frostbite Chair + $500!" },
-		{ id = 5, label = "$750", icon = "💰", color = "#C26D27", weight = 9, bux = 750, chair = nil, toast = "🎡 Wheel Prize: +$750!" },
-		{ id = 6, label = "$150", icon = "💵", color = "#C81E2B", weight = 22, bux = 150, chair = nil, toast = "🎡 Wheel Prize: +$150!" },
-		{ id = 7, label = "$750", icon = "💰", color = "#D91CE5", weight = 8, bux = 750, chair = nil, toast = "🎡 Wheel Prize: +$750!" },
-		{ id = 8, label = "$350", icon = "💵", color = "#1AD633", weight = 10, bux = 350, chair = nil, toast = "🎡 Wheel Prize: +$350!" },
+		{ id = 1, label = "350\nBUX", oddsName = "350 BUX", oddsPct = "15.85%", oddsOrder = 6, icon = "💵", assetKey = "Icon_CashCube", color = "#22C55E", strokeColor = "#4ADE80", weight = 15.85, bux = 350, spins = 0, chair = nil, dupBux = 0, toast = "🎡 Wheel Prize: +$350 Bux!" },
+		{ id = 2, label = "1 FREE\nSPIN", oddsName = "1 SPIN", oddsPct = "14.14%", oddsOrder = 5, icon = "🎡", assetKey = "Icon_Wheel", color = "#FACC15", strokeColor = "#FACC15", weight = 14.14, bux = 0, spins = 1, chair = nil, dupBux = 0, toast = "🎡 Wheel Prize: +1 Free Spin!" },
+		{ id = 3, label = "GRAND\nPRIZE", oddsName = "JACKPOT", oddsPct = "0.99%", oddsOrder = 1, icon = "🪑", assetKey = "Icon_Chair_NeonCyber", color = "#EF4444", strokeColor = "#FFD21F", weight = 0.99, bux = 0, spins = 0, chair = "cyber_core", dupBux = 1000, toast = "🎡 JACKPOT! Cyber Core Chair Unlocked!" },
+		{ id = 4, label = "1500\nBUX", oddsName = "1,500 BUX", oddsPct = "2.38%", oddsOrder = 2, icon = "🎁", assetKey = "Icon_Chest", color = "#10B981", strokeColor = "#22C55E", weight = 2.38, bux = 1500, spins = 0, chair = nil, dupBux = 0, toast = "🎡 Wheel Prize: +$1,500 Bux!" },
+		{ id = 5, label = "STADIUM\nCHAIR", oddsName = "STADIUM CHAIR", oddsPct = "13.48%", oddsOrder = 4, icon = "🪑", assetKey = "Icon_Chair_StadiumBlue", color = "#38BDF8", strokeColor = "#38BDF8", weight = 13.48, bux = 0, spins = 0, chair = "stadium", dupBux = 300, toast = "🎡 Wheel Prize: Stadium Blue Chair Unlocked!" },
+		{ id = 6, label = "3 FREE\nSPINS", oddsName = "3 SPINS", oddsPct = "4.76%", oddsOrder = 3, icon = "🎡", assetKey = "Icon_Wheel", color = "#A855F7", strokeColor = "#F59E0B", weight = 4.76, bux = 0, spins = 3, chair = nil, dupBux = 0, toast = "🎡 Wheel Prize: +3 Free Spins!" },
+		{ id = 7, label = "CLASSIC\nWOOD", oddsName = "CLASSIC WOOD", oddsPct = "17.15%", oddsOrder = 7, icon = "🪑", assetKey = "Icon_Chair_ClassicWood", color = "#8B5CF6", strokeColor = "#A855F7", weight = 17.15, bux = 0, spins = 0, chair = "wood", dupBux = 150, toast = "🎡 Wheel Prize: Classic Wood Chair!" },
+		{ id = 8, label = "100\nBUX", oddsName = "100 BUX", oddsPct = "31.25%", oddsOrder = 8, icon = "💵", assetKey = "Icon_CashCube", color = "#14B8A6", strokeColor = "#2DD4BF", weight = 31.25, bux = 100, spins = 0, chair = nil, dupBux = 0, toast = "🎡 Wheel Prize: +$100 Bux!" },
 	}),
 
 	LUCK_TIERS = table.freeze({
@@ -140,19 +140,32 @@ local GameConfig = {
 
 	-- shortcut: id = 0 uses Studio/free fallback, replace 0 with published Roblox GamePass/DeveloperProduct IDs before live monetization launch
 	MONETIZATION = table.freeze({
-		vip = { id = 0, kind = "GamePass" },
-		["2x_bux"] = { id = 0, kind = "GamePass" },
-		["2x_wins"] = { id = 0, kind = "GamePass" },
-		["2x_streak"] = { id = 0, kind = "GamePass" },
-		inf_rerolls = { id = 0, kind = "GamePass" },
-		starter_pack = { id = 0, kind = "Product" },
-		skip_daily = { id = 0, kind = "Product" },
-		claim_all_daily = { id = 0, kind = "Product" },
-		["2x_luck"] = { id = 0, kind = "GamePass" },
-		bux_300 = { id = 0, kind = "Product" },
-		bux_1000 = { id = 0, kind = "Product" },
-		bux_4000 = { id = 0, kind = "Product" },
-		bux_15000 = { id = 0, kind = "Product" },
+		-- Starter Pack (Image 1: 500 Bux + Crimson Chair | 4 Robux)
+		starter_pack = { id = 2079728288, kind = "Product", name = "Starter Pack", robux = 4 },
+
+		-- Gamepasses / Perks (Developer Products in Roblox)
+		vip = { id = 2078438297, kind = "Product", name = "VIP", robux = 19 },
+		["2x_bux"] = { id = 2079194298, kind = "Product", name = "2X BUX", robux = 30 },
+		["2x_wins"] = { id = 2079842269, kind = "Product", name = "2X WIN", robux = 30 },
+		["2x_streak"] = { id = 2079944289, kind = "Product", name = "2X STREAK", robux = 30 },
+		["2x_luck"] = { id = 2078312293, kind = "Product", name = "2X LUCK", robux = 45 },
+		inf_rerolls = { id = 2078462289, kind = "Product", name = "INFINITY REROLLS", robux = 199 },
+
+		-- Currency Developer Products (Image 4)
+		bux_300 = { id = 2079728289, kind = "Product", name = "300 BUX", robux = 5, bux = 300 },
+		bux_1000 = { id = 2078408293, kind = "Product", name = "1000 BUX", robux = 19, bux = 1000 },
+		bux_4000 = { id = 2078966289, kind = "Product", name = "4000 BUX", robux = 49, bux = 4000 },
+		bux_15000 = { id = 2078630286, kind = "Product", name = "15000 BUX", robux = 149, bux = 15000 },
+
+		-- Utilities
+		skip_daily = { id = 0, kind = "Product", name = "Skip Daily", robux = 15 },
+		claim_all_daily = { id = 0, kind = "Product", name = "Claim All Daily", robux = 50 },
+
+		-- Spin Wheel Packs (shortcut: id = 0 uses Studio/free fallback until Developer Product IDs are published)
+		spin_1 = { id = 0, kind = "Product", name = "1 Spin", robux = 6, spins = 1 },
+		spin_5 = { id = 0, kind = "Product", name = "+5 Spins", robux = 23, spins = 5 },
+		spin_10 = { id = 0, kind = "Product", name = "+10 Spins", robux = 36, spins = 10 },
+		spin_first_offer = { id = 0, kind = "Product", name = "First Spin of Day (83% Off)", robux = 2, spins = 1 },
 	}),
 }
 
@@ -178,9 +191,9 @@ function GameConfig.getChairSkin(chairId: string)
 			end
 		end
 	end
-	if chairId == "cyber" then
+	if chairId == "cyber" or chairId == "frostbite" or chairId == "clover" then
 		for _, skin in GameConfig.CHAIR_SKINS do
-			if skin.id == "frostbite" then
+			if skin.id == "lucky_clover" then
 				return skin
 			end
 		end

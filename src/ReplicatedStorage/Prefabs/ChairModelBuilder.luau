@@ -288,48 +288,39 @@ local MESH_CONFIGS: { [string]: MeshConfig } = {
 		end,
 	},
 
-	frostbite = {
-		name = "FrostbiteIceThrone",
-		meshId = "rbxassetid://76494472528484",
-		size = Vector3.new(2.09792, 2.4865, 1.350) * 3.4,
-		seatYOffset = 2.5,
+	lucky_clover = {
+		name = "LuckyCloverChair",
+		meshId = "rbxassetid://113779249418013",
+		size = Vector3.new(4.465, 7.70, 4.376),
+		seatYOffset = 2.3,
 		seatSize = Vector3.new(2.8, 0.4, 2.6),
 		textures = {
-			color = "rbxassetid://111872608785953",
-			normal = "rbxassetid://114000707456459",
-			roughness = "rbxassetid://85147068810486",
-			metalness = "rbxassetid://118447872662274",
+			color = "rbxassetid://135950506251697",
+			normal = "rbxassetid://94633743168876",
+			roughness = "rbxassetid://99634164761171",
+			metalness = "rbxassetid://100917384734662",
 		},
-		setupEffects = function(model: Model, mesh: MeshPart)
+		setupEffects = function(_model: Model, mesh: MeshPart)
 			local pl = Instance.new("PointLight")
-			pl.Color = Color3.fromRGB(160, 240, 255)
-			pl.Brightness = 3.0
-			pl.Range = 16
+			pl.Color = Color3.fromRGB(255, 220, 120)
+			pl.Brightness = 2.5
+			pl.Range = 14
 			pl.Parent = mesh
 
 			local att = Instance.new("Attachment")
-			att.Position = Vector3.new(0, mesh.Size.Y * 0.35, 0)
+			att.Position = Vector3.new(0, mesh.Size.Y * 0.42, 0)
 			att.Parent = mesh
 
-			local mist = Instance.new("ParticleEmitter")
-			mist.Texture = "rbxasset://textures/particles/sparkles_main.dds"
-			mist.Color = ColorSequence.new(Color3.fromRGB(180, 240, 255), Color3.fromRGB(240, 250, 255))
-			mist.LightEmission = 0.8
-			mist.Size = NumberSequence.new(0.5, 0)
-			mist.Lifetime = NumberRange.new(1.2, 2.4)
-			mist.Rate = 20
-			mist.Speed = NumberRange.new(0.8, 2.0)
-			mist.SpreadAngle = Vector2.new(45, 45)
-			mist.Acceleration = Vector3.new(0, -1.0, 0)
-			mist.Parent = att
-
-			local hl = Instance.new("Highlight")
-			hl.OutlineColor = Color3.fromRGB(140, 230, 255)
-			hl.OutlineTransparency = 0.4
-			hl.FillColor = Color3.fromRGB(180, 240, 255)
-			hl.FillTransparency = 0.92
-			hl.Adornee = model
-			hl.Parent = model
+			local sparkles = Instance.new("ParticleEmitter")
+			sparkles.Texture = "rbxasset://textures/particles/sparkles_main.dds"
+			sparkles.Color = ColorSequence.new(Color3.fromRGB(255, 230, 80), Color3.fromRGB(80, 255, 140))
+			sparkles.LightEmission = 1
+			sparkles.Size = NumberSequence.new(0.4, 0)
+			sparkles.Lifetime = NumberRange.new(0.9, 1.8)
+			sparkles.Rate = 10
+			sparkles.Speed = NumberRange.new(0.6, 1.6)
+			sparkles.SpreadAngle = Vector2.new(60, 60)
+			sparkles.Parent = att
 		end,
 	},
 
@@ -375,7 +366,49 @@ local MESH_CONFIGS: { [string]: MeshConfig } = {
 			hl.Parent = model
 		end,
 	},
+
+	vip_black_diamond = {
+		name = "BlackDiamondVIPChair",
+		meshId = "rbxassetid://137755864340291",
+		size = Vector3.new(4.34, 7.7, 3.69),
+		seatYOffset = 2.4,
+		seatSize = Vector3.new(2.8, 0.4, 2.6),
+		textures = {
+			color = "rbxassetid://91639274995198",
+			normal = "rbxassetid://116365734414723",
+			roughness = "rbxassetid://94606636079817",
+			metalness = "rbxassetid://88022934415399",
+		},
+		setupEffects = function(model: Model, mesh: MeshPart)
+			local pl = Instance.new("PointLight")
+			pl.Color = Color3.fromRGB(255, 220, 150)
+			pl.Brightness = 2.5
+			pl.Range = 14
+			pl.Parent = mesh
+
+			local att = Instance.new("Attachment")
+			att.Position = Vector3.new(0, mesh.Size.Y * 0.42, 0)
+			att.Parent = mesh
+
+			local diamondLight = Instance.new("PointLight")
+			diamondLight.Color = Color3.fromRGB(200, 240, 255)
+			diamondLight.Brightness = 3.5
+			diamondLight.Range = 8
+			diamondLight.Parent = att
+
+			local sparkles = Instance.new("ParticleEmitter")
+			sparkles.Texture = "rbxasset://textures/particles/sparkles_main.dds"
+			sparkles.Color = ColorSequence.new(Color3.fromRGB(255, 255, 255), Color3.fromRGB(200, 240, 255))
+			sparkles.LightEmission = 1
+			sparkles.Size = NumberSequence.new(0.4, 0)
+			sparkles.Lifetime = NumberRange.new(0.8, 1.6)
+			sparkles.Rate = 8
+			sparkles.Speed = NumberRange.new(0.6, 1.5)
+			sparkles.Parent = att
+		end,
+	},
 }
+MESH_CONFIGS.frostbite = MESH_CONFIGS.lucky_clover
 
 -- Builds a complete 3D Mesh chair with PBR SurfaceAppearance, effects, and optional Seat
 function ChairModelBuilder.buildMeshChair(skinKey: string, cfTarget: CFrame?, withSeat: boolean?): Model
@@ -397,12 +430,14 @@ function ChairModelBuilder.buildMeshChair(skinKey: string, cfTarget: CFrame?, wi
 
 	local sa = mesh:FindFirstChildWhichIsA("SurfaceAppearance")
 	if not sa then
-		sa = Instance.new("SurfaceAppearance")
-		sa.ColorMap = cfg.textures.color
-		sa.NormalMap = cfg.textures.normal
-		sa.RoughnessMap = cfg.textures.roughness
-		sa.MetalnessMap = cfg.textures.metalness
-		sa.Parent = mesh
+		pcall(function()
+			local newSa = Instance.new("SurfaceAppearance")
+			newSa.ColorMap = cfg.textures.color
+			newSa.NormalMap = cfg.textures.normal
+			newSa.RoughnessMap = cfg.textures.roughness
+			newSa.MetalnessMap = cfg.textures.metalness
+			newSa.Parent = mesh
+		end)
 	end
 
 	local cfBase = cfTarget or CFrame.identity
@@ -438,25 +473,35 @@ function ChairModelBuilder.buildCrimsonFlameChair(cfOffset: CFrame?): Model
 	return ChairModelBuilder.buildMeshChair("crimson", cfOffset, true)
 end
 
+function ChairModelBuilder.buildLuckyCloverChair(cfOffset: CFrame?): Model
+	return ChairModelBuilder.buildMeshChair("lucky_clover", cfOffset, true)
+end
+
 function ChairModelBuilder.buildFrostbiteThrone(cfOffset: CFrame?): Model
-	return ChairModelBuilder.buildMeshChair("frostbite", cfOffset, true)
+	return ChairModelBuilder.buildLuckyCloverChair(cfOffset)
 end
 
 function ChairModelBuilder.buildRoyalFootballThrone(cfOffset: CFrame?): Model
 	return ChairModelBuilder.buildMeshChair("golden", cfOffset, true)
 end
 
+function ChairModelBuilder.buildBlackDiamondVIPChair(cfOffset: CFrame?): Model
+	return ChairModelBuilder.buildMeshChair("vip_black_diamond", cfOffset, true)
+end
+
 -- Generic dispatcher mapping skin id / chair type to builder function
 function ChairModelBuilder.buildChair(chairType: string, cfOffset: CFrame?): Model
 	local key = string.lower(chairType)
-	if key == "crimson" or key == "crimson_chair" or key == "crimsonchair" or key == "crimsonflame" or key == "crimsonflamechair" or key == "emerald" then
+	if key == "vip_black_diamond" or key == "black_diamond" or key == "blackdiamond" or key == "vipchair" or key == "blackdiamondvipchair" or key == "vip" then
+		return ChairModelBuilder.buildBlackDiamondVIPChair(cfOffset)
+	elseif key == "crimson" or key == "crimson_chair" or key == "crimsonchair" or key == "crimsonflame" or key == "crimsonflamechair" or key == "emerald" then
 		return ChairModelBuilder.buildMeshChair("crimson", cfOffset, true)
 	elseif key == "cyber_core" or key == "cybercore" or key == "cybercorechair" then
 		return ChairModelBuilder.buildMeshChair("cyber_core", cfOffset, true)
-	elseif key == "frostbite" or key == "frost" or key == "frostbitethrone" or key == "frostbitechair" or key == "frostchair" or key == "cyber" then
-		return ChairModelBuilder.buildMeshChair("frostbite", cfOffset, true)
+	elseif key == "lucky_clover" or key == "clover" or key == "luckyclover" or key == "cloverchair" or key == "luckycloverchair" or key == "frostbite" or key == "frost" or key == "frostbitethrone" or key == "frostbitechair" or key == "frostchair" or key == "cyber" then
+		return ChairModelBuilder.buildLuckyCloverChair(cfOffset)
 	elseif key == "golden" or key == "football_throne" or key == "footballthrone" or key == "royal" or key == "royalthrone" or key == "royalfootballthrone" then
-		return ChairModelBuilder.buildMeshChair("golden", cfOffset, true)
+		return ChairModelBuilder.buildBlackDiamondVIPChair(cfOffset)
 	elseif key == "wood" or key == "woodchair" or key == "classic" or key == "classicwood" or key == "classic_wood" then
 		return ChairModelBuilder.buildWoodChair(cfOffset)
 	elseif key == "stadium" or key == "stadiumchair" then
@@ -468,8 +513,10 @@ end
 
 ChairModelBuilder.buildCrimsonChair = ChairModelBuilder.buildCrimsonFlameChair
 ChairModelBuilder.buildCyberChair = ChairModelBuilder.buildCyberCoreChair
-ChairModelBuilder.buildFrostThrone = ChairModelBuilder.buildFrostbiteThrone
-ChairModelBuilder.buildRoyalThrone = ChairModelBuilder.buildRoyalFootballThrone
-ChairModelBuilder.buildGoldenChair = ChairModelBuilder.buildRoyalFootballThrone
+ChairModelBuilder.buildFrostThrone = ChairModelBuilder.buildLuckyCloverChair
+ChairModelBuilder.buildCloverChair = ChairModelBuilder.buildLuckyCloverChair
+ChairModelBuilder.buildRoyalThrone = ChairModelBuilder.buildBlackDiamondVIPChair
+ChairModelBuilder.buildGoldenChair = ChairModelBuilder.buildBlackDiamondVIPChair
+ChairModelBuilder.buildRoyalFootballThrone = ChairModelBuilder.buildBlackDiamondVIPChair
 
 return ChairModelBuilder

@@ -349,70 +349,90 @@ function StadiumLighting.buildGroundGlow(tower: Model, towerIdx: number?): { [st
 end
 
 -- ============================================================================
--- STEP 3: PLAZA FILL LIGHT
+-- STEP 3: FIELD & PLAZA FILL LIGHTING (Full field coverage without dark patches)
 -- ============================================================================
-function StadiumLighting.setupPlazaFill(): Part
-	local cfg = StadiumLighting.CONFIG.PLAZA_FILL
+local FIELD_FILL_POINTS = {
+	{ name = "Fill_Center",    pos = Vector3.new(0, 32, -39),   range = 70, angle = 130, spotB = 0.8, pointB = 0.5 },
+	{ name = "Fill_NorthWalk", pos = Vector3.new(0, 32, -82),   range = 80, angle = 135, spotB = 1.6, pointB = 0.8 },
+	{ name = "Fill_SouthWalk", pos = Vector3.new(0, 32, 5),     range = 80, angle = 135, spotB = 1.6, pointB = 0.8 },
+	{ name = "Fill_NW_Tables", pos = Vector3.new(-42, 32, -65), range = 80, angle = 135, spotB = 1.7, pointB = 0.8 },
+	{ name = "Fill_NE_Tables", pos = Vector3.new(42, 32, -65),  range = 80, angle = 135, spotB = 1.7, pointB = 0.8 },
+	{ name = "Fill_SW_Tables", pos = Vector3.new(-42, 32, -13), range = 80, angle = 135, spotB = 1.7, pointB = 0.8 },
+	{ name = "Fill_SE_Tables", pos = Vector3.new(42, 32, -13),  range = 80, angle = 135, spotB = 1.7, pointB = 0.8 },
+	{ name = "Fill_Goal_West", pos = Vector3.new(-72, 32, -39), range = 75, angle = 130, spotB = 1.5, pointB = 0.7 },
+	{ name = "Fill_Goal_East", pos = Vector3.new(72, 32, -39),  range = 75, angle = 130, spotB = 1.5, pointB = 0.7 },
+}
+
+function StadiumLighting.setupPlazaFill(): Instance
+	local cfg = StadiumLighting.CONFIG
 	local stadium = workspace:FindFirstChild("Stadium")
 	local lightsFolder = stadium and stadium:FindFirstChild("Lights") or workspace
 
-	local existing = lightsFolder:FindFirstChild("PlazaFill")
-	if existing then existing:Destroy() end
+	local existing = lightsFolder:FindFirstChild("FieldFill") or lightsFolder:FindFirstChild("PlazaFill")
+	while existing do
+		existing:Destroy()
+		existing = lightsFolder:FindFirstChild("FieldFill") or lightsFolder:FindFirstChild("PlazaFill")
+	end
 
-	local fillPart = Instance.new("Part")
-	fillPart.Name = "PlazaFill"
-	fillPart.Size = Vector3.new(1, 1, 1)
-	fillPart.CFrame = CFrame.new(cfg.CENTER)
-	fillPart.Anchored = true
-	fillPart.CanCollide = false
-	fillPart.CanTouch = false
-	fillPart.CanQuery = false
-	fillPart.CastShadow = false
-	fillPart.Transparency = 1.0
+	local fillFolder = Instance.new("Folder")
+	fillFolder.Name = "FieldFill"
 
-	local att = Instance.new("Attachment")
-	att.Name = "PlazaFillAtt"
-	att.Parent = fillPart
+	for _, fp in ipairs(FIELD_FILL_POINTS) do
+		local part = Instance.new("Part")
+		part.Name = fp.name
+		part.Size = Vector3.new(1, 1, 1)
+		part.CFrame = CFrame.new(fp.pos)
+		part.Anchored = true
+		part.CanCollide = false
+		part.CanTouch = false
+		part.CanQuery = false
+		part.CastShadow = false
+		part.Transparency = 1.0
 
-	local spot = Instance.new("SpotLight")
-	spot.Name = "PlazaFill_Spot"
-	spot.Face = Enum.NormalId.Bottom
-	spot.Angle = cfg.SPOT_ANGLE
-	spot.Range = cfg.SPOT_RANGE
-	spot.Brightness = 0.0 -- Activated by SetLightsState
-	spot.Color = cfg.COLOR
-	spot.Shadows = false
-	spot.Parent = att
+		local att = Instance.new("Attachment")
+		att.Name = "FillAtt"
+		att.Parent = part
 
-	local point = Instance.new("PointLight")
-	point.Name = "PlazaFill_Point"
-	point.Range = cfg.POINT_RANGE
-	point.Brightness = 0.0
-	point.Color = cfg.COLOR
-	point.Shadows = false
-	point.Parent = att
+		local spot = Instance.new("SpotLight")
+		spot.Name = "Spot"
+		spot.Face = Enum.NormalId.Bottom
+		spot.Angle = fp.angle
+		spot.Range = fp.range
+		spot.Brightness = 0.0
+		spot.Color = cfg.SPOT_COLOR
+		spot.Shadows = false
+		spot:SetAttribute("TargetBrightness", fp.spotB)
+		spot.Parent = att
 
-	fillPart.Parent = lightsFolder
-	return fillPart
+		local point = Instance.new("PointLight")
+		point.Name = "Point"
+		point.Range = 55
+		point.Brightness = 0.0
+		point.Color = cfg.SPOT_COLOR
+		point.Shadows = false
+		point:SetAttribute("TargetBrightness", fp.pointB)
+		point.Parent = att
+
+		part.Parent = fillFolder
+	end
+
+	fillFolder.Parent = lightsFolder
+	return fillFolder
 end
 
 local function applyPlazaFillLighting(turnOn: boolean)
-	local cfg = StadiumLighting.CONFIG.PLAZA_FILL
 	local stadium = workspace:FindFirstChild("Stadium")
 	local lightsFolder = stadium and stadium:FindFirstChild("Lights") or workspace
-	local fillPart = lightsFolder:FindFirstChild("PlazaFill")
-	if not fillPart then return end
+	local fillFolder = lightsFolder:FindFirstChild("FieldFill") or lightsFolder:FindFirstChild("PlazaFill")
+	if not fillFolder then return end
 
-	local spot = fillPart:FindFirstChild("PlazaFill_Spot", true) :: SpotLight?
-	local point = fillPart:FindFirstChild("PlazaFill_Point", true) :: PointLight?
 	local tweenInfo = TweenInfo.new(StadiumLighting.CONFIG.RAMP_DURATION, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
 
-	if turnOn then
-		if spot then TweenService:Create(spot, tweenInfo, { Brightness = cfg.SPOT_BRIGHTNESS }):Play() end
-		if point then TweenService:Create(point, tweenInfo, { Brightness = cfg.POINT_BRIGHTNESS }):Play() end
-	else
-		if spot then TweenService:Create(spot, tweenInfo, { Brightness = 0.0 }):Play() end
-		if point then TweenService:Create(point, tweenInfo, { Brightness = 0.0 }):Play() end
+	for _, desc in ipairs(fillFolder:GetDescendants()) do
+		if desc:IsA("SpotLight") or desc:IsA("PointLight") then
+			local targetB = if turnOn then (desc:GetAttribute("TargetBrightness") or 1.0) else 0.0
+			TweenService:Create(desc, tweenInfo, { Brightness = targetB }):Play()
+		end
 	end
 end
 

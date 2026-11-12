@@ -13,8 +13,16 @@ local Workspace = game:GetService("Workspace")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local VIPConfig = require(Shared:WaitForChild("VIPConfig"))
+local GameConfig = require(Shared:WaitForChild("GameConfig"))
 
 local vipCache: { [number]: boolean } = {}
+
+local function getVIPPassId(): number
+	if GameConfig.MONETIZATION.vip and GameConfig.MONETIZATION.vip.id > 0 then
+		return GameConfig.MONETIZATION.vip.id
+	end
+	return VIPConfig.VIP_GAMEPASS_ID
+end
 
 -- 1. Helper to check VIP ownership
 local function isPlayerVIP(player: Player): boolean
@@ -22,7 +30,7 @@ local function isPlayerVIP(player: Player): boolean
 		return true
 	end
 
-	local gamepassId = VIPConfig.VIP_GAMEPASS_ID
+	local gamepassId = getVIPPassId()
 	if gamepassId <= 0 then
 		return player:GetAttribute("IsVIP") == true
 	end
@@ -83,7 +91,8 @@ Players.PlayerRemoving:Connect(function(player)
 end)
 
 MarketplaceService.PromptGamePassPurchaseFinished:Connect(function(player, passId, wasPurchased)
-	if wasPurchased and passId == VIPConfig.VIP_GAMEPASS_ID then
+	local vId = getVIPPassId()
+	if wasPurchased and (passId == vId or (VIPConfig.VIP_GAMEPASS_ID > 0 and passId == VIPConfig.VIP_GAMEPASS_ID)) then
 		vipCache[player.UserId] = true
 		player:SetAttribute("IsVIP", true)
 	end

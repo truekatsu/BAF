@@ -105,7 +105,7 @@ function ShopDailyUI.initShop(screenGui: ScreenGui, modalBackdrop: GuiObject, Re
 		headerColors = UITheme.CONFIG.Headers.Shop,
 		closeStyle = "magenta",
 		headerHeightOffset = 46,
-		size = UDim2.new(0, 460, 0.48, 0),
+		size = UDim2.new(0, 620, 0, 480),
 		parent = screenGui,
 		onClose = function()
 			modalBackdrop.Visible = false
@@ -113,8 +113,8 @@ function ShopDailyUI.initShop(screenGui: ScreenGui, modalBackdrop: GuiObject, Re
 	})
 	local shopWindow = shopWindowData.Window
 	local shopSizeConstraint = Instance.new("UISizeConstraint")
-	shopSizeConstraint.MaxSize = Vector2.new(490, 390)
-	shopSizeConstraint.MinSize = Vector2.new(360, 320)
+	shopSizeConstraint.MaxSize = Vector2.new(720, 560)
+	shopSizeConstraint.MinSize = Vector2.new(320, 240)
 	shopSizeConstraint.Parent = shopWindow
 	shopWindow.ZIndex = 26
 	shopWindow.Visible = false
@@ -377,6 +377,30 @@ function ShopDailyUI.initShop(screenGui: ScreenGui, modalBackdrop: GuiObject, Re
 		Remotes.MetaAction:FireServer("BuyShopItem", "starter_pack")
 	end)
 
+	local ownedStarterBtn = UITheme.button({
+		text = "   OWNED",
+		variant = "gray",
+		size = UDim2.new(0, 84, 0, 30),
+		pos = UDim2.fromScale(0.97, 0.88),
+		anchorPoint = Vector2.new(1, 1),
+		parent = starterBanner,
+	})
+	ownedStarterBtn.Name = "OwnedButton_StarterPack"
+	ownedStarterBtn.Visible = false
+	ownedStarterBtn.ZIndex = starterBanner.ZIndex + 4
+
+	local checkIconStarter = Instance.new("TextLabel")
+	checkIconStarter.Name = "CheckGlyph"
+	checkIconStarter.Size = UDim2.fromScale(0.35, 0.8)
+	checkIconStarter.Position = UDim2.fromScale(0.08, 0.1)
+	checkIconStarter.BackgroundTransparency = 1
+	checkIconStarter.Font = UITheme.CONFIG.Font
+	checkIconStarter.Text = "✓"
+	checkIconStarter.TextColor3 = UITheme.CONFIG.Colors.White
+	checkIconStarter.TextScaled = true
+	checkIconStarter.ZIndex = ownedStarterBtn.ZIndex + 1
+	checkIconStarter.Parent = ownedStarterBtn
+
 	-- SECTION 2: - GAMEPASSES - (2-column grid)
 	makeSectionHeader("- GAMEPASSES -", 4)
 
@@ -394,12 +418,12 @@ function ShopDailyUI.initShop(screenGui: ScreenGui, modalBackdrop: GuiObject, Re
 	gpGrid.Parent = gpGridWrap
 
 	local shopPasses = {
-		{ id = "vip", name = "VIP", desc = "GOLDEN CHAIR\n+ 2X BUX", iconName = "Icon_Crown", sunburstColor = Color3.fromHex("#FFD21F"), asset = if UITheme.Assets.Icon_Crown ~= "rbxassetid://0" then UITheme.Assets.Icon_Crown else UITheme.Assets.VipIcon, price = 19 },
+		{ id = "vip", name = "VIP", desc = "VIP CHAIR\n+ 2X BUX", iconName = "Icon_Crown", sunburstColor = Color3.fromHex("#FFD21F"), asset = if UITheme.Assets.Icon_Crown ~= "rbxassetid://0" then UITheme.Assets.Icon_Crown else UITheme.Assets.VipIcon, price = 19 },
 		{ id = "2x_bux", name = "2X BUX", desc = "DOUBLE BUX\nFROM GAMES", iconName = "Icon_CashCube", sunburstColor = Color3.fromHex("#68FF3B"), asset = if UITheme.Assets.Icon_CashCube ~= "rbxassetid://0" then UITheme.Assets.Icon_CashCube else UITheme.Assets.CashStack, price = 30 },
 		{ id = "2x_wins", name = "2X WIN", desc = "DOUBLE\nWINS", iconName = "Icon_Trophy", sunburstColor = Color3.fromHex("#FFAE19"), asset = if UITheme.Assets.Icon_Trophy ~= "rbxassetid://0" then UITheme.Assets.Icon_Trophy else UITheme.Assets.TrophyIcon, price = 30 },
 		{ id = "2x_streak", name = "2X STREAK", desc = "DOUBLE WIN\nSTREAK", iconName = "Icon_Flame", sunburstColor = Color3.fromHex("#FF4D2A"), asset = if UITheme.Assets.Icon_Flame ~= "rbxassetid://0" then UITheme.Assets.Icon_Flame else UITheme.Assets.FlameIcon, price = 30 },
 		{ id = "2x_luck", name = "2X LUCK", desc = "2X LEGENDARY\nPLAYER LUCK", iconName = "Icon_Luck", sunburstColor = Color3.fromHex("#2EFF9E"), asset = if UITheme.Assets.Icon_Luck ~= "rbxassetid://0" then UITheme.Assets.Icon_Luck else UITheme.Assets.LuckIcon, price = 45 },
-		{ id = "inf_rerolls", name = "INFINITY REROLLS", desc = "INFINITY FREE\nREROLLS", iconName = "Icon_InfRerolls", sunburstColor = Color3.fromHex("#52B4FF"), asset = if UITheme.Assets.Icon_InfRerolls ~= "rbxassetid://0" then UITheme.Assets.Icon_InfRerolls else UITheme.Assets.DiceIcon, price = 72 },
+		{ id = "inf_rerolls", name = "INFINITY REROLLS", desc = "INFINITY FREE\nREROLLS", iconName = "Icon_InfRerolls", sunburstColor = Color3.fromHex("#52B4FF"), asset = if UITheme.Assets.Icon_InfRerolls ~= "rbxassetid://0" then UITheme.Assets.Icon_InfRerolls else UITheme.Assets.DiceIcon, price = 199 },
 	}
 	for idx, gp in shopPasses do
 		local gpEntry = UITheme.gamepassCard({
@@ -436,10 +460,10 @@ function ShopDailyUI.initShop(screenGui: ScreenGui, modalBackdrop: GuiObject, Re
 	buxGrid.Parent = buxGridWrap
 
 	local buxPacks = {
-		{ id = "bux_300", name = "300 BUX", tag = nil, price = 20, icon = if UITheme.Assets.Icon_Bux300 and UITheme.Assets.Icon_Bux300 ~= "rbxassetid://0" then UITheme.Assets.Icon_Bux300 else UITheme.Assets.Icon_CashCube },
-		{ id = "bux_1000", name = "1000 BUX", tag = nil, price = 35, icon = if UITheme.Assets.Icon_Bux1000 and UITheme.Assets.Icon_Bux1000 ~= "rbxassetid://0" then UITheme.Assets.Icon_Bux1000 else UITheme.Assets.Icon_CashCube },
-		{ id = "bux_4000", name = "4000 BUX", tag = "MOST\nPOPULAR!", price = 99, icon = if UITheme.Assets.Icon_Bux4000 and UITheme.Assets.Icon_Bux4000 ~= "rbxassetid://0" then UITheme.Assets.Icon_Bux4000 else UITheme.Assets.Icon_CashCube },
-		{ id = "bux_15000", name = "15000 BUX", tag = "BEST\nDEAL!", price = 249, icon = if UITheme.Assets.Icon_Bux15000 and UITheme.Assets.Icon_Bux15000 ~= "rbxassetid://0" then UITheme.Assets.Icon_Bux15000 else UITheme.Assets.Icon_CashCube },
+		{ id = "bux_300", name = "300 BUX", tag = nil, price = 5, icon = if UITheme.Assets.Icon_Bux300 and UITheme.Assets.Icon_Bux300 ~= "rbxassetid://0" then UITheme.Assets.Icon_Bux300 else UITheme.Assets.Icon_CashCube },
+		{ id = "bux_1000", name = "1000 BUX", tag = nil, price = 19, icon = if UITheme.Assets.Icon_Bux1000 and UITheme.Assets.Icon_Bux1000 ~= "rbxassetid://0" then UITheme.Assets.Icon_Bux1000 else UITheme.Assets.Icon_CashCube },
+		{ id = "bux_4000", name = "4000 BUX", tag = "MOST\nPOPULAR!", price = 49, icon = if UITheme.Assets.Icon_Bux4000 and UITheme.Assets.Icon_Bux4000 ~= "rbxassetid://0" then UITheme.Assets.Icon_Bux4000 else UITheme.Assets.Icon_CashCube },
+		{ id = "bux_15000", name = "15000 BUX", tag = "BEST\nDEAL!", price = 149, icon = if UITheme.Assets.Icon_Bux15000 and UITheme.Assets.Icon_Bux15000 ~= "rbxassetid://0" then UITheme.Assets.Icon_Bux15000 else UITheme.Assets.Icon_CashCube },
 	}
 	for idx, bp in buxPacks do
 		local card = Instance.new("Frame")
@@ -524,8 +548,12 @@ function ShopDailyUI.initShop(screenGui: ScreenGui, modalBackdrop: GuiObject, Re
 
 	local function updateGamepasses(p: any)
 		if not p then return end
+		local starterOwned = p.StarterPackOwned == true or (p.OwnedChairs ~= nil and p.OwnedChairs["crimson"] == true)
+		btnBuyStarter.Visible = not starterOwned
+		ownedStarterBtn.Visible = starterOwned
+
 		if shopGamepassCards["vip"] then
-			shopGamepassCards["vip"].SetOwned(p.DoubleBux == true and p.OwnedChairs ~= nil and p.OwnedChairs["golden"] == true)
+			shopGamepassCards["vip"].SetOwned(p.VIP == true or (p.DoubleBux == true and p.OwnedChairs ~= nil and p.OwnedChairs["golden"] == true))
 		end
 		if shopGamepassCards["2x_bux"] then
 			shopGamepassCards["2x_bux"].SetOwned(p.DoubleBux == true)
@@ -568,8 +596,10 @@ local CHAIR_DATA: { [string]: { name: string, color: Color3, legColor: Color3, m
 	cyber_core = { name = "Cyber Core Chair", color = Color3.fromRGB(18, 20, 32), legColor = Color3.fromRGB(18, 20, 32), mat = Enum.Material.Metal },
 	crimson = { name = "Crimson Chair", color = Color3.fromRGB(150, 15, 25), legColor = Color3.fromRGB(110, 10, 20), mat = Enum.Material.WoodPlanks },
 	emerald = { name = "Crimson Chair", color = Color3.fromRGB(150, 15, 25), legColor = Color3.fromRGB(110, 10, 20), mat = Enum.Material.WoodPlanks },
-	frostbite = { name = "Frostbite Chair", color = Color3.fromRGB(120, 210, 255), legColor = Color3.fromRGB(60, 150, 230), mat = Enum.Material.Glass },
-	cyber = { name = "Frostbite Chair", color = Color3.fromRGB(120, 210, 255), legColor = Color3.fromRGB(60, 150, 230), mat = Enum.Material.Glass },
+	lucky_clover = { name = "Lucky Clover Chair", color = Color3.fromRGB(16, 160, 75), legColor = Color3.fromRGB(10, 80, 40), mat = Enum.Material.SmoothPlastic },
+	clover = { name = "Lucky Clover Chair", color = Color3.fromRGB(16, 160, 75), legColor = Color3.fromRGB(10, 80, 40), mat = Enum.Material.SmoothPlastic },
+	frostbite = { name = "Lucky Clover Chair", color = Color3.fromRGB(16, 160, 75), legColor = Color3.fromRGB(10, 80, 40), mat = Enum.Material.SmoothPlastic },
+	cyber = { name = "Lucky Clover Chair", color = Color3.fromRGB(16, 160, 75), legColor = Color3.fromRGB(10, 80, 40), mat = Enum.Material.SmoothPlastic },
 	golden = { name = "Football Throne", color = Color3.fromRGB(255, 195, 30), legColor = Color3.fromRGB(205, 140, 10), mat = Enum.Material.SmoothPlastic },
 	football_throne = { name = "Football Throne", color = Color3.fromRGB(255, 195, 30), legColor = Color3.fromRGB(205, 140, 10), mat = Enum.Material.SmoothPlastic },
 }
@@ -600,8 +630,8 @@ local function createChairViewport(skinId: string, parent: GuiObject): ViewportF
 	model.WorldPivot = CFrame.new(bbCF.Position)
 	local maxDim = math.max(bbSize.X, bbSize.Y, bbSize.Z)
 
-	-- Default orientation: golden throne FBX has inverted forward, others face +Z
-	local baseAngle = if skinId == "golden" or skinId == "royal" or skinId == "football_throne" or skinId == "footballthrone" or skinId == "royalfootballthrone" then math.pi else 0
+	-- Default orientation: Blender FBX chairs (VIP & Lucky Clover) have forward facing -Z, others face +Z
+	local baseAngle = if skinId == "vip" or skinId == "vip_black_diamond" or skinId == "golden" or skinId == "royal" or skinId == "football_throne" or skinId == "footballthrone" or skinId == "royalfootballthrone" or skinId == "lucky_clover" or skinId == "clover" or skinId == "luckyclover" or skinId == "cloverchair" or skinId == "luckycloverchair" or skinId == "frostbite" or skinId == "cyber" then math.pi else 0
 
 	local cam = Instance.new("Camera")
 	cam.FieldOfView = 24
@@ -783,7 +813,7 @@ function ShopDailyUI.initFreeRewards(
 	local freeRewardsWindow = freeRewardsWindowData.Window
 	local sizeConstraint = Instance.new("UISizeConstraint")
 	sizeConstraint.MaxSize = Vector2.new(720, 500)
-	sizeConstraint.MinSize = Vector2.new(520, 380)
+	sizeConstraint.MinSize = Vector2.new(320, 240)
 	sizeConstraint.Parent = freeRewardsWindow
 	freeRewardsWindow.ZIndex = 26
 	freeRewardsWindow.Visible = false
@@ -988,37 +1018,65 @@ function ShopDailyUI.initFreeRewards(
 	local function createRobuxPillBadge(button: GuiObject, price: number): Frame
 		local badge = Instance.new("Frame")
 		badge.Name = "RobuxPillBadge"
-		badge.Size = UDim2.fromOffset(58, 26)
+		badge.Size = UDim2.fromOffset(64, 26)
 		badge.Position = UDim2.new(1, 4, 0, -10)
 		badge.AnchorPoint = Vector2.new(1, 0)
-		badge.BackgroundColor3 = Color3.fromHex("#68FF3B")
+		badge.BackgroundColor3 = Color3.fromHex("#48C90E")
+		badge.ClipsDescendants = true
 		UITheme.applyGradient(badge, Color3.fromHex("#68FF3B"), Color3.fromHex("#38B018"), 90)
-		UITheme.addCorner(badge, 13)
+		local corner = Instance.new("UICorner")
+		corner.CornerRadius = UDim.new(0.5, 0)
+		corner.Parent = badge
 		UITheme.applyStroke(badge, 2, UITheme.CONFIG.Colors.Outline)
 		badge.ZIndex = button.ZIndex + 4
 		badge.Parent = button
 
+		local pad = Instance.new("UIPadding")
+		pad.PaddingLeft = UDim.new(0.08, 0)
+		pad.PaddingRight = UDim.new(0.08, 0)
+		pad.PaddingTop = UDim.new(0, 0)
+		pad.PaddingBottom = UDim.new(0, 0)
+		pad.Parent = badge
+
+		local list = Instance.new("UIListLayout")
+		list.FillDirection = Enum.FillDirection.Horizontal
+		list.HorizontalAlignment = Enum.HorizontalAlignment.Center
+		list.VerticalAlignment = Enum.VerticalAlignment.Center
+		list.Padding = UDim.new(0.06, 0)
+		list.SortOrder = Enum.SortOrder.LayoutOrder
+		list.Parent = badge
+
 		local icon = Instance.new("ImageLabel")
 		icon.Name = "RobuxHexagon"
-		icon.Size = UDim2.fromOffset(16, 16)
-		icon.Position = UDim2.new(0, 6, 0.5, 0)
-		icon.AnchorPoint = Vector2.new(0, 0.5)
+		icon.LayoutOrder = 1
+		icon.Size = UDim2.new(1, 0, 0.75, 0)
 		icon.BackgroundTransparency = 1
 		icon.Image = UITheme.Assets.RobuxHexagon
+		local aspect = Instance.new("UIAspectRatioConstraint")
+		aspect.AspectRatio = 1.0
+		aspect.DominantAxis = Enum.DominantAxis.Height
+		aspect.Parent = icon
 		icon.ScaleType = Enum.ScaleType.Fit
 		icon.ZIndex = badge.ZIndex + 1
 		icon.Parent = badge
 
 		local lbl = Instance.new("TextLabel")
 		lbl.Name = "PriceText"
-		lbl.Size = UDim2.new(1, -26, 1, 0)
-		lbl.Position = UDim2.new(0, 24, 0, 0)
+		lbl.LayoutOrder = 2
+		lbl.Size = UDim2.new(0.55, 0, 0.85, 0)
 		lbl.BackgroundTransparency = 1
 		lbl.Font = UITheme.CONFIG.Font
 		lbl.Text = tostring(price)
 		lbl.TextColor3 = UITheme.CONFIG.Colors.White
 		lbl.TextScaled = true
+		lbl.RichText = false
+		lbl.TextXAlignment = Enum.TextXAlignment.Center
+		lbl.TextYAlignment = Enum.TextYAlignment.Center
 		lbl.ZIndex = badge.ZIndex + 1
+		local tc = Instance.new("UITextSizeConstraint")
+		tc.MinTextSize = 10
+		tc.MaxTextSize = 26
+		tc.Parent = lbl
 		UITheme.applyTextStroke(lbl, 2, UITheme.CONFIG.Colors.Outline)
 		lbl.Parent = badge
 
@@ -1218,8 +1276,8 @@ function ShopDailyUI.initFreeRewards(
 
 			if reward.chair == "stadium" then
 				iconObj = createMiniChairModel(Color3.fromHex("#1E6FFF"), Enum.Material.SmoothPlastic, iconWrap, "stadium")
-			elseif reward.chair == "golden" then
-				iconObj = createMiniChairModel(Color3.fromHex("#FFD21F"), Enum.Material.Neon, iconWrap, "golden")
+			elseif reward.chair == "golden" or reward.chair == "vip" or reward.chair == "vip_black_diamond" then
+				iconObj = createMiniChairModel(Color3.fromHex("#FFD21F"), Enum.Material.Neon, iconWrap, "vip_black_diamond")
 			elseif isCash then
 				local cashImg = Instance.new("ImageLabel")
 				cashImg.Name = "Icon_Cash"
@@ -2173,7 +2231,7 @@ function ShopDailyUI.initChairSkins(
 	local skinsWindow = skinsWindowData.Window
 	local sizeConstraint = Instance.new("UISizeConstraint")
 	sizeConstraint.MaxSize = Vector2.new(650, 560)
-	sizeConstraint.MinSize = Vector2.new(460, 360)
+	sizeConstraint.MinSize = Vector2.new(320, 240)
 	sizeConstraint.Parent = skinsWindow
 	skinsWindow.ZIndex = 26
 	skinsWindow.Visible = false
@@ -2542,7 +2600,7 @@ function ShopDailyUI.initTitles(
 	local titlesWindow = titlesWindowData.Window
 	local sizeConstraint = Instance.new("UISizeConstraint")
 	sizeConstraint.MaxSize = Vector2.new(650, 480)
-	sizeConstraint.MinSize = Vector2.new(460, 360)
+	sizeConstraint.MinSize = Vector2.new(320, 240)
 	sizeConstraint.Parent = titlesWindow
 	titlesWindow.ZIndex = 26
 	titlesWindow.Visible = false
@@ -2804,7 +2862,7 @@ function ShopDailyUI.initDailyQuest(
 	questsWindow.BackgroundTransparency = 0
 	local sizeConstraint = Instance.new("UISizeConstraint")
 	sizeConstraint.MaxSize = Vector2.new(720, 500)
-	sizeConstraint.MinSize = Vector2.new(520, 380)
+	sizeConstraint.MinSize = Vector2.new(320, 240)
 	sizeConstraint.Parent = questsWindow
 	questsWindow.ZIndex = 26
 	questsWindow.Visible = false
@@ -3198,8 +3256,7 @@ function ShopDailyUI.initCardIndex(
 			Bottom = Color3.fromHex("#C8186F"),
 		},
 		closeStyle = "red",
-		size = UDim2.fromScale(0.76, 0.78),
-		aspect = 1.65,
+		size = UDim2.new(0, 700, 0, 460),
 		parent = screenGui,
 		onClose = function()
 			modalBackdrop.Visible = false
@@ -3245,7 +3302,7 @@ function ShopDailyUI.initCardIndex(
 	winData.Close.Text = ""
 
 	local sizeConstraint = Instance.new("UISizeConstraint")
-	sizeConstraint.MinSize = Vector2.new(420, 280)
+	sizeConstraint.MinSize = Vector2.new(320, 240)
 	sizeConstraint.MaxSize = Vector2.new(960, 600)
 	sizeConstraint.Parent = indexWindow
 
@@ -3687,8 +3744,10 @@ function ShopDailyUI.initCardIndex(
 	end
 
 	local function refreshVirtualGrid(forceRebind: boolean?)
-		local absW = scroll.AbsoluteSize.X
-		local absH = scroll.AbsoluteSize.Y
+		local uiScale = indexWindow:FindFirstChildOfClass("UIScale")
+		local scale = if uiScale and uiScale.Scale > 0 then uiScale.Scale else 1
+		local absW = scroll.AbsoluteSize.X / scale
+		local absH = scroll.AbsoluteSize.Y / scale
 		if absW <= 10 or absH <= 10 then
 			return
 		end
@@ -3950,7 +4009,7 @@ function ShopDailyUI.initProfile(
 		headerColors = UITheme.CONFIG.Headers.Profile,
 		closeStyle = "magenta",
 		headerHeightOffset = 46,
-		size = UDim2.new(0, 680, 0.72, 0),
+		size = UDim2.new(0, 680, 0, 460),
 		parent = screenGui,
 		onClose = function()
 			modalBackdrop.Visible = false
@@ -3960,14 +4019,9 @@ function ShopDailyUI.initProfile(
 	profileWindow.ZIndex = 26
 	profileWindow.Visible = false
 
-	local aspectConstraint = Instance.new("UIAspectRatioConstraint")
-	aspectConstraint.AspectRatio = (UITheme.CONFIG.Profile and UITheme.CONFIG.Profile.WINDOW_ASPECT) or 1.65
-	aspectConstraint.AspectType = Enum.AspectType.FitWithinMaxSize
-	aspectConstraint.Parent = profileWindow
-
 	local sizeConstraint = Instance.new("UISizeConstraint")
 	sizeConstraint.MaxSize = Vector2.new(820, 520)
-	sizeConstraint.MinSize = Vector2.new(460, 280)
+	sizeConstraint.MinSize = Vector2.new(320, 240)
 	sizeConstraint.Parent = profileWindow
 
 	profileWindow.BackgroundColor3 = Color3.fromRGB(15, 18, 25)
@@ -4464,6 +4518,824 @@ function ShopDailyUI.initProfile(
 		isOpen = isOpen,
 		update = update,
 		refreshRanks = refreshRanks,
+	}
+end
+
+function ShopDailyUI.initSummaryPopup(
+	screenGui: ScreenGui,
+	Remotes: any,
+	UITheme: any,
+	playSfx: (kind: string) -> ()
+)
+	local Workspace = game:GetService("Workspace")
+	local BASE_SIZE = UDim2.fromScale(0.5, 0.62)
+	local MIN_SIZE = Vector2.new(574, 328)
+	local MAX_SIZE = Vector2.new(860, 492)
+
+	local function addScaleCorner(parent: Instance, scaleRad: number): UICorner
+		local c = Instance.new("UICorner")
+		c.CornerRadius = UDim.new(scaleRad, 0)
+		c.Parent = parent
+		return c
+	end
+
+	local function addScaleStroke(parent: Instance, color: Color3, thickness: number, mode: Enum.ApplyStrokeMode?): UIStroke
+		local s = Instance.new("UIStroke")
+		s.Color = color
+		s.Thickness = thickness
+		s.ApplyStrokeMode = mode or Enum.ApplyStrokeMode.Border
+		s.Parent = parent
+		return s
+	end
+
+	local function addScaleGradient(parent: Instance, topCol: Color3, botCol: Color3): UIGradient
+		local g = parent:FindFirstChildOfClass("UIGradient") or Instance.new("UIGradient")
+		g.Color = ColorSequence.new(topCol, botCol)
+		g.Rotation = 90
+		g.Parent = parent
+		return g
+	end
+
+	local function addScaleStuds(parent: GuiObject, trans: number, tileW: number, tileH: number): ImageLabel
+		local st = Instance.new("ImageLabel")
+		st.Name = "Studs"
+		st.Size = UDim2.fromScale(1, 1)
+		st.BackgroundTransparency = 1
+		st.Image = UITheme.Assets.StudsTexture
+		st.ImageTransparency = trans
+		st.ScaleType = Enum.ScaleType.Tile
+		st.TileSize = UDim2.fromScale(tileW, tileH)
+		st.ZIndex = parent.ZIndex
+		st.Parent = parent
+		return st
+	end
+
+	local function makePopupText(
+		parent: Instance,
+		text: string,
+		size: UDim2,
+		pos: UDim2,
+		color: Color3,
+		minText: number,
+		maxText: number,
+		strokeThick: number,
+		zIdx: number
+	): TextLabel
+		local lbl = Instance.new("TextLabel")
+		lbl.Size = size
+		lbl.Position = pos
+		lbl.BackgroundTransparency = 1
+		lbl.Font = UITheme.CONFIG.Font
+		lbl.Text = text
+		lbl.TextColor3 = color
+		lbl.TextStrokeTransparency = 1
+		lbl.TextWrapped = false
+		lbl.TextScaled = true
+		lbl.TextTruncate = Enum.TextTruncate.AtEnd
+		lbl.ZIndex = zIdx
+		addScaleStroke(lbl, Color3.new(0, 0, 0), strokeThick, Enum.ApplyStrokeMode.Contextual)
+		local tc = Instance.new("UITextSizeConstraint")
+		tc.MinTextSize = minText
+		tc.MaxTextSize = maxText
+		tc.Parent = lbl
+		lbl.Parent = parent
+		return lbl
+	end
+
+	local resultPopup = Instance.new("Frame")
+	resultPopup.Size = BASE_SIZE
+	resultPopup.AnchorPoint = Vector2.new(0.5, 0.5)
+	resultPopup.Position = UDim2.fromScale(0.5, 0.50)
+	resultPopup.BackgroundColor3 = Color3.fromRGB(13, 14, 21)
+	resultPopup.BackgroundTransparency = 0
+	resultPopup.BorderSizePixel = 0
+	resultPopup.ClipsDescendants = true
+	resultPopup.Visible = false
+	resultPopup.ZIndex = 28
+	addScaleCorner(resultPopup, 0.032)
+	addScaleStroke(resultPopup, Color3.new(0, 0, 0), 4, Enum.ApplyStrokeMode.Border)
+	addScaleGradient(resultPopup, Color3.fromRGB(20, 22, 36), Color3.fromRGB(11, 12, 19))
+	addScaleStuds(resultPopup, 0.90, 0.055, 0.095)
+	resultPopup.Parent = screenGui
+
+	do
+		local aspect = Instance.new("UIAspectRatioConstraint")
+		aspect.AspectRatio = 1.75
+		aspect.AspectType = Enum.AspectType.FitWithinMaxSize
+		aspect.DominantAxis = Enum.DominantAxis.Width
+		aspect.Parent = resultPopup
+	end
+
+	local resultSizeConstraint = Instance.new("UISizeConstraint")
+	resultSizeConstraint.MinSize = MIN_SIZE
+	resultSizeConstraint.MaxSize = MAX_SIZE
+	resultSizeConstraint.Parent = resultPopup
+
+	local function getRestPopupBounds(): (Vector2, Vector2)
+		local cam = Workspace.CurrentCamera
+		local vp = if cam then cam.ViewportSize else Vector2.new(1280, 720)
+		local maxFitW = math.max(260, vp.X - 24)
+		local maxFitH = math.max(150, vp.Y - 24)
+		local minW = math.min(MIN_SIZE.X, maxFitW)
+		local minH = math.min(MIN_SIZE.Y, maxFitH, minW / 1.75)
+		minW = minH * 1.75
+		return Vector2.new(minW, minH), Vector2.new(math.min(MAX_SIZE.X, maxFitW), math.min(MAX_SIZE.Y, maxFitH))
+	end
+
+	local function syncPopupSizeBounds()
+		local rMin, rMax = getRestPopupBounds()
+		resultSizeConstraint.MinSize = rMin
+		resultSizeConstraint.MaxSize = rMax
+	end
+	syncPopupSizeBounds()
+	if Workspace.CurrentCamera then
+		Workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(syncPopupSizeBounds)
+	end
+
+	-- 1. Header Bar (14% height)
+	local resultHeader = Instance.new("Frame")
+	resultHeader.Size = UDim2.fromScale(1, 0.14)
+	resultHeader.Position = UDim2.fromScale(0, 0)
+	resultHeader.BackgroundColor3 = Color3.new(1, 1, 1)
+	resultHeader.BorderSizePixel = 0
+	resultHeader.ClipsDescendants = false
+	resultHeader.ZIndex = 29
+	resultHeader.Parent = resultPopup
+	local resultHeaderGrad = addScaleGradient(resultHeader, UITheme.CONFIG.Headers.DailyQuest.Top, UITheme.CONFIG.Headers.DailyQuest.Bottom)
+
+	local resultHeaderStuds = Instance.new("ImageLabel")
+	resultHeaderStuds.Name = "Studs"
+	resultHeaderStuds.Size = UDim2.fromScale(1, 1)
+	resultHeaderStuds.BackgroundTransparency = 1
+	resultHeaderStuds.Image = UITheme.Assets.Header_Studs_DailyQuest_Green
+	resultHeaderStuds.ImageTransparency = 0.22
+	resultHeaderStuds.ScaleType = Enum.ScaleType.Crop
+	resultHeaderStuds.ZIndex = 29
+	resultHeaderStuds.Parent = resultHeader
+
+	local resultTitle: TextLabel
+	local resultCountdownLbl: TextLabel
+	local btnCloseResultPopup: TextButton
+	do
+		local border = Instance.new("Frame")
+		border.Name = "BottomBorder"
+		border.Size = UDim2.fromScale(1, 0.06)
+		border.Position = UDim2.fromScale(0, 0.94)
+		border.BackgroundColor3 = Color3.new(0, 0, 0)
+		border.BorderSizePixel = 0
+		border.ZIndex = 32
+		border.Parent = resultHeader
+
+		local titleGroup = Instance.new("Frame")
+		titleGroup.Name = "TitleGroup"
+		titleGroup.Size = UDim2.fromScale(0.80, 0.74)
+		titleGroup.Position = UDim2.fromScale(0.03, 0.5)
+		titleGroup.AnchorPoint = Vector2.new(0, 0.5)
+		titleGroup.BackgroundTransparency = 1
+		titleGroup.ZIndex = 31
+		titleGroup.Parent = resultHeader
+
+		local tList = Instance.new("UIListLayout")
+		tList.FillDirection = Enum.FillDirection.Horizontal
+		tList.HorizontalAlignment = Enum.HorizontalAlignment.Left
+		tList.VerticalAlignment = Enum.VerticalAlignment.Center
+		tList.SortOrder = Enum.SortOrder.LayoutOrder
+		tList.Padding = UDim.new(0.015, 0)
+		tList.Parent = titleGroup
+
+		resultTitle = makePopupText(titleGroup, "VICTORY!", UDim2.fromScale(0.42, 1), UDim2.fromScale(0, 0), Color3.new(1, 1, 1), 8, 34, 3.5, 31)
+		resultTitle.LayoutOrder = 1
+		resultTitle.TextXAlignment = Enum.TextXAlignment.Left
+		local titleAspect = Instance.new("UIAspectRatioConstraint")
+		titleAspect.AspectRatio = 3.25
+		titleAspect.DominantAxis = Enum.DominantAxis.Height
+		titleAspect.Parent = resultTitle
+
+		resultCountdownLbl = makePopupText(titleGroup, "(3s)", UDim2.fromScale(0.20, 0.68), UDim2.fromScale(0, 0), Color3.fromRGB(255, 245, 190), 8, 22, 2.5, 31)
+		resultCountdownLbl.LayoutOrder = 2
+		resultCountdownLbl.TextXAlignment = Enum.TextXAlignment.Left
+
+		local function attachBtnLabel(btn: TextButton, maxText: number, strokeThick: number): TextLabel
+			btn.TextTransparency = 1
+			local lbl = makePopupText(btn, btn.Text, UDim2.fromScale(0.90, 0.86), UDim2.fromScale(0.5, 0.5), Color3.new(1, 1, 1), 8, maxText, strokeThick, btn.ZIndex + 2)
+			lbl.Name = "BtnLabel"
+			lbl.AnchorPoint = Vector2.new(0.5, 0.5)
+			btn:GetPropertyChangedSignal("Text"):Connect(function()
+				lbl.Text = btn.Text
+			end)
+			return lbl
+		end
+
+		local closeSlot = Instance.new("Frame")
+		closeSlot.Name = "CloseSlot"
+		closeSlot.Size = UDim2.fromScale(0.78, 0.78)
+		closeSlot.Position = UDim2.fromScale(0.982, 0.5)
+		closeSlot.AnchorPoint = Vector2.new(1, 0.5)
+		closeSlot.BackgroundTransparency = 1
+		closeSlot.ZIndex = 31
+		closeSlot.Parent = resultHeader
+		local closeAspect = Instance.new("UIAspectRatioConstraint")
+		closeAspect.AspectRatio = 1
+		closeAspect.DominantAxis = Enum.DominantAxis.Height
+		closeAspect.Parent = closeSlot
+		local closeMin = Instance.new("UISizeConstraint")
+		closeMin.MinSize = Vector2.new(44, 44)
+		closeMin.Parent = closeSlot
+
+		btnCloseResultPopup = Instance.new("TextButton")
+		btnCloseResultPopup.Size = UDim2.fromScale(1, 1)
+		btnCloseResultPopup.Position = UDim2.fromScale(0.5, 0.5)
+		btnCloseResultPopup.AnchorPoint = Vector2.new(0.5, 0.5)
+		btnCloseResultPopup.BackgroundColor3 = UITheme.CONFIG.Colors.CloseMagentaTop
+		btnCloseResultPopup.AutoButtonColor = false
+		btnCloseResultPopup.Font = UITheme.CONFIG.Font
+		btnCloseResultPopup.Text = "X"
+		btnCloseResultPopup.TextColor3 = Color3.new(1, 1, 1)
+		btnCloseResultPopup.TextStrokeTransparency = 1
+		btnCloseResultPopup.TextWrapped = false
+		btnCloseResultPopup.TextScaled = true
+		btnCloseResultPopup.TextTruncate = Enum.TextTruncate.AtEnd
+		btnCloseResultPopup.ZIndex = 32
+		addScaleCorner(btnCloseResultPopup, 0.20)
+		addScaleGradient(btnCloseResultPopup, UITheme.CONFIG.Colors.CloseMagentaTop, UITheme.CONFIG.Colors.CloseMagentaBottom)
+		addScaleStroke(btnCloseResultPopup, Color3.new(0, 0, 0), 3, Enum.ApplyStrokeMode.Border)
+		addScaleStuds(btnCloseResultPopup, 0.72, 0.5, 0.5).ZIndex = 33
+		local tc = Instance.new("UITextSizeConstraint")
+		tc.MinTextSize = 8
+		tc.MaxTextSize = 28
+		tc.Parent = btnCloseResultPopup
+		btnCloseResultPopup.Parent = closeSlot
+		attachBtnLabel(btnCloseResultPopup, 28, 3)
+	end
+
+	-- 2. Body Container (86% height)
+	local topCardsRow: Frame
+	local secondCardsRow: Frame
+	local footerRow: Frame
+	do
+		local resultBody = Instance.new("Frame")
+		resultBody.Size = UDim2.fromScale(1, 0.86)
+		resultBody.Position = UDim2.fromScale(0, 0.14)
+		resultBody.BackgroundTransparency = 1
+		resultBody.ZIndex = 29
+		resultBody.Parent = resultPopup
+
+		local bodyPad = Instance.new("UIPadding")
+		bodyPad.PaddingLeft = UDim.new(0.025, 0)
+		bodyPad.PaddingRight = UDim.new(0.025, 0)
+		bodyPad.PaddingTop = UDim.new(0.02, 0)
+		bodyPad.PaddingBottom = UDim.new(0.015, 0)
+		bodyPad.Parent = resultBody
+
+		local bodyList = Instance.new("UIListLayout")
+		bodyList.FillDirection = Enum.FillDirection.Vertical
+		bodyList.HorizontalAlignment = Enum.HorizontalAlignment.Center
+		bodyList.SortOrder = Enum.SortOrder.LayoutOrder
+		bodyList.Padding = UDim.new(0.02, 0)
+		bodyList.Parent = resultBody
+
+		local function makeRow(order: number, heightScale: number, padScale: number?): Frame
+			local f = Instance.new("Frame")
+			f.LayoutOrder = order
+			f.Size = UDim2.fromScale(1, heightScale)
+			f.BackgroundTransparency = 1
+			f.ZIndex = 29
+			f.Parent = resultBody
+			if padScale then
+				local l = Instance.new("UIListLayout")
+				l.FillDirection = Enum.FillDirection.Horizontal
+				l.HorizontalAlignment = Enum.HorizontalAlignment.Center
+				l.VerticalAlignment = Enum.VerticalAlignment.Center
+				l.SortOrder = Enum.SortOrder.LayoutOrder
+				l.Padding = UDim.new(padScale, 0)
+				l.Parent = f
+			end
+			return f
+		end
+
+		topCardsRow = makeRow(1, 0.445, 0.018)
+		secondCardsRow = makeRow(2, 0.36, 0.018)
+		footerRow = makeRow(3, 0.12, nil)
+
+		local footerLine = Instance.new("Frame")
+		footerLine.Size = UDim2.fromScale(0.96, 0.08)
+		footerLine.Position = UDim2.fromScale(0.5, 0.04)
+		footerLine.AnchorPoint = Vector2.new(0.5, 0)
+		footerLine.BackgroundColor3 = Color3.fromHex("#4E44A7")
+		footerLine.BackgroundTransparency = 0.25
+		footerLine.BorderSizePixel = 0
+		footerLine.ZIndex = 30
+		addScaleCorner(footerLine, 0.5)
+		footerLine.Parent = footerRow
+	end
+
+	local summaryCardFrames: { Frame } = {}
+
+	local function makeSummaryCard(
+		parentRow: Instance,
+		order: number,
+		widthScale: number,
+		titleText: string,
+		topCol: Color3,
+		botCol: Color3,
+		strokeCol: Color3,
+		strokeThick: number,
+		titleMaxText: number,
+		valMaxText: number
+	): (Frame, TextLabel, TextLabel)
+		local slot = Instance.new("Frame")
+		slot.LayoutOrder = order
+		slot.Size = UDim2.fromScale(widthScale, 1)
+		slot.BackgroundTransparency = 1
+		slot.ZIndex = 29
+		slot.Parent = parentRow
+
+		local c = Instance.new("Frame")
+		c.Size = UDim2.fromScale(1, 1)
+		c.Position = UDim2.fromScale(0.5, 0.5)
+		c.AnchorPoint = Vector2.new(0.5, 0.5)
+		c.BackgroundColor3 = Color3.new(1, 1, 1)
+		c.BorderSizePixel = 0
+		c.ClipsDescendants = true
+		c.ZIndex = 29
+		addScaleCorner(c, 0.10)
+		addScaleStroke(c, strokeCol, strokeThick, Enum.ApplyStrokeMode.Border)
+		addScaleGradient(c, topCol, botCol)
+		addScaleStuds(c, 0.90, 0.22, 0.25)
+		c.Parent = slot
+		table.insert(summaryCardFrames, c)
+
+		local gloss = Instance.new("Frame")
+		gloss.Size = UDim2.fromScale(0.90, 0.035)
+		gloss.Position = UDim2.fromScale(0.5, 0.025)
+		gloss.AnchorPoint = Vector2.new(0.5, 0)
+		gloss.BackgroundColor3 = Color3.new(1, 1, 1)
+		gloss.BackgroundTransparency = 0.65
+		gloss.BorderSizePixel = 0
+		gloss.ZIndex = 30
+		addScaleCorner(gloss, 0.5)
+		gloss.Parent = c
+
+		local t = makePopupText(c, titleText, UDim2.fromScale(0.90, 0.23), UDim2.fromScale(0.05, 0.08), Color3.new(1, 1, 1), 8, titleMaxText, 2, 31)
+		local v = makePopupText(c, "", UDim2.fromScale(0.90, 0.46), UDim2.fromScale(0.05, 0.36), UITheme.CONFIG.Colors.DescriptionGold, 8, valMaxText, 3, 31)
+		return c, v, t
+	end
+
+	local function attachIconValueRow(card: Frame, valLbl: TextLabel, pos: UDim2, size: UDim2, iconName: string, iconAsset: string, iconW: number, valW: number)
+		local row = Instance.new("Frame")
+		row.Size = size
+		row.Position = pos
+		row.BackgroundTransparency = 1
+		row.ZIndex = 31
+		row.Parent = card
+
+		local l = Instance.new("UIListLayout")
+		l.FillDirection = Enum.FillDirection.Horizontal
+		l.HorizontalAlignment = Enum.HorizontalAlignment.Center
+		l.VerticalAlignment = Enum.VerticalAlignment.Center
+		l.SortOrder = Enum.SortOrder.LayoutOrder
+		l.Padding = UDim.new(0.04, 0)
+		l.Parent = row
+
+		local img = Instance.new("ImageLabel")
+		img.Name = iconName
+		img.LayoutOrder = 1
+		img.Size = UDim2.fromScale(iconW, 0.88)
+		img.BackgroundTransparency = 1
+		img.Image = iconAsset
+		img.ScaleType = Enum.ScaleType.Fit
+		img.ZIndex = 31
+		local asp = Instance.new("UIAspectRatioConstraint")
+		asp.AspectRatio = 1
+		asp.Parent = img
+		img.Parent = row
+
+		valLbl.LayoutOrder = 2
+		valLbl.Size = UDim2.fromScale(valW, 1)
+		valLbl.Position = UDim2.fromScale(0, 0)
+		valLbl.Parent = row
+	end
+
+	local _, sumBuxVal = makeSummaryCard(topCardsRow, 1, 0.236, "CASH EARNED", Color3.fromHex("#2B8E44"), Color3.fromHex("#175225"), Color3.new(0, 0, 0), 3, 16, 38)
+	sumBuxVal.TextColor3 = UITheme.CONFIG.Colors.MoneyLime
+
+	local sumWinsCard, sumWinsVal, sumWinsTitle = makeSummaryCard(topCardsRow, 2, 0.236, "WINS", Color3.fromHex("#2563CC"), Color3.fromHex("#112D6B"), Color3.new(0, 0, 0), 3, 16, 38)
+	sumWinsTitle.Size = UDim2.fromScale(0.64, 0.23)
+	sumWinsTitle.Position = UDim2.fromScale(0.06, 0.08)
+	do
+		local sumTrophy = Instance.new("ImageLabel")
+		sumTrophy.Name = "Icon_Trophy"
+		sumTrophy.Size = UDim2.fromScale(0.22, 0.24)
+		sumTrophy.Position = UDim2.fromScale(0.93, 0.08)
+		sumTrophy.AnchorPoint = Vector2.new(1, 0)
+		sumTrophy.BackgroundTransparency = 1
+		sumTrophy.Image = if UITheme.Assets.Icon_Trophy ~= "rbxassetid://0" then UITheme.Assets.Icon_Trophy else UITheme.Assets.TrophyIcon
+		sumTrophy.ScaleType = Enum.ScaleType.Fit
+		sumTrophy.ZIndex = sumWinsCard.ZIndex + 2
+		local trAspect = Instance.new("UIAspectRatioConstraint")
+		trAspect.AspectRatio = 1
+		trAspect.Parent = sumTrophy
+		sumTrophy.Parent = sumWinsCard
+	end
+
+	local sumStreakCard, sumStreakVal = makeSummaryCard(topCardsRow, 3, 0.236, "WIN STREAK", Color3.fromHex("#AD4F20"), Color3.fromHex("#5B240C"), Color3.new(0, 0, 0), 3, 16, 38)
+	attachIconValueRow(
+		sumStreakCard,
+		sumStreakVal,
+		UDim2.fromScale(0.05, 0.36),
+		UDim2.fromScale(0.90, 0.46),
+		"Icon_Flame",
+		if UITheme.Assets.Icon_Flame ~= "rbxassetid://0" then UITheme.Assets.Icon_Flame else UITheme.Assets.FlameIcon,
+		0.36,
+		0.46
+	)
+
+	local btnSumClaimQuest: TextButton
+	local claimGrad: UIGradient
+	do
+		local questCard, questVal, questTitle = makeSummaryCard(topCardsRow, 4, 0.236, "FINISH A MATCH", Color3.fromHex("#7232BA"), Color3.fromHex("#3C166E"), Color3.new(0, 0, 0), 3, 15, 22)
+		questTitle.Size = UDim2.fromScale(0.92, 0.20)
+		questTitle.Position = UDim2.fromScale(0.04, 0.06)
+		questVal.Text = "+1 SPIN"
+		local qStroke = questVal:FindFirstChildOfClass("UIStroke")
+		if qStroke then qStroke.Thickness = 2.5 end
+		attachIconValueRow(
+			questCard,
+			questVal,
+			UDim2.fromScale(0.04, 0.27),
+			UDim2.fromScale(0.92, 0.27),
+			"Icon_Wheel",
+			if UITheme.Assets.Icon_Wheel ~= "rbxassetid://0" then UITheme.Assets.Icon_Wheel else UITheme.Assets.WheelIcon,
+			0.26,
+			0.66
+		)
+
+		local claimSlot = Instance.new("Frame")
+		claimSlot.Size = UDim2.fromScale(0.90, 0.34)
+		claimSlot.Position = UDim2.fromScale(0.5, 0.93)
+		claimSlot.AnchorPoint = Vector2.new(0.5, 1)
+		claimSlot.BackgroundTransparency = 1
+		claimSlot.ZIndex = 31
+		claimSlot.Parent = questCard
+		local claimMinSize = Instance.new("UISizeConstraint")
+		claimMinSize.MinSize = Vector2.new(0, 44)
+		claimMinSize.Parent = claimSlot
+
+		btnSumClaimQuest = Instance.new("TextButton")
+		btnSumClaimQuest.Size = UDim2.fromScale(1, 1)
+		btnSumClaimQuest.Position = UDim2.fromScale(0.5, 0.5)
+		btnSumClaimQuest.AnchorPoint = Vector2.new(0.5, 0.5)
+		btnSumClaimQuest.BackgroundColor3 = Color3.new(1, 1, 1)
+		btnSumClaimQuest.AutoButtonColor = false
+		btnSumClaimQuest.Font = UITheme.CONFIG.Font
+		btnSumClaimQuest.Text = "CLAIM!"
+		btnSumClaimQuest.TextColor3 = Color3.new(1, 1, 1)
+		btnSumClaimQuest.TextStrokeTransparency = 1
+		btnSumClaimQuest.TextWrapped = false
+		btnSumClaimQuest.TextScaled = true
+		btnSumClaimQuest.TextTruncate = Enum.TextTruncate.AtEnd
+		btnSumClaimQuest.ZIndex = 32
+		btnSumClaimQuest.TextTransparency = 1
+		addScaleCorner(btnSumClaimQuest, 0.22)
+		claimGrad = addScaleGradient(btnSumClaimQuest, Color3.fromHex("#66D218"), Color3.fromHex("#48A80E"))
+		addScaleStroke(btnSumClaimQuest, Color3.new(0, 0, 0), 2.5, Enum.ApplyStrokeMode.Border)
+		addScaleStuds(btnSumClaimQuest, 0.75, 0.4, 0.6).ZIndex = 33
+		local tc = Instance.new("UITextSizeConstraint")
+		tc.MinTextSize = 8
+		tc.MaxTextSize = 20
+		tc.Parent = btnSumClaimQuest
+		btnSumClaimQuest.Parent = claimSlot
+		local claimTxtLbl = makePopupText(btnSumClaimQuest, btnSumClaimQuest.Text, UDim2.fromScale(0.90, 0.86), UDim2.fromScale(0.5, 0.5), Color3.new(1, 1, 1), 8, 20, 2.5, 34)
+		claimTxtLbl.Name = "BtnLabel"
+		claimTxtLbl.AnchorPoint = Vector2.new(0.5, 0.5)
+		btnSumClaimQuest:GetPropertyChangedSignal("Text"):Connect(function()
+			claimTxtLbl.Text = btnSumClaimQuest.Text
+		end)
+	end
+
+	local sumPlay30Card, sumPlay30Val, sumPlay30Title = makeSummaryCard(secondCardsRow, 1, 0.321, "PLAY FOR 30 MINUTES", Color3.fromHex("#352E78"), Color3.fromHex("#1D1947"), Color3.fromHex("#5A4DBE"), 2.5, 15, 28)
+	sumPlay30Title.Size = UDim2.fromScale(0.92, 0.24)
+	sumPlay30Title.Position = UDim2.fromScale(0.04, 0.08)
+	sumPlay30Val.Size = UDim2.fromScale(0.92, 0.36)
+	sumPlay30Val.Position = UDim2.fromScale(0.04, 0.33)
+
+	local sumPlay30Fill: Frame
+	do
+		local rail = Instance.new("Frame")
+		rail.Size = UDim2.fromScale(0.86, 0.14)
+		rail.Position = UDim2.fromScale(0.5, 0.81)
+		rail.AnchorPoint = Vector2.new(0.5, 0.5)
+		rail.BackgroundColor3 = Color3.fromRGB(16, 18, 28)
+		rail.BorderSizePixel = 0
+		rail.ClipsDescendants = true
+		rail.ZIndex = 31
+		addScaleCorner(rail, 0.5)
+		addScaleStroke(rail, Color3.new(0, 0, 0), 2, Enum.ApplyStrokeMode.Border)
+		rail.Parent = sumPlay30Card
+
+		sumPlay30Fill = Instance.new("Frame")
+		sumPlay30Fill.Size = UDim2.fromScale(0, 1)
+		sumPlay30Fill.BackgroundColor3 = Color3.new(1, 1, 1)
+		sumPlay30Fill.BorderSizePixel = 0
+		sumPlay30Fill.ZIndex = 32
+		addScaleCorner(sumPlay30Fill, 0.5)
+		addScaleGradient(sumPlay30Fill, UITheme.CONFIG.Colors.LimeTop, UITheme.CONFIG.Colors.LimeBottom)
+		sumPlay30Fill.Parent = rail
+	end
+
+	local _, sumNextPtVal, sumNextPtTitle = makeSummaryCard(secondCardsRow, 2, 0.321, "NEXT: PLAYTIME BUX", Color3.fromHex("#352E78"), Color3.fromHex("#1D1947"), Color3.fromHex("#5A4DBE"), 2.5, 15, 28)
+	sumNextPtTitle.Size = UDim2.fromScale(0.92, 0.24)
+	sumNextPtTitle.Position = UDim2.fromScale(0.04, 0.08)
+	sumNextPtVal.Size = UDim2.fromScale(0.92, 0.44)
+	sumNextPtVal.Position = UDim2.fromScale(0.04, 0.42)
+
+	local _, sumNextSkinVal, sumNextSkinTitle = makeSummaryCard(secondCardsRow, 3, 0.321, "NEXT CHAIR SKIN", Color3.fromHex("#352E78"), Color3.fromHex("#1D1947"), Color3.fromHex("#5A4DBE"), 2.5, 15, 24)
+	sumNextSkinTitle.Size = UDim2.fromScale(0.92, 0.24)
+	sumNextSkinTitle.Position = UDim2.fromScale(0.04, 0.08)
+	sumNextSkinVal.Size = UDim2.fromScale(0.92, 0.44)
+	sumNextSkinVal.Position = UDim2.fromScale(0.04, 0.42)
+
+	local sumFooterLabel = makePopupText(footerRow, "1 MATCH PLAYED \u{2022} 1 WON", UDim2.fromScale(0.94, 0.72), UDim2.fromScale(0.5, 0.60), Color3.fromRGB(235, 240, 255), 8, 16, 2, 31)
+	sumFooterLabel.AnchorPoint = Vector2.new(0.5, 0.5)
+
+	type AlphaTarget = { obj: Instance, restBg: number, restTxt: number, restTxtSt: number, restImg: number, restSt: number }
+	local alphaTargets: { AlphaTarget } = {}
+	do
+		local function addAlphaTarget(inst: Instance)
+			local entry: AlphaTarget = { obj = inst, restBg = 1, restTxt = 0, restTxtSt = 1, restImg = 0, restSt = 0 }
+			if inst:IsA("GuiObject") then entry.restBg = inst.BackgroundTransparency end
+			if inst:IsA("TextLabel") or inst:IsA("TextButton") then
+				entry.restTxt = inst.TextTransparency
+				entry.restTxtSt = inst.TextStrokeTransparency
+			elseif inst:IsA("ImageLabel") or inst:IsA("ImageButton") then
+				entry.restImg = inst.ImageTransparency
+			elseif inst:IsA("UIStroke") then
+				entry.restSt = inst.Transparency
+			end
+			table.insert(alphaTargets, entry)
+		end
+		addAlphaTarget(resultPopup)
+		for _, d in resultPopup:GetDescendants() do
+			if d:IsA("GuiObject") or d:IsA("UIStroke") then addAlphaTarget(d) end
+		end
+	end
+
+	local function applyPopupAlpha(alpha: number)
+		for _, e in alphaTargets do
+			local o = e.obj
+			if o:IsA("GuiObject") then o.BackgroundTransparency = e.restBg + (1 - e.restBg) * alpha end
+			if o:IsA("TextLabel") or o:IsA("TextButton") then
+				o.TextTransparency = e.restTxt + (1 - e.restTxt) * alpha
+				o.TextStrokeTransparency = e.restTxtSt + (1 - e.restTxtSt) * alpha
+			elseif o:IsA("ImageLabel") or o:IsA("ImageButton") then
+				o.ImageTransparency = e.restImg + (1 - e.restImg) * alpha
+			elseif o:IsA("UIStroke") then
+				o.Transparency = e.restSt + (1 - e.restSt) * alpha
+			end
+		end
+	end
+
+	local popupCountdownToken = 0
+	local popupAnimToken = 0
+	local claimPulseToken = 0
+	local isQuestClaimable = true
+	local rewardTargets = { bux = 100, wins = 1, streak = 1 }
+
+	local activeSummaryTweens: { Tween } = {}
+	local function cancelSummaryTweens()
+		for _, tw in activeSummaryTweens do tw:Cancel() end
+		table.clear(activeSummaryTweens)
+	end
+	local function trackTween(tw: Tween): Tween
+		table.insert(activeSummaryTweens, tw)
+		tw:Play()
+		return tw
+	end
+
+	local activeBtnTweens: { [GuiObject]: Tween } = {}
+	local function tweenBtnScale(btn: GuiObject, scaleFactor: number, dur: number, style: Enum.EasingStyle, dir: Enum.EasingDirection): Tween
+		local prev = activeBtnTweens[btn]
+		if prev then prev:Cancel() end
+		local tw = TweenService:Create(btn, TweenInfo.new(dur, style, dir), { Size = UDim2.fromScale(scaleFactor, scaleFactor) })
+		activeBtnTweens[btn] = tw
+		tw:Play()
+		return tw
+	end
+
+	local btnStates: { [GuiObject]: { hovered: boolean, pressed: boolean } } = {}
+	local function startClaimPulse()
+		claimPulseToken += 1
+		local myPulse = claimPulseToken
+		local st = btnStates[btnSumClaimQuest]
+		if not isQuestClaimable or not resultPopup.Visible or (st and (st.hovered or st.pressed)) then
+			return
+		end
+		task.spawn(function()
+			while claimPulseToken == myPulse and isQuestClaimable and resultPopup.Visible do
+				local curSt = btnStates[btnSumClaimQuest]
+				if curSt and (curSt.hovered or curSt.pressed) then break end
+				local twUp = tweenBtnScale(btnSumClaimQuest, 1.05, 0.55, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut)
+				twUp.Completed:Wait()
+				if claimPulseToken ~= myPulse or not isQuestClaimable or not resultPopup.Visible then break end
+				local twDn = tweenBtnScale(btnSumClaimQuest, 1.0, 0.55, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut)
+				twDn.Completed:Wait()
+			end
+		end)
+	end
+
+	local function bindBtnHoverPress(btn: GuiButton, onRest: (() -> ())?)
+		local st = { hovered = false, pressed = false }
+		btnStates[btn] = st
+		btn.MouseEnter:Connect(function()
+			st.hovered = true
+			if btn == btnSumClaimQuest then claimPulseToken += 1 end
+			if not st.pressed then
+				tweenBtnScale(btn, 1.08, 0.10, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+			end
+		end)
+		btn.MouseLeave:Connect(function()
+			st.hovered = false
+			st.pressed = false
+			tweenBtnScale(btn, 1.0, 0.10, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+			if onRest then onRest() end
+		end)
+		btn.InputBegan:Connect(function(input)
+			if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+				st.pressed = true
+				if btn == btnSumClaimQuest then claimPulseToken += 1 end
+				tweenBtnScale(btn, 0.94, 0.08, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+			end
+		end)
+		btn.InputEnded:Connect(function(input)
+			if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+				st.pressed = false
+				tweenBtnScale(btn, if st.hovered then 1.08 else 1.0, 0.10, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
+				if not st.hovered and onRest then onRest() end
+			end
+		end)
+	end
+
+	bindBtnHoverPress(btnCloseResultPopup, nil)
+	bindBtnHoverPress(btnSumClaimQuest, function()
+		if isQuestClaimable and resultPopup.Visible then startClaimPulse() end
+	end)
+
+	local function setQuestClaimState(claimable: boolean)
+		isQuestClaimable = claimable
+		local st = btnStates[btnSumClaimQuest]
+		if claimable then
+			btnSumClaimQuest.Text = "CLAIM!"
+			claimGrad.Color = ColorSequence.new(Color3.fromHex("#66D218"), Color3.fromHex("#48A80E"))
+			startClaimPulse()
+		else
+			claimPulseToken += 1
+			btnSumClaimQuest.Text = "CLAIMED \u{2713}"
+			claimGrad.Color = ColorSequence.new(Color3.fromHex("#607085"), Color3.fromHex("#475569"))
+			if st and not st.hovered and not st.pressed then
+				tweenBtnScale(btnSumClaimQuest, 1.0, 0.10, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+			end
+		end
+	end
+
+	btnSumClaimQuest.Activated:Connect(function()
+		playSfx("click")
+		Remotes.MetaAction:FireServer("ClaimQuest", "finish_match")
+		setQuestClaimState(false)
+	end)
+
+	local popupAlphaVal = Instance.new("NumberValue")
+	popupAlphaVal.Value = 0
+	popupAlphaVal.Changed:Connect(applyPopupAlpha)
+
+	local statCountVal = Instance.new("NumberValue")
+	statCountVal.Value = 1
+	statCountVal.Changed:Connect(function(p)
+		sumBuxVal.Text = "+$" .. tostring(math.round(rewardTargets.bux * p))
+		sumWinsVal.Text = "+" .. tostring(math.round(rewardTargets.wins * p))
+		sumStreakVal.Text = tostring(math.round(rewardTargets.streak * p))
+	end)
+
+	local function closeSummaryPopup()
+		if not resultPopup.Visible then return end
+		popupCountdownToken += 1
+		popupAnimToken += 1
+		claimPulseToken += 1
+		local myAnimToken = popupAnimToken
+		cancelSummaryTweens()
+
+		local rMin, rMax = getRestPopupBounds()
+		trackTween(TweenService:Create(resultPopup, TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
+			Size = UDim2.fromScale(BASE_SIZE.X.Scale * 0.9, BASE_SIZE.Y.Scale * 0.9),
+		}))
+		trackTween(TweenService:Create(resultSizeConstraint, TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
+			MinSize = rMin * 0.9,
+			MaxSize = rMax * 0.9,
+		}))
+		local fadeOutTw = trackTween(TweenService:Create(popupAlphaVal, TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
+			Value = 1,
+		}))
+		fadeOutTw.Completed:Once(function()
+			if popupAnimToken == myAnimToken then
+				resultPopup.Visible = false
+				resultPopup.Size = BASE_SIZE
+				syncPopupSizeBounds()
+				popupAlphaVal.Value = 0
+			end
+		end)
+	end
+
+	btnCloseResultPopup.Activated:Connect(function()
+		playSfx("click")
+		closeSummaryPopup()
+	end)
+
+	local function show(didWin: boolean)
+		popupCountdownToken += 1
+		popupAnimToken += 1
+		local myToken = popupCountdownToken
+		local myAnimToken = popupAnimToken
+		cancelSummaryTweens()
+
+		resultTitle.Text = if didWin then "VICTORY!" else "DEFEAT!"
+		resultCountdownLbl.Text = "(3s)"
+		if didWin then
+			resultHeaderGrad.Color = ColorSequence.new(UITheme.CONFIG.Headers.DailyQuest.Top, UITheme.CONFIG.Headers.DailyQuest.Bottom)
+			resultHeaderStuds.Image = UITheme.Assets.Header_Studs_DailyQuest_Green
+		else
+			resultHeaderGrad.Color = ColorSequence.new(UITheme.CONFIG.Colors.CloseRedTop, UITheme.CONFIG.Colors.CloseRedBottom)
+			resultHeaderStuds.Image = UITheme.Assets.Header_Studs_Shop_Red
+		end
+
+		local rMin, rMax = getRestPopupBounds()
+		resultPopup.Size = UDim2.fromScale(BASE_SIZE.X.Scale * 0.85, BASE_SIZE.Y.Scale * 0.85)
+		resultSizeConstraint.MinSize = rMin * 0.85
+		resultSizeConstraint.MaxSize = rMax * 0.85
+		for _, card in summaryCardFrames do
+			card.Size = UDim2.fromScale(0.82, 0.82)
+		end
+		popupAlphaVal.Value = 1
+		applyPopupAlpha(1)
+		resultPopup.Visible = true
+
+		trackTween(TweenService:Create(resultPopup, TweenInfo.new(0.25, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+			Size = BASE_SIZE,
+		}))
+		trackTween(TweenService:Create(resultSizeConstraint, TweenInfo.new(0.25, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+			MinSize = rMin,
+			MaxSize = rMax,
+		}))
+		trackTween(TweenService:Create(popupAlphaVal, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+			Value = 0,
+		}))
+
+		for idx, card in summaryCardFrames do
+			task.delay((idx - 1) * 0.05, function()
+				if popupAnimToken ~= myAnimToken or not resultPopup.Visible then return end
+				trackTween(TweenService:Create(card, TweenInfo.new(0.22, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+					Size = UDim2.fromScale(1, 1),
+				}))
+			end)
+		end
+
+		statCountVal.Value = 0
+		sumBuxVal.Text = "+$0"
+		sumWinsVal.Text = "+0"
+		sumStreakVal.Text = "0"
+		trackTween(TweenService:Create(statCountVal, TweenInfo.new(0.50, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+			Value = 1,
+		}))
+
+		if isQuestClaimable then startClaimPulse() end
+
+		task.spawn(function()
+			for sec = 3, 1, -1 do
+				if popupCountdownToken ~= myToken or not resultPopup.Visible then return end
+				resultCountdownLbl.Text = "(" .. tostring(sec) .. "s)"
+				task.wait(1)
+			end
+			if popupCountdownToken == myToken and resultPopup.Visible then
+				closeSummaryPopup()
+			end
+		end)
+	end
+
+	return {
+		resultPopup = resultPopup,
+		sumPlay30Val = sumPlay30Val,
+		sumPlay30Fill = sumPlay30Fill,
+		sumNextPtVal = sumNextPtVal,
+		sumNextSkinVal = sumNextSkinVal,
+		sumFooterLabel = sumFooterLabel,
+		setReward = function(bux: number, wins: number, streak: number)
+			rewardTargets.bux = bux
+			rewardTargets.wins = wins
+			rewardTargets.streak = streak
+			sumBuxVal.Text = "+$" .. tostring(bux)
+			sumWinsVal.Text = "+" .. tostring(wins)
+			sumStreakVal.Text = tostring(streak)
+		end,
+		setQuestClaimState = setQuestClaimState,
+		show = show,
 	}
 end
 
