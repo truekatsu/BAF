@@ -7,7 +7,7 @@
 ]]
 
 export type AttributeKey = "PAC" | "SHO" | "PAS" | "DRI" | "DEF" | "PHY"
-export type Rarity = "Common" | "Rare" | "Epic" | "Legendary" | "Mythic"
+export type Rarity = "Common" | "Uncommon" | "Rare" | "Epic" | "Legend" | "Mythic"
 export type Grade = "S" | "A" | "B" | "C" | "D"
 
 local GameConfig = {
@@ -28,31 +28,33 @@ local GameConfig = {
 	SHOWDOWN_TIME = 12,
 	REMATCH_TIME = 30,
 
-	DEFAULT_REROLLS = 2,
-	DEFAULT_STEALS = 1,
+	DEFAULT_REROLLS = 1,
+	DEFAULT_STEALS = 0,
 	WIN_BUX = 100,
 	LOSS_BUX = 25,
 	FRIEND_BOOST_PER_FRIEND = 0.10,
 
-	-- Bot picks the optimal empty slot with this probability (~58% player win rate target)
-	BOT_OPTIMAL_CHANCE = 0.60,
+	-- Bot picks the optimal empty slot with this probability (default fallback; MatchService scales by player wins)
+	BOT_OPTIMAL_CHANCE = 0.85,
 	BOT_STEAL_CHANCE = 0.0,
 
 	RARITY_WEIGHTS = table.freeze({
-		Common = 45,
-		Rare = 30,
-		Epic = 17,
-		Legendary = 6,
+		Common = 35,
+		Uncommon = 25,
+		Rare = 20,
+		Epic = 12,
+		Legend = 6,
 		Mythic = 2,
 	}),
 
-	RARITY_ORDER = table.freeze({ "Common", "Rare", "Epic", "Legendary", "Mythic" }) :: { Rarity },
+	RARITY_ORDER = table.freeze({ "Common", "Uncommon", "Rare", "Epic", "Legend", "Mythic" }) :: { Rarity },
 
 	RARITY_COLORS = table.freeze({
 		Common = Color3.fromHex("#CD7F32"),
-		Rare = Color3.fromHex("#C0C0C0"),
+		Uncommon = Color3.fromHex("#22C55E"),
+		Rare = Color3.fromHex("#34B6FF"),
 		Epic = Color3.fromHex("#A855F7"),
-		Legendary = Color3.fromHex("#FFD21F"),
+		Legend = Color3.fromHex("#FFD21F"),
 		Mythic = Color3.fromHex("#FF2E93"),
 	}),
 
@@ -86,8 +88,10 @@ local GameConfig = {
 		{ id = "stadium", name = "Stadium Blue", cost = 300, color = Color3.fromHex("#1E6FFF"), mat = Enum.Material.SmoothPlastic },
 		{ id = "cyber_core", name = "Cyber Core Chair", cost = 3500, color = Color3.fromRGB(18, 20, 32), mat = Enum.Material.Metal },
 		{ id = "crimson", name = "Crimson Chair", cost = 6000, color = Color3.fromRGB(150, 15, 25), mat = Enum.Material.WoodPlanks },
-		{ id = "lucky_clover", name = "Lucky Clover Chair", cost = 10000, color = Color3.fromRGB(16, 160, 75), mat = Enum.Material.SmoothPlastic },
-		{ id = "vip_black_diamond", name = "Black Diamond VIP", cost = 25000, color = Color3.fromRGB(30, 30, 35), mat = Enum.Material.DiamondPlate },
+		{ id = "frostbite", name = "Frostbite Chair", cost = 10000, color = Color3.fromRGB(120, 210, 255), mat = Enum.Material.Glass },
+		{ id = "golden", name = "Football Throne", cost = 15000, color = Color3.fromRGB(255, 195, 30), mat = Enum.Material.SmoothPlastic },
+		{ id = "lucky_clover", name = "Lucky Clover Chair", cost = 0, unlockSource = "JACKPOT", color = Color3.fromRGB(16, 160, 75), mat = Enum.Material.SmoothPlastic },
+		{ id = "vip_black_diamond", name = "Black Diamond VIP", cost = 0, unlockSource = "VIP", color = Color3.fromRGB(30, 30, 35), mat = Enum.Material.DiamondPlate },
 	}),
 
 	DAILY_REWARDS = table.freeze({
@@ -97,7 +101,8 @@ local GameConfig = {
 		{ day = 4, label = "500 BUX", bux = 500, spins = 0, chair = nil },
 		{ day = 5, label = "1000 BUX", bux = 1000, spins = 0, chair = nil },
 		{ day = 6, label = "2 SPINS", bux = 0, spins = 2, chair = nil },
-		{ day = 7, label = "VIP CHAIR", bux = 2500, spins = 0, chair = "vip_black_diamond" },
+		-- shortcut: Day 7 rewards 2500 Bux until the dedicated free Day 7 chair model is ready
+		{ day = 7, label = "2500 BUX", bux = 2500, spins = 0, chair = nil },
 	}),
 
 	PLAYTIME_REWARDS = table.freeze({
@@ -122,7 +127,7 @@ local GameConfig = {
 	WHEEL_SEGMENTS = table.freeze({
 		{ id = 1, label = "350\nBUX", oddsName = "350 BUX", oddsPct = "15.85%", oddsOrder = 6, icon = "💵", assetKey = "Icon_CashCube", color = "#22C55E", strokeColor = "#4ADE80", weight = 15.85, bux = 350, spins = 0, chair = nil, dupBux = 0, toast = "🎡 Wheel Prize: +$350 Bux!" },
 		{ id = 2, label = "1 FREE\nSPIN", oddsName = "1 SPIN", oddsPct = "14.14%", oddsOrder = 5, icon = "🎡", assetKey = "Icon_Wheel", color = "#FACC15", strokeColor = "#FACC15", weight = 14.14, bux = 0, spins = 1, chair = nil, dupBux = 0, toast = "🎡 Wheel Prize: +1 Free Spin!" },
-		{ id = 3, label = "GRAND\nPRIZE", oddsName = "JACKPOT", oddsPct = "0.99%", oddsOrder = 1, icon = "🪑", assetKey = "Icon_Chair_NeonCyber", color = "#EF4444", strokeColor = "#FFD21F", weight = 0.99, bux = 0, spins = 0, chair = "cyber_core", dupBux = 1000, toast = "🎡 JACKPOT! Cyber Core Chair Unlocked!" },
+		{ id = 3, label = "GRAND\nPRIZE", oddsName = "JACKPOT", oddsPct = "0.99%", oddsOrder = 1, icon = "🍀", assetKey = "Icon_Chair_EmeraldPitch", color = "#EF4444", strokeColor = "#FFD21F", weight = 0.99, bux = 0, spins = 0, chair = "lucky_clover", dupBux = 1000, toast = "🎡 JACKPOT! Lucky Clover Chair Unlocked!" },
 		{ id = 4, label = "1500\nBUX", oddsName = "1,500 BUX", oddsPct = "2.38%", oddsOrder = 2, icon = "🎁", assetKey = "Icon_Chest", color = "#10B981", strokeColor = "#22C55E", weight = 2.38, bux = 1500, spins = 0, chair = nil, dupBux = 0, toast = "🎡 Wheel Prize: +$1,500 Bux!" },
 		{ id = 5, label = "STADIUM\nCHAIR", oddsName = "STADIUM CHAIR", oddsPct = "13.48%", oddsOrder = 4, icon = "🪑", assetKey = "Icon_Chair_StadiumBlue", color = "#38BDF8", strokeColor = "#38BDF8", weight = 13.48, bux = 0, spins = 0, chair = "stadium", dupBux = 300, toast = "🎡 Wheel Prize: Stadium Blue Chair Unlocked!" },
 		{ id = 6, label = "3 FREE\nSPINS", oddsName = "3 SPINS", oddsPct = "4.76%", oddsOrder = 3, icon = "🎡", assetKey = "Icon_Wheel", color = "#A855F7", strokeColor = "#F59E0B", weight = 4.76, bux = 0, spins = 3, chair = nil, dupBux = 0, toast = "🎡 Wheel Prize: +3 Free Spins!" },
@@ -138,34 +143,39 @@ local GameConfig = {
 		{ luck = 5, cost = 12500 },
 	}),
 
-	-- shortcut: id = 0 uses Studio/free fallback, replace 0 with published Roblox GamePass/DeveloperProduct IDs before live monetization launch
 	MONETIZATION = table.freeze({
-		-- Starter Pack (Image 1: 500 Bux + Crimson Chair | 4 Robux)
-		starter_pack = { id = 2079728288, kind = "Product", name = "Starter Pack", robux = 4 },
+		-- Starter Pack (500 Bux + Crimson Chair | 4 Robux)
+		starter_pack = { id = 3730645478, kind = "Product", name = "Starter Pack", robux = 4 },
 
-		-- Gamepasses / Perks (Developer Products in Roblox)
-		vip = { id = 2078438297, kind = "Product", name = "VIP", robux = 19 },
-		["2x_bux"] = { id = 2079194298, kind = "Product", name = "2X BUX", robux = 30 },
-		["2x_wins"] = { id = 2079842269, kind = "Product", name = "2X WIN", robux = 30 },
-		["2x_streak"] = { id = 2079944289, kind = "Product", name = "2X STREAK", robux = 30 },
-		["2x_luck"] = { id = 2078312293, kind = "Product", name = "2X LUCK", robux = 45 },
-		inf_rerolls = { id = 2078462289, kind = "Product", name = "INFINITY REROLLS", robux = 199 },
+		-- Permanent Perks (saved to Profile DataStore on purchase)
+		vip = { id = 3730645426, kind = "Product", name = "VIP", robux = 19 },
+		["2x_bux"] = { id = 3730645380, kind = "Product", name = "2X BUX", robux = 30 },
+		["2x_wins"] = { id = 3730645347, kind = "Product", name = "2X WIN", robux = 30 },
+		["2x_streak"] = { id = 3730645306, kind = "Product", name = "2X STREAK", robux = 30 },
+		["2x_luck"] = { id = 3730645268, kind = "Product", name = "2X LUCK", robux = 45 },
+		inf_rerolls = { id = 3730645220, kind = "Product", name = "INFINITY REROLLS", robux = 199 },
 
-		-- Currency Developer Products (Image 4)
-		bux_300 = { id = 2079728289, kind = "Product", name = "300 BUX", robux = 5, bux = 300 },
-		bux_1000 = { id = 2078408293, kind = "Product", name = "1000 BUX", robux = 19, bux = 1000 },
-		bux_4000 = { id = 2078966289, kind = "Product", name = "4000 BUX", robux = 49, bux = 4000 },
-		bux_15000 = { id = 2078630286, kind = "Product", name = "15000 BUX", robux = 149, bux = 15000 },
+		-- Currency Packs (Developer Products for repeatable purchases)
+		bux_300 = { id = 3730645154, kind = "Product", name = "300 BUX", robux = 5, bux = 300 },
+		bux_1000 = { id = 3730645111, kind = "Product", name = "1000 BUX", robux = 19, bux = 1000 },
+		bux_4000 = { id = 3730645071, kind = "Product", name = "4000 BUX", robux = 49, bux = 4000 },
+		bux_15000 = { id = 3730645031, kind = "Product", name = "15000 BUX", robux = 149, bux = 15000 },
 
 		-- Utilities
-		skip_daily = { id = 0, kind = "Product", name = "Skip Daily", robux = 15 },
-		claim_all_daily = { id = 0, kind = "Product", name = "Claim All Daily", robux = 50 },
+		skip_daily = { id = 3730808261, kind = "Product", name = "Skip day", robux = 11 },
+		claim_all_daily = { id = 3730808299, kind = "Product", name = "Claim All", robux = 29 },
 
-		-- Spin Wheel Packs (shortcut: id = 0 uses Studio/free fallback until Developer Product IDs are published)
+		-- Spin Wheel Packs (Developer Products for repeatable buys)
 		spin_1 = { id = 0, kind = "Product", name = "1 Spin", robux = 6, spins = 1 },
-		spin_5 = { id = 0, kind = "Product", name = "+5 Spins", robux = 23, spins = 5 },
-		spin_10 = { id = 0, kind = "Product", name = "+10 Spins", robux = 36, spins = 10 },
+		spin_5 = { id = 3730644808, kind = "Product", name = "+5 Spins", robux = 23, spins = 5 },
+		spin_10 = { id = 3730644744, kind = "Product", name = "+10 Spins", robux = 36, spins = 10 },
 		spin_first_offer = { id = 0, kind = "Product", name = "First Spin of Day (83% Off)", robux = 2, spins = 1 },
+
+		-- In-Match Per-Session / Per-Use Consumables (Developer Products for repeatable buys)
+		match_reroll = { id = 3730644846, kind = "Product", name = "Reroll", robux = 9 },
+		match_reveal_all = { id = 3730644905, kind = "Product", name = "Reveal All", robux = 29 },
+		match_see_best = { id = 3730644938, kind = "Product", name = "See Best", robux = 9 },
+		match_steal = { id = 3730644975, kind = "Product", name = "Steal", robux = 39 },
 	}),
 }
 
@@ -191,7 +201,14 @@ function GameConfig.getChairSkin(chairId: string)
 			end
 		end
 	end
-	if chairId == "cyber" or chairId == "frostbite" or chairId == "clover" then
+	if chairId == "cyber" then
+		for _, skin in GameConfig.CHAIR_SKINS do
+			if skin.id == "frostbite" then
+				return skin
+			end
+		end
+	end
+	if chairId == "clover" then
 		for _, skin in GameConfig.CHAIR_SKINS do
 			if skin.id == "lucky_clover" then
 				return skin
@@ -201,6 +218,13 @@ function GameConfig.getChairSkin(chairId: string)
 	if chairId == "football_throne" or chairId == "royal" then
 		for _, skin in GameConfig.CHAIR_SKINS do
 			if skin.id == "golden" then
+				return skin
+			end
+		end
+	end
+	if chairId == "vip" then
+		for _, skin in GameConfig.CHAIR_SKINS do
+			if skin.id == "vip_black_diamond" then
 				return skin
 			end
 		end

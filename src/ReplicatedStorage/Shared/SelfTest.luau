@@ -1,7 +1,7 @@
 --!strict
 --[[
 	SelfTest
-	Responsibility: Assert-based self-checks for the 152-player Footballers pool, 3D FootballerModelBuilder, and MatchLogic rules.
+	Responsibility: Assert-based self-checks for the 150-player Footballers pool, 3D FootballerModelBuilder, and MatchLogic rules.
 	Loop step: n/a (verification)
 	Location: ReplicatedStorage/Shared/SelfTest (ModuleScript)
 ]]
@@ -17,14 +17,15 @@ local SelfTest = {}
 function SelfTest.run()
 	local rng = Random.new(42)
 
-	-- 1. Pool & Rarity distribution check (152 total = 65 Common, 45 Rare, 25 Epic, 12 Legendary, 5 Mythic)
-	assert(#Footballers.All == 152, `Expected 152 footballers, got {#Footballers.All}`)
-	assert(#Footballers.ByRarity.Mythic == 5, `Expected 5 Mythic, got {#Footballers.ByRarity.Mythic}`)
+	-- 1. Pool & Rarity distribution check (150 total = 25 Common, 35 Uncommon, 40 Rare, 30 Epic, 14 Legend, 6 Mythic)
+	assert(#Footballers.All == 150, `Expected 150 footballers, got {#Footballers.All}`)
+	assert(#Footballers.ByRarity.Mythic == 6, `Expected 6 Mythic, got {#Footballers.ByRarity.Mythic}`)
 	assert(Footballers.ById["messi"] ~= nil and Footballers.ById["ronaldo"] ~= nil, "Messi and Ronaldo must exist in Mythic")
-	assert(#Footballers.ByRarity.Legendary == 12, `Expected 12 Legendary, got {#Footballers.ByRarity.Legendary}`)
-	assert(#Footballers.ByRarity.Epic == 25, `Expected 25 Epic, got {#Footballers.ByRarity.Epic}`)
-	assert(#Footballers.ByRarity.Rare == 45, `Expected 45 Rare, got {#Footballers.ByRarity.Rare}`)
-	assert(#Footballers.ByRarity.Common == 65, `Expected 65 Common, got {#Footballers.ByRarity.Common}`)
+	assert(#Footballers.ByRarity.Legend == 14, `Expected 14 Legend, got {#Footballers.ByRarity.Legend}`)
+	assert(#Footballers.ByRarity.Epic == 30, `Expected 30 Epic, got {#Footballers.ByRarity.Epic}`)
+	assert(#Footballers.ByRarity.Rare == 40, `Expected 40 Rare, got {#Footballers.ByRarity.Rare}`)
+	assert(#Footballers.ByRarity.Uncommon == 35, `Expected 35 Uncommon, got {#Footballers.ByRarity.Uncommon}`)
+	assert(#Footballers.ByRarity.Common == 25, `Expected 25 Common, got {#Footballers.ByRarity.Common}`)
 
 	local seenIds: { [string]: boolean } = {}
 	for _, card in Footballers.All do
@@ -53,17 +54,24 @@ function SelfTest.run()
 		mdl:Destroy()
 	end
 
-	-- 2. PRD 3.3 verification: Haaland in DEF = 60, in SHO = 96
+	-- 2. PRD 3.3 verification: Haaland in DEF = 45, in SHO = 93
 	local haaland = Footballers.ById["haaland"]
 	assert(haaland ~= nil, "Haaland must exist in pool")
-	assert(haaland.stats.DEF == 60 and haaland.stats.SHO == 96, "Haaland stat mismatch")
+	assert(haaland.stats.DEF == 45 and haaland.stats.SHO == 93, "Haaland stat mismatch")
+
+	assert(GameConfig.DEFAULT_REROLLS == 1, "Default free rerolls per match must be 1")
+	assert(GameConfig.DEFAULT_STEALS == 0, "Default free steals per match must be 0")
+	assert(GameConfig.MONETIZATION.match_reroll.id == 3730644846 and GameConfig.MONETIZATION.match_reroll.kind == "Product", "match_reroll product ID mismatch")
+	assert(GameConfig.MONETIZATION.match_reveal_all.id == 3730644905 and GameConfig.MONETIZATION.match_reveal_all.kind == "Product", "match_reveal_all product ID mismatch")
+	assert(GameConfig.MONETIZATION.match_see_best.id == 3730644938 and GameConfig.MONETIZATION.match_see_best.kind == "Product", "match_see_best product ID mismatch")
+	assert(GameConfig.MONETIZATION.match_steal.id == 3730644975 and GameConfig.MONETIZATION.match_steal.kind == "Product", "match_steal product ID mismatch")
 
 	-- 3. Board creation, SeeBest, Place, and Reroll
 	local boardA = MatchLogic.createBoard(2, 1, 1, false, rng)
 	local boardB = MatchLogic.createBoard(2, 1, 1, false, rng)
 	boardA.currentRoll = haaland
 	local bestForHaaland = MatchLogic.getBestSlot(boardA, haaland)
-	assert(bestForHaaland == "PAC" or bestForHaaland == "SHO", "Haaland best slot should be PAC or SHO (96)")
+	assert(bestForHaaland == "SHO", "Haaland best slot should be SHO (93)")
 
 	assert(MatchLogic.placeInSlot(boardA, "SHO", rng) == true, "Should place Haaland in SHO")
 	assert(boardA.slots.SHO == haaland, "SHO slot must hold Haaland")
@@ -90,19 +98,76 @@ function SelfTest.run()
 	assert(res.evalA.avgScore > 0 and res.evalB.avgScore > 0, "Average scores must be positive")
 	assert(GameConfig.getGrade(92) == "S" and GameConfig.getGrade(85) == "A" and GameConfig.getGrade(55) == "D", "Grade thresholds mismatch")
 
+	-- 5a. Bot adaptive optimalChance places card in getBestSlot when optimalChance = 1
+	local botBoard = MatchLogic.createBoard(2, 0, 1, false, rng)
+	local humanBoard = MatchLogic.createBoard(2, 0, 1, false, rng)
+	local expectedBest = MatchLogic.getBestSlot(botBoard)
+	MatchLogic.stepBot(botBoard, humanBoard, rng, 1)
+	assert(expectedBest ~= nil and botBoard.slots[expectedBest] ~= nil, "stepBot with optimalChance=1 must pick best slot")
+
+	-- 5b. No-repeat footballers within 1 match session, resetting in next session & on full-pool exhaustion
+	local sessionUsed: { [string]: boolean } = {}
+	local sBoardA = MatchLogic.createBoard(10, 1, 1, true, rng, sessionUsed)
+	local sBoardB = MatchLogic.createBoard(10, 1, 1, true, rng, sessionUsed)
+	local seenInMatch: { [string]: boolean } = {}
+	local function assertUniqueRoll(card: MatchLogic.Footballer?)
+		assert(card ~= nil, "Expected a rolled footballer")
+		assert(not seenInMatch[(card :: MatchLogic.Footballer).id], `Duplicate footballer {(card :: MatchLogic.Footballer).id} in same session`)
+		seenInMatch[(card :: MatchLogic.Footballer).id] = true
+	end
+	assertUniqueRoll(sBoardA.currentRoll)
+	assertUniqueRoll(sBoardB.currentRoll)
+	for _, attr in GameConfig.ATTRIBUTES do
+		assert(MatchLogic.reroll(sBoardA, rng), "Reroll A should succeed")
+		assertUniqueRoll(sBoardA.currentRoll)
+		assert(MatchLogic.placeInSlot(sBoardA, attr, rng), "Place A should succeed")
+		if sBoardA.currentRoll then
+			assertUniqueRoll(sBoardA.currentRoll)
+		end
+		assert(MatchLogic.reroll(sBoardB, rng), "Reroll B should succeed")
+		assertUniqueRoll(sBoardB.currentRoll)
+		assert(MatchLogic.placeInSlot(sBoardB, attr, rng), "Place B should succeed")
+		if sBoardB.currentRoll then
+			assertUniqueRoll(sBoardB.currentRoll)
+		end
+	end
+	-- Exhaust remaining cards up to 150 and verify pool resets cleanly on 151st roll
+	local totalUnique = 0
+	for _ in seenInMatch do
+		totalUnique += 1
+	end
+	for _ = totalUnique + 1, #Footballers.All do
+		local c = MatchLogic.rollFootballer(1, rng, sessionUsed)
+		assertUniqueRoll(c)
+	end
+	local wrapCard = MatchLogic.rollFootballer(1, rng, sessionUsed)
+	assert(wrapCard ~= nil, "151st roll must succeed after pool reset")
+	-- Next session with fresh usedIds starts clean
+	local nextUsed: { [string]: boolean } = {}
+	local nextBoard = MatchLogic.createBoard(2, 1, 1, false, rng, nextUsed)
+	assert(nextBoard.currentRoll ~= nil, "New session board must roll a footballer")
+
 	-- 6. Meta progression config checks (Daily, Playtime, Quests, Chair Skins)
 	assert(#GameConfig.DAILY_REWARDS == 7, "Must have 7 daily rewards")
 	assert(#GameConfig.PLAYTIME_REWARDS == 6, "Must have 6 playtime rewards")
 	assert(#GameConfig.QUESTS == 3, "Must have 3 daily quests")
-	assert(#GameConfig.CHAIR_SKINS == 6, "Must have 6 chair skins")
+	assert(#GameConfig.CHAIR_SKINS == 8, "Must have 8 chair skins")
+	assert(GameConfig.CHAIR_SKINS[5].id == "frostbite" and GameConfig.CHAIR_SKINS[6].id == "golden", "Frostbite and Football Throne must occupy slots 5-6")
+	assert(GameConfig.CHAIR_SKINS[7].id == "lucky_clover" and GameConfig.CHAIR_SKINS[8].id == "vip_black_diamond", "Lucky Clover and Black Diamond VIP must occupy slots 7-8 below Throne")
+	assert(GameConfig.getChairSkin("frostbite").name == "Frostbite Chair" and GameConfig.getChairSkin("frostbite").cost == 10000, "Frostbite Chair must exist and cost 10000 Bux")
 	assert(GameConfig.getChairSkin("golden").name == "Football Throne" and GameConfig.getChairSkin("golden").cost == 15000, "Football Throne must exist and cost 15000 Bux")
-	assert(GameConfig.getChairSkin("football_throne").name == "Football Throne", "football_throne alias must resolve to Football Throne")
+	assert(GameConfig.getChairSkin("football_throne").id == "golden", "football_throne alias must resolve to Football Throne")
+	assert(GameConfig.getChairSkin("royal").id == "golden", "royal alias must resolve to Football Throne")
+	assert(GameConfig.getChairSkin("vip_black_diamond").name == "Black Diamond VIP" and GameConfig.getChairSkin("vip_black_diamond").unlockSource == "VIP", "Black Diamond VIP must exist and require VIP")
+	assert(GameConfig.getChairSkin("vip").id == "vip_black_diamond", "vip alias must resolve to Black Diamond VIP")
 	assert(GameConfig.getChairSkin("cyber_core").name == "Cyber Core Chair" and GameConfig.getChairSkin("cyber_core").cost == 3500, "Cyber Core Chair must exist and cost 3500 Bux")
 	assert(GameConfig.getChairSkin("crimson").name == "Crimson Chair" and GameConfig.getChairSkin("crimson").cost == 6000, "Crimson Chair must exist and cost 6000 Bux")
 	assert(GameConfig.getChairSkin("emerald").name == "Crimson Chair", "emerald alias must resolve to Crimson Chair")
-	assert(GameConfig.getChairSkin("lucky_clover").name == "Lucky Clover Chair" and GameConfig.getChairSkin("lucky_clover").cost == 10000, "Lucky Clover Chair must exist and cost 10000 Bux")
-	assert(GameConfig.getChairSkin("cyber").name == "Lucky Clover Chair", "cyber alias must resolve to Lucky Clover Chair")
-	assert(GameConfig.getChairSkin("frostbite").name == "Lucky Clover Chair", "frostbite alias must resolve to Lucky Clover Chair")
+	assert(GameConfig.getChairSkin("lucky_clover").name == "Lucky Clover Chair" and GameConfig.getChairSkin("lucky_clover").unlockSource == "JACKPOT", "Lucky Clover Chair must exist as JACKPOT reward")
+	assert(GameConfig.getChairSkin("clover").id == "lucky_clover", "clover alias must resolve to Lucky Clover Chair")
+	assert(GameConfig.WHEEL_SEGMENTS[3].chair == "lucky_clover", "Wheel Jackpot segment must reward lucky_clover")
+	assert(GameConfig.DAILY_REWARDS[7].chair == nil, "Day 7 daily reward must not grant a chair until its model is ready")
+	assert(GameConfig.getChairSkin("cyber").name == "Frostbite Chair", "cyber alias must resolve to Frostbite Chair")
 	assert(GameConfig.getChairSkin("nonexistent").id == "wood", "getChairSkin must fallback to wood")
 	assert(GameConfig.MONETIZATION.vip ~= nil, "MONETIZATION table must define vip")
 	local nextLuck = GameConfig.getNextLuckTier(1)
@@ -119,9 +184,18 @@ function SelfTest.run()
 	end
 	assert(math.abs(totalWheelWeight - 100) < 1e-6, `Expected wheel weight sum 100, got {totalWheelWeight}`)
 	assert(GameConfig.MONETIZATION.spin_5 ~= nil and GameConfig.MONETIZATION.spin_10 ~= nil and GameConfig.MONETIZATION.spin_first_offer ~= nil, "MONETIZATION must define spin wheel products")
+	assert(GameConfig.MONETIZATION.spin_5.id == 3730644808 and GameConfig.MONETIZATION.spin_5.kind == "Product" and GameConfig.MONETIZATION.spin_5.spins == 5, "spin_5 product mismatch")
+	assert(GameConfig.MONETIZATION.spin_10.id == 3730644744 and GameConfig.MONETIZATION.spin_10.kind == "Product" and GameConfig.MONETIZATION.spin_10.spins == 10, "spin_10 product mismatch")
+	assert(GameConfig.MONETIZATION.skip_daily.id == 3730808261 and GameConfig.MONETIZATION.skip_daily.kind == "Product" and GameConfig.MONETIZATION.skip_daily.robux == 11, "skip_daily product mismatch")
+	assert(GameConfig.MONETIZATION.claim_all_daily.id == 3730808299 and GameConfig.MONETIZATION.claim_all_daily.kind == "Product" and GameConfig.MONETIZATION.claim_all_daily.robux == 29, "claim_all_daily product mismatch")
 	assert(Remotes.OpponentAlert ~= nil, "OpponentAlert RemoteEvent must exist")
 	assert(GameConfig.getTitleColor("Legend") == Color3.fromHex("#FFD21F"), "Legend title color must be gold")
 	assert(GameConfig.getTitleColor("Captain") == Color3.fromHex("#A855F7"), "Captain title color must be purple")
+	assert(GameConfig.getTitleForWins(0) == "Benchwarmer" and GameConfig.getTitleForWins(9) == "Benchwarmer", "0-9 wins must resolve to Benchwarmer")
+	assert(GameConfig.getTitleForWins(10) == "Rookie" and GameConfig.getTitleForWins(14) == "Rookie", "10-14 wins must resolve to Rookie")
+	assert(GameConfig.getTitleForWins(15) == "Starter" and GameConfig.getTitleForWins(49) == "Starter", "15-49 wins must resolve to Starter")
+	assert(GameConfig.getTitleForWins(50) == "Captain" and GameConfig.getTitleForWins(99) == "Captain", "50-99 wins must resolve to Captain")
+	assert(GameConfig.getTitleForWins(100) == "Legend", "100+ wins must resolve to Legend")
 	assert(GameConfig.formatPlaytime(234000) == "2d 17h", "Playtime day/hour format mismatch")
 	assert(GameConfig.formatPlaytime(80160) == "22h 16m", "Playtime hour/min format mismatch")
 	assert(GameConfig.formatPlaytime(45) == "45s", "Playtime seconds format mismatch")
@@ -189,6 +263,14 @@ function SelfTest.run()
 	assert(JumbotronConfig.BRIGHTNESS == 1.5, "Screen Brightness must be 1.5")
 	assert(#JumbotronConfig.PROMO_SLIDES >= 3, "Must have at least 3 promo slides")
 	assert(JumbotronConfig.SKIN_ROTATION_INTERVAL_SEC == 600, "Skin rotation interval must be 600s (10 min)")
+	local satState = JumbotronConfig.getWeekendEventState(os.time({ year = 2026, month = 11, day = 14, hour = 8, min = 0, sec = 0 }))
+	assert(satState.active == true and satState.remainingSec == 40 * 3600, "Saturday 08:00 must be active with 40h remaining")
+	local sunState = JumbotronConfig.getWeekendEventState(os.time({ year = 2026, month = 11, day = 15, hour = 22, min = 0, sec = 0 }))
+	assert(sunState.active == true and sunState.remainingSec == 2 * 3600, "Sunday 22:00 must be active with 2h remaining")
+	local monState = JumbotronConfig.getWeekendEventState(os.time({ year = 2026, month = 11, day = 16, hour = 0, min = 0, sec = 0 }))
+	assert(monState.active == false and monState.remainingSec == 5 * 86400, "Monday 00:00 must be inactive with 5d remaining")
+	local friState = JumbotronConfig.getWeekendEventState(os.time({ year = 2026, month = 11, day = 20, hour = 18, min = 0, sec = 0 }))
+	assert(friState.active == false and friState.remainingSec == 6 * 3600, "Friday 18:00 must be inactive with 6h remaining")
 
 	-- 12. VIPConfig verification (P4 VIP Lounge)
 	local VIPConfig = require(script.Parent:WaitForChild("VIPConfig"))

@@ -15,6 +15,12 @@ export type PromoSlide = {
 	color: Color3,
 }
 
+export type WeekendEventState = {
+	active: boolean,
+	targetTimestamp: number,
+	remainingSec: number,
+}
+
 local JumbotronConfig = {
 	SCREEN_SIZE = Vector3.new(60.0, 28.0, 0.8),
 	POSITION = Vector3.new(0.0, 22.0, -110.0),
@@ -44,7 +50,7 @@ local JumbotronConfig = {
 		"👥  JOIN THE GROUP FOR FREE CASH  👥",
 		"⚡  PRESS [E] ON A PAD TO VOTE  ⚡",
 		"🎁  CLAIM YOUR DAILY REWARD  🎁",
-		"🎴  COLLECT ALL 152 CARDS  🎴",
+		"🎴  COLLECT ALL 150 CARDS  🎴",
 	},
 
 	-- Right Panel Default Events
@@ -74,5 +80,31 @@ local JumbotronConfig = {
 		D = Color3.fromHex("#6B7280"),
 	},
 }
+
+-- Active every Saturday (wday == 7) & Sunday (wday == 1) 00:00 -> Monday 00:00; inactive Mon-Fri -> next Saturday 00:00
+function JumbotronConfig.getWeekendEventState(unixNow: number?): WeekendEventState
+	local nowSec = math.floor(unixNow or os.time())
+	-- Use UTC ("!*t") to match Roblox os.time(table) semantics across Studio and cloud servers
+	local dt = os.date("!*t", nowSec) :: { year: number, month: number, day: number, wday: number, hour: number, min: number, sec: number }
+	local isWeekend = (dt.wday == 7 or dt.wday == 1)
+	local daysAhead = if dt.wday == 7 then 2 elseif dt.wday == 1 then 1 else (7 - dt.wday)
+	local targetTs = os.time({
+		year = dt.year,
+		month = dt.month,
+		day = dt.day + daysAhead,
+		hour = 0,
+		min = 0,
+		sec = 0,
+	})
+	return {
+		active = isWeekend,
+		targetTimestamp = targetTs,
+		remainingSec = math.max(0, targetTs - nowSec),
+	}
+end
+
+function JumbotronConfig.isWeekendEventActive(unixNow: number?): boolean
+	return JumbotronConfig.getWeekendEventState(unixNow).active
+end
 
 return table.freeze(JumbotronConfig)

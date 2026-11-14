@@ -380,16 +380,18 @@ local function refreshTableFromAttributes(entry: TableEntry)
 	end
 end
 
--- Hook table attributes using GetAttributeChangedSignal
-local function bindTable(tableModel: Model)
-	if tablesByModel[tableModel] then
+local watchedTables: { [Model]: boolean } = {}
+local ATTR_NAMES = { "InMatch", "Occupancy", "PlayerA", "PlayerB", "Turn", "PlacedA", "PlacedB" }
+
+local function tryBindTable(tableModel: Model)
+	if tablesByModel[tableModel] or not tableModel.Parent then
 		return
 	end
 
 	local anchor = tableModel:FindFirstChild("BillboardAnchor", true) :: Attachment?
 	if not anchor then
 		-- Fallback: locate table top or primary part and attach anchor at 7 studs height
-		local top = tableModel:FindFirstChild("TableTop") or tableModel.PrimaryPart or tableModel:FindFirstChildWhichIsA("BasePart")
+		local top = tableModel:FindFirstChild("TableTop") or tableModel.PrimaryPart
 		if top and top:IsA("BasePart") then
 			anchor = Instance.new("Attachment")
 			anchor.Name = "BillboardAnchor"
@@ -406,12 +408,44 @@ local function bindTable(tableModel: Model)
 	tablesByModel[tableModel] = entry
 	refreshTableFromAttributes(entry)
 
-	-- Attribute listeners
-	for _, attrName in { "InMatch", "Occupancy", "PlayerA", "PlayerB", "Turn", "PlacedA", "PlacedB" } do
-		tableModel:GetAttributeChangedSignal(attrName):Connect(function()
+	local conns: { RBXScriptConnection } = {}
+	for _, attrName in ATTR_NAMES do
+		table.insert(conns, tableModel:GetAttributeChangedSignal(attrName):Connect(function()
 			refreshTableFromAttributes(entry)
-		end)
+		end))
 	end
+
+	-- Rebind cleanly if StreamingEnabled streams TableTop/BillboardAnchor out and back in
+	table.insert(conns, anchor.AncestryChanged:Connect(function()
+		if not anchor:IsDescendantOf(tableModel) then
+			tablesByModel[tableModel] = nil
+			for _, c in conns do
+				c:Disconnect()
+			end
+		end
+	end))
+end
+
+-- Hook table attributes using GetAttributeChangedSignal (retrying as descendants stream in)
+local function bindTable(tableModel: Model)
+	if watchedTables[tableModel] then
+		tryBindTable(tableModel)
+		return
+	end
+	watchedTables[tableModel] = true
+
+	local descConn = tableModel.DescendantAdded:Connect(function()
+		if not tablesByModel[tableModel] then
+			task.defer(tryBindTable, tableModel)
+		end
+	end)
+	tableModel.Destroying:Connect(function()
+		watchedTables[tableModel] = nil
+		tablesByModel[tableModel] = nil
+		descConn:Disconnect()
+	end)
+
+	tryBindTable(tableModel)
 end
 
 -- Initialize tables in Workspace

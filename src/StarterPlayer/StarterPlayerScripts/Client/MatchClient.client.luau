@@ -55,15 +55,13 @@ local DAILY_COOLDOWN_SEC = 86400
 
 -- Built-in Engine SFX & UI Tween Helpers
 
+local sfxFolder = Instance.new("Folder")
+sfxFolder.Name = "BAF_SFX"
+sfxFolder.Parent = SoundService
+
 local playSfx: (kind: string) -> ()
 
 do
-
-	local sfxFolder = Instance.new("Folder")
-
-	sfxFolder.Name = "BAF_SFX"
-
-	sfxFolder.Parent = SoundService
 
 	local function createSound(name: string, soundId: string, speed: number, vol: number): Sound
 
@@ -83,6 +81,8 @@ do
 
 	end
 
+	local cheerToken = 0
+
 	local sfxMap: { [string]: Sound } = {
 
 		click = createSound("Click", "rbxasset://sounds/button.wav", 1.25, 0.45),
@@ -97,17 +97,79 @@ do
 
 		lose = createSound("Lose", "rbxasset://sounds/swoosh.wav", 0.65, 0.65),
 
+		crowdCheer = createSound("CrowdCheer", "rbxassetid://9112766203", 1.0, 0.55),
+
 	}
 
 	function playSfx(kind: string)
 
-		local s = sfxMap[kind]
+		if kind == "stopCrowdCheer" then
 
-		if s then
+			cheerToken += 1
 
-			SoundService:PlayLocalSound(s)
+			sfxMap.crowdCheer:Stop()
+
+			return
 
 		end
+
+		local s = sfxMap[kind]
+
+		if not s then
+
+			return
+
+		end
+
+		if kind == "crowdCheer" then
+
+			cheerToken += 1
+
+			local token = cheerToken
+
+			s:Stop()
+
+			s.TimePosition = 0
+
+			s.Volume = 0.55
+
+			pcall(function()
+
+				s:Play()
+
+			end)
+
+			-- Fade out the 79s crowd clip smoothly after 4s so it does not bleed into lobby/next match
+
+			task.delay(4.0, function()
+
+				if token ~= cheerToken or not s.IsPlaying then
+
+					return
+
+				end
+
+				local tw = TweenService:Create(s, TweenInfo.new(1.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { Volume = 0 })
+
+				tw:Play()
+
+				tw.Completed:Connect(function()
+
+					if token == cheerToken then
+
+						s:Stop()
+
+					end
+
+				end)
+
+			end)
+
+			return
+
+		end
+
+		SoundService:PlayLocalSound(s)
 
 	end
 
@@ -550,6 +612,7 @@ lobbyHud.Parent = screenGui
 
 -- Toast Notification Banner (parented to screenGui so it is visible in both Lobby and Match)
 
+local pushIndexNotification: ((rarityUpper: string, playerName: string, bonus: number) -> ())? = nil
 local showToast: (msg: string) -> ()
 
 do
@@ -571,6 +634,12 @@ addStroke(toastBanner, Color3.fromHex("#FFD21F"), 2)
 local toastToken = 0
 
 function showToast(msg: string)
+	local cleaned = string.gsub(msg, "^📖%s*", "")
+	local rarityUpper, playerName, bonusStr = string.match(cleaned, "^NEW ([A-Z]+): (.+) %(%+%$(%d+) Bux!%)$")
+	if rarityUpper and playerName and bonusStr and pushIndexNotification then
+		pushIndexNotification(rarityUpper, playerName, tonumber(bonusStr) or 25)
+		return
+	end
 
 	toastToken += 1
 
@@ -764,7 +833,7 @@ do
 	UITheme.applyStroke(freeBadge, 1.5, UITheme.Colors.Black)
 
 	-- Index Badge moved to top-right corner of Index button, small, TextScaled, Max 12, ZIndex above button
-	local badge = makeLabel(btnNavIndex, "0/152", UDim2.new(0.55, 0, 0.28, 0), UDim2.new(1, 0, 0, 0), Color3.new(1, 1, 1))
+	local badge = makeLabel(btnNavIndex, `0/{#Footballers.All}`, UDim2.new(0.55, 0, 0.28, 0), UDim2.new(1, 0, 0, 0), Color3.new(1, 1, 1))
 	badge.Name = "IndexBadge"
 	badge.AnchorPoint = Vector2.new(1, 0)
 	badge.BackgroundTransparency = 0
@@ -1767,7 +1836,7 @@ local skinNameLabels: { [string]: TextLabel } = {}
 
 -- ============================================================
 
--- Build Page 6: CARD INDEX / POKEDEX (152 Footballers sorted Mythic -> Common)
+-- Build Page 6: CARD INDEX / POKEDEX (150 Footballers sorted Mythic -> Common)
 
 -- ============================================================
 
@@ -1777,7 +1846,7 @@ local indexCardCells: { [string]: { frame: Frame, label: TextLabel, card: Footba
 
 do
 
-indexProgressHeader = makeLabel(pageIndex, "DISCOVERED: 0 / 152 (0%) • +$25–$250 PER NEW CARD!", UDim2.new(0.96, 0, 0.11, 0), UDim2.new(0.02, 0, 0, 0), UITheme.Colors.NoticeYellow)
+indexProgressHeader = makeLabel(pageIndex, `DISCOVERED: 0 / {#Footballers.All} (0%) • +$25–$250 PER NEW CARD!`, UDim2.new(0.96, 0, 0.11, 0), UDim2.new(0.02, 0, 0, 0), UITheme.Colors.NoticeYellow)
 
 local indexScroll = Instance.new("ScrollingFrame")
 
@@ -2197,7 +2266,7 @@ do
 
 	profIndexBarText.TextScaled = true
 
-	profIndexBarText.Text = "PROGRES CARD INDEX: 0/152 (0%)"
+	profIndexBarText.Text = `PROGRES CARD INDEX: 0/{#Footballers.All} (0%)`
 
 	profIndexBarText.ZIndex = 74
 
@@ -2207,13 +2276,13 @@ do
 
 	profIndexBarText.Parent = profIndexBarBg
 
-	local rarityTileOrder = { "Common", "Rare", "Epic", "Legendary", "Mythic" }
+	local rarityTileOrder = { "Common", "Uncommon", "Rare", "Epic", "Legend", "Mythic" }
 
 	local profRarityVals: { [string]: TextLabel } = {}
 
 	for idx, rName in rarityTileOrder do
 
-		local xScale = (idx - 1) * 0.2
+		local xScale = (idx - 1) / #rarityTileOrder
 
 		profRarityVals[rName] = makeStatTile(
 
@@ -2221,7 +2290,7 @@ do
 
 			UDim2.new(xScale, if idx == 1 then 12 else 4, 0, 70),
 
-			UDim2.new(0.2, if idx == 1 or idx == 5 then -16 else -8, 0, 48),
+			UDim2.new(1 / #rarityTileOrder, if idx == 1 or idx == #rarityTileOrder then -16 else -8, 0, 48),
 
 			string.upper(rName),
 
@@ -2233,7 +2302,7 @@ do
 
 	local profTotalSpinsVal = makeStatTile(secCards, UDim2.new(0, 12, 0, 124), UDim2.new(0.5, -16, 0, 48), "TOTAL SPIN & MYTHIC DIDAPAT", GameConfig.RARITY_COLORS.Mythic)
 
-	local profPityVal = makeStatTile(secCards, UDim2.new(0.5, 4, 0, 124), UDim2.new(0.5, -16, 0, 48), "SPIN TANPA MYTHIC (MAX / SKRG)", GameConfig.RARITY_COLORS.Legendary)
+	local profPityVal = makeStatTile(secCards, UDim2.new(0.5, 4, 0, 124), UDim2.new(0.5, -16, 0, 48), "SPIN TANPA MYTHIC (MAX / SKRG)", GameConfig.RARITY_COLORS.Legend)
 
 	local profRarestCardVal = makeStatTile(secCards, UDim2.new(0, 12, 0, 176), UDim2.new(0.5, -16, 0, 48), "KARTU TERLANGKA", GameConfig.RARITY_COLORS.Mythic)
 
@@ -2329,11 +2398,11 @@ do
 
 		profIndexBarText.Text = `PROGRES CARD INDEX: {discCount}/{#Footballers.All} ({pct}%)`
 
-		local rCounts: { [string]: number } = { Common = 0, Rare = 0, Epic = 0, Legendary = 0, Mythic = 0 }
+		local rCounts: { [string]: number } = { Common = 0, Uncommon = 0, Rare = 0, Epic = 0, Legend = 0, Mythic = 0 }
 
-		local rTotal: { [string]: number } = { Common = 0, Rare = 0, Epic = 0, Legendary = 0, Mythic = 0 }
+		local rTotal: { [string]: number } = { Common = 0, Uncommon = 0, Rare = 0, Epic = 0, Legend = 0, Mythic = 0 }
 
-		local rarityRankMap: { [string]: number } = { Common = 1, Rare = 2, Epic = 3, Legendary = 4, Mythic = 5 }
+		local rarityRankMap: { [string]: number } = { Common = 1, Uncommon = 2, Rare = 3, Epic = 4, Legend = 5, Mythic = 6 }
 
 		local fallbackRarestCard: any = nil
 
@@ -2421,32 +2490,41 @@ end
 
 -- Modal Navigation Logic
 
+local function hideImmediate(win: GuiObject?)
+	if win and win.Visible then
+		win:SetAttribute("WindowTweenToken", ((win:GetAttribute("WindowTweenToken") :: number?) or 0) + 1)
+		win.Visible = false
+	end
+end
+
 local function closeAllModals(except: string?)
-	if except ~= "SHOP" and shopWindow.Visible then
-		shopWindow.Visible = false
+	if except ~= "SHOP" then
+		hideImmediate(shopWindow)
 	end
-	if except ~= "SKINS" and skinsWindow and skinsWindow.Visible then
-		skinsWindow.Visible = false
+	if except ~= "SKINS" then
+		hideImmediate(skinsWindow)
 	end
-	if except ~= "TITLES" and titlesWindow and titlesWindow.Visible then
-		titlesWindow.Visible = false
+	if except ~= "TITLES" then
+		hideImmediate(titlesWindow)
 	end
-	if except ~= "QUESTS" and questsWindow and questsWindow.Visible then
-		questsWindow.Visible = false
+	if except ~= "QUESTS" then
+		hideImmediate(questsWindow)
 	end
-	if except ~= "FREE" and freeRewardsWindow and freeRewardsWindow.Visible then
-		freeRewardsWindow.Visible = false
+	if except ~= "FREE" then
+		hideImmediate(freeRewardsWindow)
 	end
 	if except ~= "WHEEL" and wheelHandler.isOpen() then
-		wheelHandler.window.Visible = false
+		hideImmediate(wheelHandler.window)
 	end
-	if except ~= "WRAP" and modalWrap.Visible then
-		modalWrap.Visible = false
+	if except ~= "WRAP" then
+		hideImmediate(modalWrap)
 	end
 end
 
 local function openWheel()
 	closeAllModals("WHEEL")
+	modalBackdrop:SetAttribute("OpenedAt", os.clock())
+	modalBackdrop:SetAttribute("OpenToken", ((modalBackdrop:GetAttribute("OpenToken") :: number?) or 0) + 1)
 	modalBackdrop.Visible = true
 	wheelHandler.open()
 end
@@ -2543,7 +2621,7 @@ local function openModal(kind: "FREE" | "QUESTS" | "SKINS" | "TITLES" | "SHOP" |
 	UITheme.animateWindowOpen(modalWrap, modalBox, targetScale)
 
 	if kind == "INDEX" then
-		UITheme.styleHeader(modalHeader, "Magenta", "CARD INDEX (152 FOOTBALLERS)")
+		UITheme.styleHeader(modalHeader, "Magenta", `CARD INDEX ({#Footballers.All} FOOTBALLERS)`)
 	elseif kind == "PROFILE" then
 		UITheme.styleHeader(modalHeader, "Blue", "PLAYER PROFILE & STATS TRACKER")
 		refreshProfileGlobalRanks()
@@ -2560,6 +2638,7 @@ modalBackdrop.Activated:Connect(function()
 		return
 	end
 	local openedAt = math.max(
+		(modalBackdrop:GetAttribute("OpenedAt") :: number?) or 0,
 		(modalWrap:GetAttribute("OpenedAt") :: number?) or 0,
 		(wheelHandler.window:GetAttribute("OpenedAt") :: number?) or 0
 	)
@@ -2848,6 +2927,29 @@ local winnerNameLabel = MatchUi.label(layoutRoot, "", UDim2.fromScale(0.50, 0.07
 winnerNameLabel.AnchorPoint = Vector2.new(0.5, 0)
 winnerNameLabel.Visible = false
 
+local currentIsBotMatch = false
+local leaveConfirmUntil = 0
+local midMatchLeaveBtn = makeButton(layoutRoot, "LEAVE", UDim2.fromOffset(104, 34), UDim2.new(1, -10, 0, 8), GameConfig.UI_COLORS.Steal)
+midMatchLeaveBtn.Name = "MidMatchLeaveBtn"
+midMatchLeaveBtn.AnchorPoint = Vector2.new(1, 0)
+midMatchLeaveBtn.ZIndex = 20
+midMatchLeaveBtn.Visible = false
+midMatchLeaveBtn.Activated:Connect(function()
+	if currentIsBotMatch or os.clock() <= leaveConfirmUntil then
+		leaveConfirmUntil = 0
+		midMatchLeaveBtn.Text = "LEAVE"
+		Remotes.MatchAction:FireServer("LeaveTable")
+		return
+	end
+	leaveConfirmUntil = os.clock() + 3
+	midMatchLeaveBtn.Text = "CONFIRM?"
+	task.delay(3, function()
+		if os.clock() > leaveConfirmUntil then
+			midMatchLeaveBtn.Text = "LEAVE"
+		end
+	end)
+end)
+
 -- ============================================================
 -- 2A. SEATED WAITING SCREEN ("INVITE FRIENDS", "LEAVE" + "FIGHT WITH AI -> PLAY!")
 -- ============================================================
@@ -3115,6 +3217,547 @@ local function createFaceViewport(parent: Instance): ViewportFrame
 
 end
 
+-- Redesigned Index Discovery Notification Queue (Top-Left, Scale-only, max 3 stacked)
+do
+	local INDEX_RARITY_COLORS: { [string]: Color3 } = {
+		Common = Color3.fromHex("#8FA3B8"),
+		Uncommon = Color3.fromHex("#22C55E"),
+		Rare = Color3.fromHex("#3FA2FF"),
+		Epic = Color3.fromHex("#A855F7"),
+		Legend = Color3.fromHex("#FFC928"),
+		Mythic = UITheme.CONFIG.CardIndex.RARITY_COLORS.Mythic,
+	}
+	local INDEX_RARITY_KEYS: { [string]: string } = {
+		COMMON = "Common",
+		UNCOMMON = "Uncommon",
+		RARE = "Rare",
+		EPIC = "Epic",
+		LEGEND = "Legend",
+		MYTHIC = "Mythic",
+	}
+	local cardByDisplayName: { [string]: Footballers.Footballer } = {}
+	for _, fc in Footballers.All do
+		cardByDisplayName[Footballers.getDisplayName(fc)] = fc
+	end
+
+	local indexToastQueue = Instance.new("Frame")
+	indexToastQueue.Name = "IndexToastQueue"
+	indexToastQueue.AnchorPoint = Vector2.new(0, 0)
+	indexToastQueue.Position = UDim2.fromScale(0.01, 0.1)
+	indexToastQueue.Size = UDim2.fromScale(1, 1)
+	indexToastQueue.BackgroundTransparency = 1
+	indexToastQueue.Active = false
+	indexToastQueue.ClipsDescendants = false
+	indexToastQueue.ZIndex = 30
+	indexToastQueue.Parent = screenGui
+
+	local queueLayout = Instance.new("UIListLayout")
+	queueLayout.Name = "UIListLayout"
+	queueLayout.FillDirection = Enum.FillDirection.Vertical
+	queueLayout.HorizontalAlignment = Enum.HorizontalAlignment.Left
+	queueLayout.VerticalAlignment = Enum.VerticalAlignment.Top
+	queueLayout.SortOrder = Enum.SortOrder.LayoutOrder
+	queueLayout.Padding = UDim.new(0.015, 0)
+	queueLayout.Parent = indexToastQueue
+
+	local function syncToastQueuePlacement()
+		if lobbyHud.Visible then
+			indexToastQueue.AnchorPoint = Vector2.new(0, 0)
+			indexToastQueue.Position = UDim2.fromScale(0.01, 0.1)
+			queueLayout.HorizontalAlignment = Enum.HorizontalAlignment.Left
+		else
+			-- Top-right stays clear of LeftStatPanel and sits below MidMatchLeaveBtn during matches
+			indexToastQueue.AnchorPoint = Vector2.new(1, 0)
+			indexToastQueue.Position = UDim2.fromScale(0.99, 0.08)
+			queueLayout.HorizontalAlignment = Enum.HorizontalAlignment.Right
+		end
+	end
+	syncToastQueuePlacement()
+	lobbyHud:GetPropertyChangedSignal("Visible"):Connect(syncToastQueuePlacement)
+
+	local function addScaleCorner(parent: Instance, scaleRad: number): UICorner
+		local c = Instance.new("UICorner")
+		c.CornerRadius = UDim.new(scaleRad, 0)
+		c.Parent = parent
+		return c
+	end
+
+	local function addNotifStroke(parent: Instance, thickness: number, color: Color3, mode: Enum.ApplyStrokeMode?): UIStroke
+		local s = Instance.new("UIStroke")
+		s.Thickness = thickness
+		s.Color = color
+		s.ApplyStrokeMode = mode or Enum.ApplyStrokeMode.Border
+		s.LineJoinMode = Enum.LineJoinMode.Round
+		s.Parent = parent
+		return s
+	end
+
+	local function addNotifTextConstraint(lbl: TextLabel, minSz: number, maxSz: number)
+		local tc = Instance.new("UITextSizeConstraint")
+		tc.MinTextSize = minSz
+		tc.MaxTextSize = maxSz
+		tc.Parent = lbl
+	end
+
+	type IndexToastEntry = {
+		slot: Frame,
+		fadeVal: NumberValue,
+		tweens: { Tween },
+		alive: boolean,
+	}
+	local activeToasts: { IndexToastEntry } = {}
+	local nextToastOrder = 0
+
+	local function trackTween(entry: IndexToastEntry, tw: Tween): Tween
+		table.insert(entry.tweens, tw)
+		tw:Play()
+		return tw
+	end
+
+	local function dismissEntry(entry: IndexToastEntry)
+		if not entry.alive then
+			return
+		end
+		entry.alive = false
+		local idx = table.find(activeToasts, entry)
+		if idx then
+			table.remove(activeToasts, idx)
+		end
+		for _, tw in entry.tweens do
+			tw:Cancel()
+		end
+		table.clear(entry.tweens)
+		entry.fadeVal:Destroy()
+		entry.slot:Destroy()
+	end
+
+	pushIndexNotification = function(rarityUpper: string, playerName: string, bonus: number)
+		while #activeToasts >= 3 do
+			dismissEntry(activeToasts[1])
+		end
+
+		nextToastOrder += 1
+		local matchedCard = cardByDisplayName[playerName]
+		local rarityKey = if matchedCard then matchedCard.rarity else (INDEX_RARITY_KEYS[rarityUpper] or "Common")
+		local rarityColor = INDEX_RARITY_COLORS[rarityKey] or INDEX_RARITY_COLORS.Common
+		local hasShine = (rarityKey == "Epic" or rarityKey == "Legend" or rarityKey == "Mythic")
+		local isLegendary = (rarityKey == "Legend" or rarityKey == "Mythic")
+
+		local slot = Instance.new("Frame")
+		slot.Name = "IndexNotificationSlot"
+		slot.LayoutOrder = nextToastOrder
+		slot.Size = UDim2.fromScale(0.22, 0.1)
+		slot.BackgroundTransparency = 1
+		slot.ClipsDescendants = false
+		slot.ZIndex = 30
+		slot.Parent = indexToastQueue
+
+		local slotAspect = Instance.new("UIAspectRatioConstraint")
+		slotAspect.AspectRatio = 3.2
+		slotAspect.AspectType = Enum.AspectType.ScaleWithParentSize
+		slotAspect.DominantAxis = Enum.DominantAxis.Width
+		slotAspect.Parent = slot
+
+		local slotMin = Instance.new("UISizeConstraint")
+		slotMin.MinSize = Vector2.new(200, 62)
+		slotMin.Parent = slot
+
+		local slideOffsetX = if queueLayout.HorizontalAlignment == Enum.HorizontalAlignment.Right then 1.15 else -1.15
+		local card = Instance.new("Frame")
+		card.Name = "IndexNotificationCard"
+		card.Size = UDim2.fromScale(1, 1)
+		card.Position = UDim2.fromScale(slideOffsetX, 0)
+		card.BackgroundColor3 = Color3.new(1, 1, 1)
+		card.BackgroundTransparency = 0
+		card.BorderSizePixel = 0
+		card.ClipsDescendants = false
+		card.ZIndex = 30
+		addScaleCorner(card, 0.16)
+		addNotifStroke(card, 2.5, rarityColor, Enum.ApplyStrokeMode.Border)
+		local bgGrad = Instance.new("UIGradient")
+		bgGrad.Color = ColorSequence.new(Color3.fromHex("#25293A"), Color3.fromHex("#131622"))
+		bgGrad.Rotation = 90
+		bgGrad.Parent = card
+		card.Parent = slot
+
+		-- Clipped layer for studs texture + Epic/Legendary shine sweep
+		local shineClip = Instance.new("Frame")
+		shineClip.Name = "ShineClip"
+		shineClip.Size = UDim2.fromScale(1, 1)
+		shineClip.BackgroundTransparency = 1
+		shineClip.ClipsDescendants = true
+		shineClip.ZIndex = 31
+		addScaleCorner(shineClip, 0.16)
+		shineClip.Parent = card
+
+		local studs = Instance.new("ImageLabel")
+		studs.Name = "Studs"
+		studs.Size = UDim2.fromScale(1, 1)
+		studs.BackgroundTransparency = 1
+		studs.Image = UITheme.Assets.StudsTexture
+		studs.ImageTransparency = 0.92
+		studs.ScaleType = Enum.ScaleType.Tile
+		studs.TileSize = UDim2.fromScale(0.10, 0.32)
+		studs.ZIndex = 31
+		studs.Parent = shineClip
+
+		local shineGrad: UIGradient? = nil
+		if hasShine then
+			local shineOverlay = Instance.new("Frame")
+			shineOverlay.Name = "ShineOverlay"
+			shineOverlay.Size = UDim2.fromScale(1, 1)
+			shineOverlay.BackgroundColor3 = Color3.new(1, 1, 1)
+			shineOverlay.BackgroundTransparency = 0
+			shineOverlay.BorderSizePixel = 0
+			shineOverlay.ZIndex = 36
+			local sg = Instance.new("UIGradient")
+			sg.Rotation = 35
+			sg.Offset = Vector2.new(-1.2, 0)
+			sg.Transparency = NumberSequence.new({
+				NumberSequenceKeypoint.new(0.00, 1.0),
+				NumberSequenceKeypoint.new(0.42, 1.0),
+				NumberSequenceKeypoint.new(0.50, 0.55),
+				NumberSequenceKeypoint.new(0.58, 1.0),
+				NumberSequenceKeypoint.new(1.00, 1.0),
+			})
+			sg.Parent = shineOverlay
+			shineOverlay.Parent = shineClip
+			shineGrad = sg
+		end
+
+		-- Left: Player portrait in rounded square (height 0.85, 1:1), UIStroke in rarity color
+		local portraitBox = Instance.new("Frame")
+		portraitBox.Name = "PortraitBox"
+		portraitBox.AnchorPoint = Vector2.new(0, 0.5)
+		portraitBox.Position = UDim2.fromScale(0.024, 0.5)
+		portraitBox.Size = UDim2.fromScale(1, 0.85)
+		portraitBox.BackgroundColor3 = Color3.fromRGB(20, 24, 34)
+		portraitBox.BorderSizePixel = 0
+		portraitBox.ClipsDescendants = true
+		portraitBox.ZIndex = 32
+		addScaleCorner(portraitBox, 0.18)
+		addNotifStroke(portraitBox, 2, rarityColor, Enum.ApplyStrokeMode.Border)
+		local pAsp = Instance.new("UIAspectRatioConstraint")
+		pAsp.AspectRatio = 1.0
+		pAsp.AspectType = Enum.AspectType.ScaleWithParentSize
+		pAsp.DominantAxis = Enum.DominantAxis.Height
+		pAsp.Parent = portraitBox
+		portraitBox.Parent = card
+
+		local pSunburst = Instance.new("ImageLabel")
+		pSunburst.Name = "Sunburst"
+		pSunburst.Size = UDim2.fromScale(1, 1)
+		pSunburst.BackgroundTransparency = 1
+		pSunburst.Image = UITheme.Assets.SunburstTexture
+		pSunburst.ImageColor3 = rarityColor
+		pSunburst.ImageTransparency = 0.65
+		pSunburst.ScaleType = Enum.ScaleType.Fit
+		pSunburst.ZIndex = 32
+		pSunburst.Parent = portraitBox
+
+		if matchedCard then
+			local faceVp = createFaceViewport(portraitBox)
+			faceVp.ZIndex = 33
+			addScaleCorner(faceVp, 0.18)
+			local mount: ViewportMount = { model = nil, modelId = nil }
+			mountViewportModel(faceVp, mount, matchedCard.id)
+		end
+
+		-- Middle: Vertical UIListLayout (0.28 + 0.46 + 0.26 = 1.00)
+		local middleCol = Instance.new("Frame")
+		middleCol.Name = "MiddleColumn"
+		middleCol.AnchorPoint = Vector2.new(0, 0.5)
+		middleCol.Position = UDim2.fromScale(0.300, 0.5)
+		middleCol.Size = UDim2.fromScale(0.405, 0.85)
+		middleCol.BackgroundTransparency = 1
+		middleCol.ZIndex = 32
+		middleCol.Parent = card
+
+		local midList = Instance.new("UIListLayout")
+		midList.FillDirection = Enum.FillDirection.Vertical
+		midList.HorizontalAlignment = Enum.HorizontalAlignment.Left
+		midList.VerticalAlignment = Enum.VerticalAlignment.Center
+		midList.SortOrder = Enum.SortOrder.LayoutOrder
+		midList.Padding = UDim.new(0, 0)
+		midList.Parent = middleCol
+
+		local entryHeader = Instance.new("Frame")
+		entryHeader.Name = "EntryHeader"
+		entryHeader.LayoutOrder = 1
+		entryHeader.Size = UDim2.fromScale(1, 0.28)
+		entryHeader.BackgroundTransparency = 1
+		entryHeader.ZIndex = 32
+		entryHeader.Parent = middleCol
+
+		local hdrList = Instance.new("UIListLayout")
+		hdrList.FillDirection = Enum.FillDirection.Horizontal
+		hdrList.HorizontalAlignment = Enum.HorizontalAlignment.Left
+		hdrList.VerticalAlignment = Enum.VerticalAlignment.Center
+		hdrList.SortOrder = Enum.SortOrder.LayoutOrder
+		hdrList.Padding = UDim.new(0.03, 0)
+		hdrList.Parent = entryHeader
+
+		local indexIcon = Instance.new("ImageLabel")
+		indexIcon.Name = "IndexIcon"
+		indexIcon.LayoutOrder = 1
+		indexIcon.Size = UDim2.fromScale(1, 0.90)
+		indexIcon.BackgroundTransparency = 1
+		indexIcon.Image = UITheme.Assets.NavIndexIcon
+		indexIcon.ScaleType = Enum.ScaleType.Fit
+		indexIcon.ZIndex = 33
+		local iAsp = Instance.new("UIAspectRatioConstraint")
+		iAsp.AspectRatio = 1.0
+		iAsp.AspectType = Enum.AspectType.ScaleWithParentSize
+		iAsp.DominantAxis = Enum.DominantAxis.Height
+		iAsp.Parent = indexIcon
+		indexIcon.Parent = entryHeader
+
+		local entryLbl = Instance.new("TextLabel")
+		entryLbl.Name = "EntryLabel"
+		entryLbl.LayoutOrder = 2
+		entryLbl.Size = UDim2.fromScale(0.80, 1)
+		entryLbl.BackgroundTransparency = 1
+		entryLbl.Font = UITheme.CONFIG.Font
+		entryLbl.Text = "NEW INDEX ENTRY"
+		entryLbl.TextColor3 = rarityColor:Lerp(Color3.fromRGB(200, 210, 225), 0.52)
+		entryLbl.TextScaled = true
+		entryLbl.TextXAlignment = Enum.TextXAlignment.Left
+		entryLbl.ZIndex = 33
+		addNotifTextConstraint(entryLbl, 7, 11)
+		addNotifStroke(entryLbl, 1.5, Color3.new(0, 0, 0), Enum.ApplyStrokeMode.Contextual)
+		entryLbl.Parent = entryHeader
+
+		local nameLbl = Instance.new("TextLabel")
+		nameLbl.Name = "PlayerNameLabel"
+		nameLbl.LayoutOrder = 2
+		nameLbl.Size = UDim2.fromScale(1, 0.46)
+		nameLbl.BackgroundTransparency = 1
+		nameLbl.Font = UITheme.CONFIG.Font
+		nameLbl.Text = playerName
+		nameLbl.TextColor3 = Color3.new(1, 1, 1)
+		nameLbl.TextScaled = true
+		nameLbl.TextTruncate = Enum.TextTruncate.AtEnd
+		nameLbl.TextXAlignment = Enum.TextXAlignment.Left
+		nameLbl.ZIndex = 33
+		addNotifTextConstraint(nameLbl, 7, 18)
+		addNotifStroke(nameLbl, 2, Color3.new(0, 0, 0), Enum.ApplyStrokeMode.Contextual)
+		nameLbl.Parent = middleCol
+
+		local rarityLbl = Instance.new("TextLabel")
+		rarityLbl.Name = "RarityLabel"
+		rarityLbl.LayoutOrder = 3
+		rarityLbl.Size = UDim2.fromScale(1, 0.26)
+		rarityLbl.BackgroundTransparency = 1
+		rarityLbl.Font = UITheme.CONFIG.Font
+		rarityLbl.Text = string.upper(rarityKey)
+		rarityLbl.TextColor3 = rarityColor
+		rarityLbl.TextScaled = true
+		rarityLbl.TextXAlignment = Enum.TextXAlignment.Left
+		rarityLbl.ZIndex = 33
+		addNotifTextConstraint(rarityLbl, 7, 12)
+		addNotifStroke(rarityLbl, 1.5, Color3.new(0, 0, 0), Enum.ApplyStrokeMode.Contextual)
+		rarityLbl.Parent = middleCol
+
+		-- Right: Reward Pill (green gradient, UICorner 0.5)
+		local rewardSlot = Instance.new("Frame")
+		rewardSlot.Name = "RewardSlot"
+		rewardSlot.AnchorPoint = Vector2.new(1, 0.5)
+		rewardSlot.Position = UDim2.fromScale(0.978, 0.5)
+		rewardSlot.Size = UDim2.fromScale(0.265, 0.44)
+		rewardSlot.BackgroundTransparency = 1
+		rewardSlot.ClipsDescendants = false
+		rewardSlot.ZIndex = 32
+		rewardSlot.Parent = card
+
+		local rewardPill = Instance.new("Frame")
+		rewardPill.Name = "RewardPill"
+		rewardPill.AnchorPoint = Vector2.new(0.5, 0.5)
+		rewardPill.Position = UDim2.fromScale(0.5, 0.5)
+		rewardPill.Size = UDim2.fromScale(1, 1)
+		rewardPill.BackgroundColor3 = Color3.new(1, 1, 1)
+		rewardPill.BorderSizePixel = 0
+		rewardPill.ClipsDescendants = true
+		rewardPill.ZIndex = 33
+		addScaleCorner(rewardPill, 0.5)
+		addNotifStroke(rewardPill, 2, Color3.new(0, 0, 0), Enum.ApplyStrokeMode.Border)
+		local pillGrad = Instance.new("UIGradient")
+		pillGrad.Color = ColorSequence.new(Color3.fromHex("#68FF3B"), Color3.fromHex("#38B018"))
+		pillGrad.Rotation = 90
+		pillGrad.Parent = rewardPill
+		local pillPad = Instance.new("UIPadding")
+		pillPad.PaddingLeft = UDim.new(0.05, 0)
+		pillPad.PaddingRight = UDim.new(0.05, 0)
+		pillPad.Parent = rewardPill
+		local pillList = Instance.new("UIListLayout")
+		pillList.FillDirection = Enum.FillDirection.Horizontal
+		pillList.HorizontalAlignment = Enum.HorizontalAlignment.Center
+		pillList.VerticalAlignment = Enum.VerticalAlignment.Center
+		pillList.SortOrder = Enum.SortOrder.LayoutOrder
+		pillList.Padding = UDim.new(0.04, 0)
+		pillList.Parent = rewardPill
+		rewardPill.Parent = rewardSlot
+
+		local cashIcon = Instance.new("ImageLabel")
+		cashIcon.Name = "CashIcon"
+		cashIcon.LayoutOrder = 1
+		cashIcon.Size = UDim2.fromScale(1, 0.58)
+		cashIcon.BackgroundTransparency = 1
+		cashIcon.Image = UITheme.Assets.CashIcon
+		cashIcon.ScaleType = Enum.ScaleType.Fit
+		cashIcon.ZIndex = 34
+		local cAsp = Instance.new("UIAspectRatioConstraint")
+		cAsp.AspectRatio = 1.0
+		cAsp.AspectType = Enum.AspectType.ScaleWithParentSize
+		cAsp.DominantAxis = Enum.DominantAxis.Height
+		cAsp.Parent = cashIcon
+		cashIcon.Parent = rewardPill
+
+		local rewardLbl = Instance.new("TextLabel")
+		rewardLbl.Name = "RewardLabel"
+		rewardLbl.LayoutOrder = 2
+		rewardLbl.Size = UDim2.fromScale(0.62, 0.85)
+		rewardLbl.BackgroundTransparency = 1
+		rewardLbl.Font = UITheme.CONFIG.Font
+		rewardLbl.Text = `+$` .. tostring(bonus)
+		rewardLbl.TextColor3 = Color3.new(1, 1, 1)
+		rewardLbl.TextScaled = true
+		rewardLbl.TextXAlignment = Enum.TextXAlignment.Center
+		rewardLbl.ZIndex = 34
+		addNotifTextConstraint(rewardLbl, 7, 15)
+		addNotifStroke(rewardLbl, 2, Color3.new(0, 0, 0), Enum.ApplyStrokeMode.Contextual)
+		rewardLbl.Parent = rewardPill
+
+		-- Collect resting alpha targets for 0.25s fade-out (including ViewportFrame)
+		type FadeTarget = { obj: Instance, restBg: number, restTxt: number, restTxtSt: number, restImg: number, restSt: number }
+		local fadeTargets: { FadeTarget } = {}
+		local function collectFadeTarget(inst: Instance)
+			if not (inst:IsA("GuiObject") or inst:IsA("UIStroke")) then
+				return
+			end
+			local t: FadeTarget = { obj = inst, restBg = 1, restTxt = 0, restTxtSt = 1, restImg = 0, restSt = 0 }
+			if inst:IsA("GuiObject") then
+				t.restBg = inst.BackgroundTransparency
+			end
+			if inst:IsA("TextLabel") or inst:IsA("TextButton") then
+				t.restTxt = inst.TextTransparency
+				t.restTxtSt = inst.TextStrokeTransparency
+			elseif inst:IsA("ImageLabel") or inst:IsA("ImageButton") or inst:IsA("ViewportFrame") then
+				t.restImg = inst.ImageTransparency
+			elseif inst:IsA("UIStroke") then
+				t.restSt = inst.Transparency
+			end
+			table.insert(fadeTargets, t)
+		end
+		collectFadeTarget(card)
+		for _, d in card:GetDescendants() do
+			collectFadeTarget(d)
+		end
+
+		local fadeVal = Instance.new("NumberValue")
+		fadeVal.Value = 0
+		fadeVal.Changed:Connect(function(a)
+			for _, t in fadeTargets do
+				local o = t.obj
+				if o:IsA("GuiObject") then
+					o.BackgroundTransparency = t.restBg + (1 - t.restBg) * a
+				end
+				if o:IsA("TextLabel") or o:IsA("TextButton") then
+					o.TextTransparency = t.restTxt + (1 - t.restTxt) * a
+					o.TextStrokeTransparency = t.restTxtSt + (1 - t.restTxtSt) * a
+				elseif o:IsA("ImageLabel") or o:IsA("ImageButton") or o:IsA("ViewportFrame") then
+					o.ImageTransparency = t.restImg + (1 - t.restImg) * a
+				elseif o:IsA("UIStroke") then
+					o.Transparency = t.restSt + (1 - t.restSt) * a
+				end
+			end
+		end)
+
+		local entry: IndexToastEntry = {
+			slot = slot,
+			fadeVal = fadeVal,
+			tweens = {},
+			alive = true,
+		}
+		table.insert(activeToasts, entry)
+
+		playSfx(if isLegendary then "win" else "rare")
+
+		-- 1. Slide in from left with Back Out (0.35s)
+		local slideInTw = trackTween(entry, TweenService:Create(
+			card,
+			TweenInfo.new(0.35, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
+			{ Position = UDim2.fromScale(0, 0) }
+		))
+
+		-- 2. Epic/Legendary UIGradient shine sweep once on entry
+		if shineGrad then
+			trackTween(entry, TweenService:Create(
+				shineGrad,
+				TweenInfo.new(0.60, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut),
+				{ Offset = Vector2.new(1.2, 0) }
+			))
+		end
+
+		-- 3. Reward pill pop (1.0 -> 1.12 -> 1.0) 0.2s after entry
+		task.delay(0.2, function()
+			if not entry.alive then return end
+			local popUp = trackTween(entry, TweenService:Create(
+				rewardPill,
+				TweenInfo.new(0.11, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
+				{ Size = UDim2.fromScale(1.12, 1.12) }
+			))
+			popUp.Completed:Once(function()
+				if not entry.alive then return end
+				trackTween(entry, TweenService:Create(
+					rewardPill,
+					TweenInfo.new(0.12, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+					{ Size = UDim2.fromScale(1, 1) }
+				))
+			end)
+		end)
+
+		-- 4. Legendary small shake on settle, then stay 3s, then slide out & fade (0.25s)
+		slideInTw.Completed:Once(function()
+			if not entry.alive then return end
+			if isLegendary then
+				task.spawn(function()
+					for _, off in {
+						UDim2.fromScale(0.025, -0.015),
+						UDim2.fromScale(-0.022, 0.015),
+						UDim2.fromScale(0.015, -0.010),
+						UDim2.fromScale(-0.008, 0.006),
+						UDim2.fromScale(0, 0),
+					} do
+						if not entry.alive then return end
+						local st = trackTween(entry, TweenService:Create(
+							card,
+							TweenInfo.new(0.04, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+							{ Position = off }
+						))
+						st.Completed:Wait()
+					end
+				end)
+			end
+			task.delay(3, function()
+				if not entry.alive then return end
+				trackTween(entry, TweenService:Create(
+					fadeVal,
+					TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.In),
+					{ Value = 1 }
+				))
+				local slideOutTw = trackTween(entry, TweenService:Create(
+					card,
+					TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.In),
+					{ Position = UDim2.fromScale(slideOffsetX, 0) }
+				))
+				slideOutTw.Completed:Once(function()
+					dismissEntry(entry)
+				end)
+			end)
+		end)
+	end
+end
+
 function MatchUi.createCard(parent: Instance, posScale: UDim2)
 	local frame = Instance.new("Frame")
 	frame.Size = UDim2.fromScale(0.139, 0.29)
@@ -3203,7 +3846,7 @@ function MatchUi.createCard(parent: Instance, posScale: UDim2)
 	clubLbl.LayoutOrder = 4
 	clubLbl.TextTruncate = Enum.TextTruncate.AtEnd
 
-	local rarityLbl = MatchUi.label(cardContent, "Legendary", UDim2.fromScale(0.96, 0.11), nil, GameConfig.RARITY_COLORS.Legendary, 15, 1.5, 8)
+	local rarityLbl = MatchUi.label(cardContent, "Legend", UDim2.fromScale(0.96, 0.11), nil, GameConfig.RARITY_COLORS.Legend, 15, 1.5, 8)
 	rarityLbl.LayoutOrder = 5
 
 	local dimVeil = Instance.new("Frame")
@@ -3255,7 +3898,7 @@ function MatchUi.populateCard(widget: any, card: any, isMine: boolean?, isDimmed
 	if widget.lastId ~= card.id then
 		widget.lastId = card.id
 		if isMine then
-			playSfx(if card.rarity == "Mythic" or card.rarity == "Legendary" then "rare" else "roll")
+			playSfx(if card.rarity == "Mythic" or card.rarity == "Legend" then "rare" else "roll")
 		end
 	end
 	local col = GameConfig.RARITY_COLORS[card.rarity] or Color3.new(1, 1, 1)
@@ -3717,6 +4360,8 @@ actionBar.BackgroundTransparency = 1
 actionBar.ZIndex = 12
 actionBar.Parent = layoutRoot
 
+local btnRevealAll: TextButton
+local btnSeeBest: TextButton
 local btnReroll: TextButton
 local btnSteal: TextButton
 do
@@ -3783,10 +4428,10 @@ do
 		return btn
 	end
 
-	local btnRevealAll = makeActionButton("👁️ REVEAL ALL\nR$29", 1, GameConfig.UI_COLORS.RevealAll)
-	local btnSeeBest = makeActionButton("🔍 SEE BEST\nR$9", 2, GameConfig.UI_COLORS.SeeBest)
-	btnReroll = makeActionButton("🎲 REROLL (2)\nR$19", 3, GameConfig.UI_COLORS.Reroll)
-	btnSteal = makeActionButton("😈 STEAL (1)\nR$39", 4, GameConfig.UI_COLORS.Steal)
+	btnRevealAll = makeActionButton("👁️ REVEAL ALL\nR$29", 1, GameConfig.UI_COLORS.RevealAll)
+	btnSeeBest = makeActionButton("🔍 SEE BEST\nR$9", 2, GameConfig.UI_COLORS.SeeBest)
+	btnReroll = makeActionButton("🎲 REROLL (1)\nFREE", 3, GameConfig.UI_COLORS.Reroll)
+	btnSteal = makeActionButton("😈 STEAL\nR$39", 4, GameConfig.UI_COLORS.Steal)
 	local btnShuffle = makeActionButton("🔀 SHUFFLE\nFREE", 5, GameConfig.UI_COLORS.Shuffle)
 
 	btnRevealAll.Activated:Connect(function()
@@ -3913,6 +4558,8 @@ local winnerWrap = Instance.new("Frame")
 winnerWrap.Size = UDim2.fromScale(1, 1)
 
 winnerWrap.BackgroundTransparency = 1
+
+winnerWrap.ZIndex = 13
 
 winnerWrap.Visible = false
 
@@ -4283,12 +4930,22 @@ bottomRematchBtn.Activated:Connect(function()
 end)
 
 local bottomLeaveBtn = makeButton(winnerWrap, "LEAVE", UDim2.fromOffset(140, 48), UDim2.new(0.5, 26, 0.84, 0), GameConfig.UI_COLORS.Steal)
+bottomRematchBtn.ZIndex = 15
+bottomLeaveBtn.ZIndex = 15
 
-bottomLeaveBtn.Activated:Connect(function()
-
-	Remotes.MatchAction:FireServer("LeaveTable")
-
-end)
+do
+	local lastLeaveAt = 0
+	local function triggerLeave()
+		local now = os.clock()
+		if now - lastLeaveAt < 0.3 then
+			return
+		end
+		lastLeaveAt = now
+		Remotes.MatchAction:FireServer("LeaveTable")
+	end
+	bottomLeaveBtn.Activated:Connect(triggerLeave)
+	bottomLeaveBtn.MouseButton1Click:Connect(triggerLeave)
+end
 
 -- Post-Match VICTORY! (3s) Summary Modal Popup (parented to screenGui so it displays cleanly on return to Lobby or on demand)
 
@@ -4674,7 +5331,7 @@ local function refreshMetaUI()
 		titlesHandler.update(p)
 	end
 
-	-- 7. Card Index (152 Footballers)
+	-- 7. Card Index (150 Footballers)
 
 	local disc = p.DiscoveredCards or {}
 
@@ -5574,6 +6231,18 @@ Remotes.MatchState.OnClientEvent:Connect(function(state: any)
 
 	currentSubPhase = state.subPhase or ""
 
+	if state.isBot ~= nil then
+		currentIsBotMatch = state.isBot == true
+	elseif state.oppName ~= nil then
+		currentIsBotMatch = (state.oppName == "BOT")
+	elseif state.phase == "Idle" then
+		currentIsBotMatch = false
+	end
+
+	leaveConfirmUntil = 0
+	midMatchLeaveBtn.Text = "LEAVE"
+	midMatchLeaveBtn.Visible = (state.phase == "Intro" or state.phase == "Countdown" or state.phase == "Build" or state.phase == "Showdown")
+
 	setBgmPhase(state.phase)
 
 	game:GetService("ProximityPromptService").Enabled = (state.phase == "Idle")
@@ -5581,6 +6250,8 @@ Remotes.MatchState.OnClientEvent:Connect(function(state: any)
 	refreshAllSpectateBillboards()
 
 	if state.phase == "Idle" then
+
+		playSfx("stopCrowdCheer")
 
 		currentPlacedThisRound = false
 
@@ -5631,6 +6302,8 @@ Remotes.MatchState.OnClientEvent:Connect(function(state: any)
 	-- 1. SEATED WAITING SCREEN
 
 	if state.phase == "Waiting" then
+
+		playSfx("stopCrowdCheer")
 
 		setMatchBlur(false)
 
@@ -5944,9 +6617,13 @@ Remotes.MatchState.OnClientEvent:Connect(function(state: any)
 
 		luckBtn.Text = if nextLuck then `      LUCK: {curLuck}x [→{nextLuck.luck}x ${nextLuck.cost}]` else `      LUCK: {curLuck}x [MAX]`
 
-		btnReroll.Text = if myB.infRerolls then "🎲 REROLL (INF)\nFREE" else if myB.rerollsLeft > 0 then `🎲 REROLL ({myB.rerollsLeft})\nFREE` else "🎲 REROLL (0)\nLOCKED"
+		btnRevealAll.Text = if myB.revealedAll then "👁️ REVEAL ALL\nACTIVE" else "👁️ REVEAL ALL\nR$29"
 
-		btnSteal.Text = `😈 STEAL ({myB.stealsLeft})\nR$39`
+		btnSeeBest.Text = if myB.bestHint ~= nil then "🔍 SEE BEST\nACTIVE" else "🔍 SEE BEST\nR$9"
+
+		btnReroll.Text = if myB.infRerolls then "🎲 REROLL (INF)\nFREE" elseif myB.rerollsLeft > 0 then `🎲 REROLL ({myB.rerollsLeft})\nFREE` else "🎲 REROLL\nR$9"
+
+		btnSteal.Text = if myB.stealsLeft > 0 then `😈 STEAL ({myB.stealsLeft})\nFREE` else "😈 STEAL\nR$39"
 
 		for _, attr in GameConfig.ATTRIBUTES do
 
@@ -5984,7 +6661,7 @@ Remotes.MatchState.OnClientEvent:Connect(function(state: any)
 
 				if oppRow.stealTag then
 
-					oppRow.stealTag.Visible = (state.subPhase == "Selecting" and myB.stealsLeft > 0 and not myB.placedThisRound and myCard == nil)
+					oppRow.stealTag.Visible = (state.subPhase == "Selecting" and not myB.placedThisRound and myCard == nil)
 
 				end
 
@@ -6326,7 +7003,13 @@ Remotes.MatchState.OnClientEvent:Connect(function(state: any)
 
 		focusTableCamera(state.tablePos, "Result")
 
-		playSfx(if state.didWin then "win" else "lose")
+		if prevPhase ~= "Result" then
+
+			playSfx(if state.didWin then "win" else "lose")
+
+			playSfx("crowdCheer")
+
+		end
 
 		headerLabel.Visible = true
 

@@ -6,6 +6,7 @@
 	Location: ServerScriptService/Server/MatchService (ModuleScript)
 ]]
 
+local MarketplaceService = game:GetService("MarketplaceService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Workspace = game:GetService("Workspace")
@@ -49,6 +50,9 @@ type TableSession = {
 
 local RATE_LIMIT_PER_SEC = 8
 local actionTimestamps: { [Player]: { number } } = {}
+local rejoinCooldown: { [Player]: number } = {}
+local pendingMatchPurchase: { [Player]: { key: string, token: number, attr: GameConfig.AttributeKey?, dest: GameConfig.AttributeKey? } } = {}
+local pendingSeeBest: { [Player]: boolean } = {}
 local sessionsByTable: { [Model]: TableSession } = {}
 local sessionByPlayer: { [Player]: TableSession } = {}
 
@@ -92,6 +96,23 @@ local function setCharacterSeatedLock(player: Player?, locked: boolean)
 	end
 end
 
+local function setWoodChairVisible(tableModel: Model, seatName: string, visible: boolean, color: Color3, mat: Enum.Material)
+	for _, child in tableModel:GetChildren() do
+		if child:IsA("BasePart") then
+			if child.Name == seatName or string.find(child.Name, `^{seatName}_Leg`) ~= nil then
+				child.Transparency = if visible then 0 else 1
+				child.Color = color
+				child.Material = mat
+			elseif string.find(child.Name, `^{seatName}_Back`) ~= nil then
+				child.Transparency = if visible then 0 else 1
+				child.CanCollide = visible
+				child.Color = color
+				child.Material = mat
+			end
+		end
+	end
+end
+
 local function applyChairSkin(tableModel: Model, seatName: string, player: Player?)
 	local profile = if player then ProfileService.get(player) else nil
 	local equipped = if profile and profile.EquippedChair then profile.EquippedChair elseif player then (player:GetAttribute("EquippedChair") :: string?) else nil
@@ -100,41 +121,31 @@ local function applyChairSkin(tableModel: Model, seatName: string, player: Playe
 	if not seat then return end
 
 	local oldDecor = tableModel:FindFirstChild(seatName .. "_Decor")
+	if skin.id == "wood" then
+		if oldDecor then
+			oldDecor:Destroy()
+		end
+		setWoodChairVisible(tableModel, seatName, true, skin.color, skin.mat)
+		return
+	end
+
+	if oldDecor and oldDecor:GetAttribute("SkinId") == skin.id then
+		setWoodChairVisible(tableModel, seatName, false, skin.color, skin.mat)
+		return
+	end
+
 	if oldDecor then
 		oldDecor:Destroy()
 	end
 
-	local isWood = (skin.id == "wood")
-	local isStadium = (skin.id == "stadium")
-	local isMesh = not isWood and not isStadium
-
-	for _, child in tableModel:GetChildren() do
-		if child:IsA("BasePart") then
-			if child.Name == seatName then
-				child.Transparency = if isWood then 0 else 1
-				child.Color = skin.color
-				child.Material = skin.mat
-			elseif string.find(child.Name, `^{seatName}_Leg`) ~= nil or string.find(child.Name, `^{seatName}_Back`) ~= nil then
-				child.Transparency = if isWood then 0 else 1
-				child.Color = skin.color
-				child.Material = skin.mat
-			end
-		end
-	end
-
-	if isStadium then
-		local decor = ChairModelBuilder.buildStadiumChair()
-		decor.Name = seatName .. "_Decor"
-		local floorY = seat.Position.Y - 1.6
-		local decorCF = CFrame.lookAt(Vector3.new(seat.Position.X, floorY, seat.Position.Z), Vector3.new(seat.Position.X, floorY, seat.Position.Z) + seat.CFrame.LookVector)
-		decor:PivotTo(decorCF)
-		decor.Parent = tableModel
-	elseif isMesh then
-		local floorY = seat.Position.Y - 1.6
-		local decorCF = CFrame.lookAt(Vector3.new(seat.Position.X, floorY, seat.Position.Z), Vector3.new(seat.Position.X, floorY, seat.Position.Z) + seat.CFrame.LookVector)
-		local decor = ChairModelBuilder.buildMeshChair(skin.id, decorCF, false)
+	local decor = ChairModelBuilder.buildChairForSeat(skin.id, seat, tableModel)
+	if decor then
+		decor:SetAttribute("SkinId", skin.id)
 		decor.Name = seatName .. "_Decor"
 		decor.Parent = tableModel
+		setWoodChairVisible(tableModel, seatName, false, skin.color, skin.mat)
+	else
+		setWoodChairVisible(tableModel, seatName, true, skin.color, skin.mat)
 	end
 end
 
@@ -327,13 +338,13 @@ local function sendBuildState(session: TableSession, endsAt: number)
 	end
 end
 
-local function makeBoardForPlayer(player: Player?): MatchLogic.BoardState
+local function makeBoardForPlayer(player: Player?, usedIds: { [string]: boolean }?): MatchLogic.BoardState
 	local profile = if player then ProfileService.get(player) else nil
 	local rerolls = GameConfig.DEFAULT_REROLLS
 	local steals = GameConfig.DEFAULT_STEALS + (if profile then profile.ExtraSteals else 0)
 	local luck = (if profile then profile.Luck else 1) * (if profile and profile.DoubleLuck then 2 else 1)
 	local infRerolls = if profile then profile.InfRerolls else false
-	return MatchLogic.createBoard(rerolls, steals, luck, infRerolls)
+	return MatchLogic.createBoard(rerolls, steals, luck, infRerolls, nil, usedIds)
 end
 
 local function despawnBotCharacter(session: TableSession)
@@ -416,6 +427,43 @@ local function spawnBotCharacter(session: TableSession)
 	session.botModel = bot
 end
 
+local function unseatPlayer(player: Player?, fallbackSeat: Seat?)
+	if not player then
+		return
+	end
+	rejoinCooldown[player] = os.clock() + 2
+	setCharacterSeatedLock(player, false)
+	local char = player.Character
+	local hum = if char then char:FindFirstChildOfClass("Humanoid") else nil
+	local seat = if hum and hum.SeatPart and hum.SeatPart:IsA("Seat") then hum.SeatPart else fallbackSeat
+	if seat then
+		-- Briefly disable seat so character stepping off doesn't immediately re-weld on landing
+		seat.Disabled = true
+		local weld = seat:FindFirstChild("SeatWeld")
+		if weld then
+			weld:Destroy()
+		end
+		task.delay(2.0, function()
+			if seat.Parent and not seat.Parent:FindFirstChild("BotOpponent") then
+				seat.Disabled = false
+			end
+		end)
+	end
+	if hum then
+		hum.Sit = false
+	end
+	-- Step player clear of the chair after stand-up replicates so client doesn't snap back onto the seat
+	if char and seat then
+		local exitPos = seat.Position + seat.CFrame.RightVector * 6.5 + Vector3.new(0, 2.2, 0)
+		local targetCF = CFrame.lookAt(exitPos, exitPos + seat.CFrame.LookVector)
+		task.delay(0.1, function()
+			if char.Parent then
+				char:PivotTo(targetCF)
+			end
+		end)
+	end
+end
+
 local function resetSession(session: TableSession, unseat: boolean)
 	if session.phase == "Waiting" then
 		Remotes.OpponentAlert:FireAllClients({ active = false, tableId = session.id })
@@ -424,6 +472,7 @@ local function resetSession(session: TableSession, unseat: boolean)
 	despawnBotCharacter(session)
 	local oldA = session.playerA
 	local oldB = session.playerB
+	local oldHumanInSeatB = session.humanInSeatB == true
 
 	session.phase = "Idle"
 	session.subPhase = nil
@@ -442,24 +491,22 @@ local function resetSession(session: TableSession, unseat: boolean)
 
 	if oldA then
 		sessionByPlayer[oldA] = nil
-		setCharacterSeatedLock(oldA, false)
-		if unseat and oldA.Character then
-			local hum = oldA.Character:FindFirstChildOfClass("Humanoid")
-			if hum then
-				hum.Sit = false
-				hum.Jump = true
-			end
+		pendingMatchPurchase[oldA] = nil
+		pendingSeeBest[oldA] = nil
+		if unseat then
+			unseatPlayer(oldA, if oldHumanInSeatB then session.seatB else session.seatA)
+		else
+			setCharacterSeatedLock(oldA, false)
 		end
 	end
 	if oldB then
 		sessionByPlayer[oldB] = nil
-		setCharacterSeatedLock(oldB, false)
-		if unseat and oldB.Character then
-			local hum = oldB.Character:FindFirstChildOfClass("Humanoid")
-			if hum then
-				hum.Sit = false
-				hum.Jump = true
-			end
+		pendingMatchPurchase[oldB] = nil
+		pendingSeeBest[oldB] = nil
+		if unseat then
+			unseatPlayer(oldB, if oldHumanInSeatB then session.seatA else session.seatB)
+		else
+			setCharacterSeatedLock(oldB, false)
 		end
 	end
 
@@ -686,6 +733,14 @@ startBuildRound = function(session: TableSession, roundNum: number, frozenSec: n
 		if session.playerB and session.roundRollB then
 			ProfileService.recordCardRoll(session.playerB, session.roundRollB.id)
 		end
+		if session.playerA and pendingSeeBest[session.playerA] then
+			pendingSeeBest[session.playerA] = nil
+			session.boardA.bestHint = MatchLogic.getBestSlot(session.boardA, session.roundRollA or session.boardA.currentRoll)
+		end
+		if session.playerB and pendingSeeBest[session.playerB] then
+			pendingSeeBest[session.playerB] = nil
+			session.boardB.bestHint = MatchLogic.getBestSlot(session.boardB, session.roundRollB or session.boardB.currentRoll)
+		end
 		sendBuildState(session, session.roundEndsAt)
 
 		if session.isBot and not session.placedThisRoundB then
@@ -693,7 +748,9 @@ startBuildRound = function(session: TableSession, roundNum: number, frozenSec: n
 				if session.phaseToken ~= roundToken or session.phase ~= "Build" or session.placedThisRoundB or not session.boardB or not session.boardA then
 					return
 				end
-				MatchLogic.stepBot(session.boardB, session.boardA)
+				local hostProfile = if session.playerA then ProfileService.get(session.playerA) else nil
+				local botOptimalChance = if hostProfile and hostProfile.Wins < 5 then 0.65 else 0.88
+				MatchLogic.stepBot(session.boardB, session.boardA, nil, botOptimalChance)
 				session.placedThisRoundB = true
 				checkAdvanceBuildRound(session, roundToken)
 			end)
@@ -718,10 +775,19 @@ end
 
 startBuildPhase = function(session: TableSession)
 	Remotes.OpponentAlert:FireAllClients({ active = false, tableId = session.id })
+	if session.playerA then
+		pendingMatchPurchase[session.playerA] = nil
+		pendingSeeBest[session.playerA] = nil
+	end
+	if session.playerB then
+		pendingMatchPurchase[session.playerB] = nil
+		pendingSeeBest[session.playerB] = nil
+	end
 	session.phaseToken += 1
 	local token = session.phaseToken
-	session.boardA = makeBoardForPlayer(session.playerA)
-	session.boardB = makeBoardForPlayer(session.playerB)
+	local sessionUsedIds: { [string]: boolean } = {}
+	session.boardA = makeBoardForPlayer(session.playerA, sessionUsedIds)
+	session.boardB = makeBoardForPlayer(session.playerB, sessionUsedIds)
 	session.rematchA = false
 	session.rematchB = false
 	session.round = 1
@@ -811,6 +877,14 @@ local function onSeatChanged(session: TableSession)
 	local pA = getPlayerFromOccupant(session.seatA.Occupant)
 	local pB = getPlayerFromOccupant(session.seatB.Occupant)
 
+	if pA and (rejoinCooldown[pA] or 0) > os.clock() then
+		unseatPlayer(pA, session.seatA)
+		pA = nil
+	end
+	if pB and (rejoinCooldown[pB] or 0) > os.clock() then
+		unseatPlayer(pB, session.seatB)
+		pB = nil
+	end
 	if pA and sessionByPlayer[pA] and sessionByPlayer[pA] ~= session then
 		pA = nil
 	end
@@ -915,6 +989,8 @@ local function handleDisconnectOrLeave(player: Player)
 			reward = reward,
 			rematchEndsAt = Workspace:GetServerTimeNow() + 5,
 		})
+	elseif survivor and session.phase == "Result" then
+		Remotes.MatchState:FireClient(survivor, { phase = "Idle" })
 	end
 	if session.playerA == player then
 		Remotes.MatchState:FireClient(player, { phase = "Idle" })
@@ -924,8 +1000,37 @@ local function handleDisconnectOrLeave(player: Player)
 	resetSession(session, true)
 end
 
+local function promptMatchMonetization(player: Player, itemKey: string, session: TableSession, attr: GameConfig.AttributeKey?, dest: GameConfig.AttributeKey?)
+	local item = (GameConfig.MONETIZATION :: any)[itemKey]
+	if not item or not item.id or item.id <= 0 then
+		return
+	end
+	pendingMatchPurchase[player] = {
+		key = itemKey,
+		token = session.phaseToken,
+		attr = attr,
+		dest = dest,
+	}
+	pcall(function()
+		if item.kind == "GamePass" then
+			MarketplaceService:PromptGamePassPurchase(player, item.id)
+		else
+			MarketplaceService:PromptProductPurchase(player, item.id)
+		end
+	end)
+end
+
 local function handleMatchAction(player: Player, action: unknown, arg1: unknown, arg2: unknown)
 	if not allowAction(player) or typeof(action) ~= "string" then
+		return
+	end
+	if action == "LeaveTable" then
+		if sessionByPlayer[player] then
+			handleDisconnectOrLeave(player)
+		else
+			unseatPlayer(player, nil)
+			Remotes.MatchState:FireClient(player, { phase = "Idle" })
+		end
 		return
 	end
 	if action == "JoinWaitingTable" and typeof(arg1) == "string" then
@@ -952,17 +1057,6 @@ local function handleMatchAction(player: Player, action: unknown, arg1: unknown,
 	end
 	local session = sessionByPlayer[player]
 	if not session then
-		return
-	end
-
-	if action == "LeaveTable" then
-		local char = player.Character
-		local hum = if char then char:FindFirstChildOfClass("Humanoid") else nil
-		if hum then
-			hum.Sit = false
-			hum.Jump = true
-		end
-		handleDisconnectOrLeave(player)
 		return
 	end
 
@@ -1013,40 +1107,56 @@ local function handleMatchAction(player: Player, action: unknown, arg1: unknown,
 			end
 		end
 	elseif action == "Reroll" then
-		if session.subPhase == "Selecting" and not isPlaced then
-			changed = MatchLogic.reroll(myBoard)
-			if changed then
-				if isA then
-					session.roundRollA = myBoard.currentRoll
-				else
-					session.roundRollB = myBoard.currentRoll
+		if session.subPhase == "Selecting" and not isPlaced and not MatchLogic.isBoardFull(myBoard) then
+			if myBoard.infRerolls or myBoard.rerollsLeft > 0 then
+				changed = MatchLogic.reroll(myBoard)
+				if changed then
+					if isA then
+						session.roundRollA = myBoard.currentRoll
+					else
+						session.roundRollB = myBoard.currentRoll
+					end
+					if myBoard.currentRoll then
+						ProfileService.recordCardRoll(player, myBoard.currentRoll.id)
+					end
 				end
-				if myBoard.currentRoll then
-					ProfileService.recordCardRoll(player, myBoard.currentRoll.id)
-				end
+			else
+				promptMatchMonetization(player, "match_reroll", session)
+				return
 			end
 		end
 	elseif action == "Steal" and typeof(arg1) == "string" then
-		if session.subPhase == "Selecting" then
-			local dest = if typeof(arg2) == "string" then arg2 :: GameConfig.AttributeKey else nil
-			changed = MatchLogic.stealSlot(myBoard, oppBoard, arg1 :: GameConfig.AttributeKey, dest)
-			if changed then
-				if isA and session.placedThisRoundB and not MatchLogic.isBoardFull(oppBoard) then
-					session.placedThisRoundB = false
-				elseif not isA and session.placedThisRoundA and not MatchLogic.isBoardFull(oppBoard) then
-					session.placedThisRoundA = false
+		if session.subPhase == "Selecting" and not isPlaced then
+			local targetAttr = arg1 :: GameConfig.AttributeKey
+			local dest = (if typeof(arg2) == "string" then arg2 else arg1) :: GameConfig.AttributeKey
+			if table.find(GameConfig.ATTRIBUTES, targetAttr) and table.find(GameConfig.ATTRIBUTES, dest) and oppBoard.slots[targetAttr] ~= nil and myBoard.slots[dest] == nil then
+				if myBoard.stealsLeft > 0 then
+					changed = MatchLogic.stealSlot(myBoard, oppBoard, targetAttr, dest)
+					if changed then
+						if isA and session.placedThisRoundB and not MatchLogic.isBoardFull(oppBoard) then
+							session.placedThisRoundB = false
+						elseif not isA and session.placedThisRoundA and not MatchLogic.isBoardFull(oppBoard) then
+							session.placedThisRoundA = false
+						end
+					end
+				else
+					promptMatchMonetization(player, "match_steal", session, targetAttr, dest)
+					return
 				end
 			end
 		end
 	elseif action == "Shuffle" then
 		changed = MatchLogic.shuffleSlots(myBoard)
 	elseif action == "SeeBest" then
-		local activeRoll = if isA then session.roundRollA else session.roundRollB
-		myBoard.bestHint = MatchLogic.getBestSlot(myBoard, activeRoll or myBoard.currentRoll)
-		changed = true
+		if session.subPhase == "Selecting" and not isPlaced and myBoard.bestHint == nil then
+			promptMatchMonetization(player, "match_see_best", session)
+		end
+		return
 	elseif action == "RevealAll" then
-		myBoard.revealedAll = true
-		changed = true
+		if not myBoard.revealedAll then
+			promptMatchMonetization(player, "match_reveal_all", session)
+		end
+		return
 	elseif action == "UpgradeLuck" then
 		if ProfileService.upgradeLuck(player) then
 			local updatedProf = ProfileService.get(player)
@@ -1115,9 +1225,13 @@ local function bindTableModel(model: Model)
 	updateTableSign(session)
 
 	local function hookPrompt(seat: Seat)
+		seat.CanTouch = false
 		local prompt = seat:FindFirstChildOfClass("ProximityPrompt")
 		if prompt then
 			prompt.Triggered:Connect(function(plr)
+				if (rejoinCooldown[plr] or 0) > os.clock() then
+					return
+				end
 				local char = plr.Character
 				local hum = char and char:FindFirstChildOfClass("Humanoid")
 				if hum and not hum.Sit and seat.Occupant == nil then
@@ -1178,6 +1292,7 @@ local function createStarterTable(parent: Instance, name: string, center: Vector
 		seat.Size = Vector3.new(2.2, 0.4, 2.2)
 		seat.CFrame = CFrame.lookAt(seatPos, center + Vector3.new(0, 1.6, 0))
 		seat.Anchored = true
+		seat.CanTouch = false
 		seat.Color = woodColor
 		seat.Material = Enum.Material.WoodPlanks
 		seat.Parent = model
@@ -1275,6 +1390,65 @@ function MatchService.buildStarterTables()
 	return tablesFolder
 end
 
+local function handleMatchProductPurchase(player: Player, itemKey: string): boolean
+	local session = sessionByPlayer[player]
+	if not session or session.phase ~= "Build" or not session.boardA or not session.boardB then
+		return false
+	end
+
+	local isA = session.playerA == player
+	local myBoard: MatchLogic.BoardState = if isA then session.boardA else session.boardB
+	local oppBoard: MatchLogic.BoardState = if isA then session.boardB else session.boardA
+	local isPlaced = if isA then session.placedThisRoundA else session.placedThisRoundB
+	local pending = pendingMatchPurchase[player]
+	pendingMatchPurchase[player] = nil
+
+	if itemKey == "match_reveal_all" then
+		myBoard.revealedAll = true
+	elseif itemKey == "match_see_best" then
+		if session.subPhase == "Selecting" and not isPlaced then
+			local activeRoll = if isA then session.roundRollA else session.roundRollB
+			myBoard.bestHint = MatchLogic.getBestSlot(myBoard, activeRoll or myBoard.currentRoll)
+		else
+			pendingSeeBest[player] = true
+		end
+	elseif itemKey == "match_reroll" then
+		myBoard.rerollsLeft += 1
+		if session.subPhase == "Selecting" and not isPlaced and not MatchLogic.isBoardFull(myBoard) then
+			if MatchLogic.reroll(myBoard) then
+				if isA then
+					session.roundRollA = myBoard.currentRoll
+				else
+					session.roundRollB = myBoard.currentRoll
+				end
+				if myBoard.currentRoll then
+					ProfileService.recordCardRoll(player, myBoard.currentRoll.id)
+				end
+			end
+		end
+	elseif itemKey == "match_steal" then
+		myBoard.stealsLeft += 1
+		if pending and pending.key == "match_steal" and pending.token == session.phaseToken and pending.attr and session.subPhase == "Selecting" and not isPlaced then
+			if MatchLogic.stealSlot(myBoard, oppBoard, pending.attr, pending.dest) then
+				if isA and session.placedThisRoundB and not MatchLogic.isBoardFull(oppBoard) then
+					session.placedThisRoundB = false
+				elseif not isA and session.placedThisRoundA and not MatchLogic.isBoardFull(oppBoard) then
+					session.placedThisRoundA = false
+				end
+			end
+		end
+	else
+		return false
+	end
+
+	updateTableSign(session)
+	sendBuildState(session, session.roundEndsAt)
+	if MatchLogic.isBoardFull(session.boardA) and MatchLogic.isBoardFull(session.boardB) then
+		startShowdownPhase(session)
+	end
+	return true
+end
+
 function MatchService.init()
 	local tablesFolder = MatchService.buildStarterTables()
 	if not game:GetService("RunService"):IsServer() then
@@ -1291,8 +1465,39 @@ function MatchService.init()
 		end
 	end)
 
+	ProfileService.setMatchProductHandler(handleMatchProductPurchase)
+	MarketplaceService.PromptProductPurchaseFinished:Connect(function(userId: number, _productId: number, isPurchased: boolean)
+		if not isPurchased then
+			local plr = Players:GetPlayerByUserId(userId)
+			if plr then
+				pendingMatchPurchase[plr] = nil
+			end
+		end
+	end)
+	MarketplaceService.PromptGamePassPurchaseFinished:Connect(function(plr: Player, _passId: number, wasPurchased: boolean)
+		if not wasPurchased then
+			pendingMatchPurchase[plr] = nil
+		end
+	end)
 	Remotes.MatchAction.OnServerEvent:Connect(handleMatchAction)
-	Players.PlayerRemoving:Connect(handleDisconnectOrLeave)
+	local function watchPlayerChair(plr: Player)
+		plr:GetAttributeChangedSignal("EquippedChair"):Connect(function()
+			local session = sessionByPlayer[plr]
+			if session then
+				updateTableSign(session)
+			end
+		end)
+	end
+	for _, plr in Players:GetPlayers() do
+		watchPlayerChair(plr)
+	end
+	Players.PlayerAdded:Connect(watchPlayerChair)
+	Players.PlayerRemoving:Connect(function(plr)
+		rejoinCooldown[plr] = nil
+		pendingMatchPurchase[plr] = nil
+		pendingSeeBest[plr] = nil
+		handleDisconnectOrLeave(plr)
+	end)
 end
 
 return table.freeze(MatchService)

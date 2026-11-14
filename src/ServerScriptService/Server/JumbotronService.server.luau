@@ -26,13 +26,33 @@ if not configFolder then
 	configFolder = newFolder
 end
 
--- Default event attributes (2X WINS WEEKEND ending in ~1d 04h)
-if not configFolder:GetAttribute("EventEndsAt") then
-	configFolder:SetAttribute("EventName", "2X WINS WEEKEND")
-	configFolder:SetAttribute("EventSubtitle", "Double wins on all tables this weekend!")
-	configFolder:SetAttribute("EventEndsAt", Workspace:GetServerTimeNow() + 100800) -- ~1d 04h
-	configFolder:SetAttribute("EventActive", true)
+-- Real-time weekend event sync (Active Sat-Sun, Inactive Mon-Fri)
+local lastEventActive: boolean? = nil
+local lastEventSyncAt = 0
+
+local function syncWeekendEvent(force: boolean?)
+	if not configFolder then return end
+	local now = Workspace:GetServerTimeNow()
+	local state = JumbotronConfig.getWeekendEventState(os.time())
+	if force or lastEventActive ~= state.active or (now - lastEventSyncAt) >= 60 then
+		lastEventActive = state.active
+		lastEventSyncAt = now
+		configFolder:SetAttribute("EventName", "2X WINS WEEKEND")
+		configFolder:SetAttribute("EventSubtitle", if state.active
+			then "Double wins on all tables this weekend!"
+			else "Double wins on all tables every weekend!")
+		configFolder:SetAttribute("EventActive", state.active)
+		configFolder:SetAttribute("EventEndsAt", now + state.remainingSec)
+	end
 end
+
+syncWeekendEvent(true)
+task.spawn(function()
+	while true do
+		task.wait(1)
+		syncWeekendEvent(false)
+	end
+end)
 
 -- 2. Jumbotron 3D & SurfaceGui Builder
 local function buildJumbotron(parent: Instance): Model?

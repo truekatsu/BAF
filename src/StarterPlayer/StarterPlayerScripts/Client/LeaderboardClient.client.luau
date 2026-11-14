@@ -51,9 +51,11 @@ type BoardUI = {
 }
 
 local activeBoards: { [Model]: BoardUI } = {}
+local bindingBoards: { [Model]: boolean } = {}
 local neonStrips: { BasePart } = {}
 local lastMyRankFetch: { [string]: number } = {}
 local myRankCache: { [string]: number } = {}
+local updateBoardDisplay: (ui: BoardUI, entries: { any }, updatedAt: number) -> ()
 
 -- Safely fetch local player's rank via RemoteFunction (Rate-limited to once per 2 minutes)
 local function fetchMyRank(boardType: string): number?
@@ -80,95 +82,115 @@ local function fetchMyRank(boardType: string): number?
 	return myRankCache[boardType]
 end
 
--- Bind UI references from a spawned Leaderboard Model
+-- Bind UI references from a spawned Leaderboard Model (waits safely for StreamingEnabled children)
 local function bindBoardUI(model: Model)
-	if activeBoards[model] then
+	if activeBoards[model] or bindingBoards[model] then
 		return
 	end
+	bindingBoards[model] = true
 
-	local boardType = model:GetAttribute("BoardType") or "Wins"
-	local screenPart = model:FindFirstChild("ScreenPart", true) :: BasePart?
-	if not screenPart then
-		return
-	end
+	task.spawn(function()
+		local gui: SurfaceGui? = nil
+		local screen: Frame? = nil
+		local rows: { RowItem } = {}
 
-	local gui = screenPart:FindFirstChild("LeaderboardGui") :: SurfaceGui?
-	if not gui then
-		return
-	end
-
-	local screen = gui:FindFirstChild("Screen") :: Frame?
-	if not screen then
-		return
-	end
-
-	local rows: { RowItem } = {}
-	for i = 1, LeaderboardConfig.ROW_COUNT do
-		local rowFrame = screen:FindFirstChild(`Row_{i}`) :: Frame?
-		if rowFrame then
-			local item: RowItem = {
-				frame = rowFrame,
-				rankNum = rowFrame:FindFirstChild("RankNum") :: TextLabel,
-				crownIcon = rowFrame:FindFirstChild("CrownIcon") :: TextLabel,
-				avatar = rowFrame:FindFirstChild("Avatar") :: ImageLabel,
-				onlineDot = rowFrame:FindFirstChild("OnlineDot") :: Frame,
-				nameLbl = rowFrame:FindFirstChild("PlayerName") :: TextLabel,
-				userLbl = rowFrame:FindFirstChild("Username") :: TextLabel,
-				deltaLbl = rowFrame:FindFirstChild("RankDelta") :: TextLabel,
-				valLbl = rowFrame:FindFirstChild("StatValue") :: TextLabel,
-				stroke = rowFrame:FindFirstChild("Stroke") :: UIStroke?,
-			}
-			table.insert(rows, item)
+		for _ = 1, 60 do
+			if not model.Parent then
+				bindingBoards[model] = nil
+				return
+			end
+			local screenOverlay = model:FindFirstChild("ScreenOverlay")
+			local screenPart = model:FindFirstChild("ScreenPart", true)
+			gui = (
+				(screenOverlay and screenOverlay:FindFirstChild("LeaderboardGui"))
+				or (screenPart and screenPart:FindFirstChild("LeaderboardGui"))
+				or model:FindFirstChild("LeaderboardGui", true)
+			) :: SurfaceGui?
+			screen = if gui then gui:FindFirstChild("Screen") :: Frame? else nil
+			if screen and screen:FindFirstChild(`Row_{LeaderboardConfig.ROW_COUNT}`) then
+				break
+			end
+			task.wait(0.25)
 		end
-	end
 
-	local localRow = screen:FindFirstChild("LocalPlayerRow") :: Frame?
-	local localRankText = localRow and localRow:FindFirstChild("LocalRankText") :: TextLabel?
-	local statusBar = screen:FindFirstChild("StatusBar") :: Frame?
-	local liveDot = statusBar and statusBar:FindFirstChild("LiveDot") :: Frame?
-	local countdownLabel = statusBar and statusBar:FindFirstChild("CountdownLabel") :: TextLabel?
-
-	activeBoards[model] = {
-		model = model,
-		boardType = boardType,
-		screen = screen,
-		rows = rows,
-		localRow = localRow,
-		localRankText = localRankText,
-		liveDot = liveDot,
-		countdownLabel = countdownLabel,
-		prevRanks = {},
-		prevDataSignature = "",
-	}
-
-	-- Immediately populate UI if replicated data already exists
-	local dataFolder = ReplicatedStorage:FindFirstChild("LeaderboardData") :: Folder?
-	if dataFolder then
-		local sv = dataFolder:FindFirstChild(boardType) :: StringValue?
-		if not sv and (boardType == "Bux" or boardType == "Cash") then
-			sv = (dataFolder:FindFirstChild("Cash") or dataFolder:FindFirstChild("Bux")) :: StringValue?
+		bindingBoards[model] = nil
+		if activeBoards[model] or not model.Parent or not gui or not screen then
+			return
 		end
-		if sv and sv.Value ~= "" and sv.Value ~= "[]" then
-			local ok, entries = pcall(function()
-				return HttpService:JSONDecode(sv.Value)
-			end)
-			if ok and typeof(entries) == "table" then
-				local updatedAt = sv:GetAttribute("UpdatedAt") or os.time()
-				updateBoardDisplay(activeBoards[model], entries, updatedAt)
+
+		local boardType = (model:GetAttribute("BoardType") :: string?) or "Wins"
+
+		for i = 1, LeaderboardConfig.ROW_COUNT do
+			local rowFrame = screen:FindFirstChild(`Row_{i}`) :: Frame?
+			if rowFrame then
+				local item: RowItem = {
+					frame = rowFrame,
+					rankNum = rowFrame:FindFirstChild("RankNum") :: TextLabel,
+					crownIcon = rowFrame:FindFirstChild("CrownIcon") :: TextLabel,
+					avatar = rowFrame:FindFirstChild("Avatar") :: ImageLabel,
+					onlineDot = rowFrame:FindFirstChild("OnlineDot") :: Frame,
+					nameLbl = rowFrame:FindFirstChild("PlayerName") :: TextLabel,
+					userLbl = rowFrame:FindFirstChild("Username") :: TextLabel,
+					deltaLbl = rowFrame:FindFirstChild("RankDelta") :: TextLabel,
+					valLbl = rowFrame:FindFirstChild("StatValue") :: TextLabel,
+					stroke = rowFrame:FindFirstChild("Stroke") :: UIStroke?,
+				}
+				table.insert(rows, item)
 			end
 		end
-	end
 
-	-- Collect neon strips
-	for _, desc in model:GetDescendants() do
-		if desc:IsA("BasePart") and desc:GetAttribute("IsNeonStrip") == true then
-			table.insert(neonStrips, desc)
+		if #rows == 0 then
+			return
 		end
-	end
+
+		local localRow = screen:FindFirstChild("LocalPlayerRow") :: Frame?
+		local localRankText = localRow and localRow:FindFirstChild("LocalRankText") :: TextLabel?
+		local statusBar = screen:FindFirstChild("StatusBar") :: Frame?
+		local liveDot = statusBar and statusBar:FindFirstChild("LiveDot") :: Frame?
+		local countdownLabel = statusBar and statusBar:FindFirstChild("CountdownLabel") :: TextLabel?
+
+		activeBoards[model] = {
+			model = model,
+			boardType = boardType,
+			screen = screen,
+			rows = rows,
+			localRow = localRow,
+			localRankText = localRankText,
+			liveDot = liveDot,
+			countdownLabel = countdownLabel,
+			prevRanks = {},
+			prevDataSignature = "",
+		}
+
+		-- Immediately populate UI if replicated data already exists
+		local dataFolder = ReplicatedStorage:FindFirstChild("LeaderboardData") :: Folder?
+		if dataFolder then
+			local sv = dataFolder:FindFirstChild(boardType) :: StringValue?
+			if not sv and (boardType == "Bux" or boardType == "Cash") then
+				sv = (dataFolder:FindFirstChild("Cash") or dataFolder:FindFirstChild("Bux")) :: StringValue?
+			end
+			if sv and sv.Value ~= "" and sv.Value ~= "[]" then
+				local ok, entries = pcall(function()
+					return HttpService:JSONDecode(sv.Value)
+				end)
+				if ok and typeof(entries) == "table" then
+					local updatedAt = sv:GetAttribute("UpdatedAt") or os.time()
+					updateBoardDisplay(activeBoards[model], entries, updatedAt)
+				end
+			end
+		end
+
+		-- Collect neon strips
+		for _, desc in model:GetDescendants() do
+			if desc:IsA("BasePart") and desc:GetAttribute("IsNeonStrip") == true then
+				table.insert(neonStrips, desc)
+			end
+		end
+	end)
 end
 
 -- Update a specific board UI when data changes
-local function updateBoardDisplay(ui: BoardUI, entries: { any }, updatedAt: number)
+updateBoardDisplay = function(ui: BoardUI, entries: { any }, updatedAt: number)
 	local boardDef = LeaderboardConfig.BOARDS[ui.boardType] or LeaderboardConfig.BOARDS.Wins
 	local currentSignature = HttpService:JSONEncode(entries)
 	local hasChanged = (ui.prevDataSignature ~= currentSignature)
@@ -306,6 +328,7 @@ local function initClient()
 	CollectionService:GetInstanceRemovedSignal("LeaderboardBoard"):Connect(function(inst: Instance)
 		if inst:IsA("Model") then
 			activeBoards[inst] = nil
+			bindingBoards[inst] = nil
 		end
 	end)
 

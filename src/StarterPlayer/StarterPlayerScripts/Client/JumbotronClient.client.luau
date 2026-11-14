@@ -226,8 +226,8 @@ local function initJumbotronClient()
 
 	-- 3. RIGHT PANEL: Event Countdown & Status Badge
 	local rightPanel = root:WaitForChild("RightPanel", 5) :: Frame?
-	local activeBadge = rightPanel and rightPanel:WaitForChild("ActiveBadge", 5) :: Frame?
-	local activeLbl = activeBadge and activeBadge:WaitForChild("BadgeLabel", 5) :: TextLabel?
+	local activeBadge = (rightPanel and (rightPanel:FindFirstChild("ActiveBadge", true) or rightPanel:WaitForChild("ActiveBadge", 5))) :: Frame?
+	local activeLbl = (activeBadge and (activeBadge:FindFirstChild("BadgeLabel") or activeBadge:WaitForChild("BadgeLabel", 5))) :: TextLabel?
 	local slideBox = rightPanel and rightPanel:WaitForChild("SlideBox", 5) :: Frame?
 	local slideTitle = slideBox and slideBox:WaitForChild("SlideTitle", 5) :: TextLabel?
 	local slideSub = slideBox and slideBox:WaitForChild("SlideSubtitle", 5) :: TextLabel?
@@ -236,24 +236,34 @@ local function initJumbotronClient()
 	task.spawn(function()
 		while eventTimerLbl and eventTimerLbl.Parent do
 			local now = Workspace:GetServerTimeNow()
-			local endsAt = tonumber(configFolder:GetAttribute("EventEndsAt")) or (now + 100800)
-			local isActive = (configFolder:GetAttribute("EventActive") ~= false)
+			local endsAt = tonumber(configFolder:GetAttribute("EventEndsAt"))
+			local attrActive = configFolder:GetAttribute("EventActive")
+			local isActive: boolean
+			local rem: number
+			if endsAt ~= nil and typeof(attrActive) == "boolean" then
+				isActive = attrActive
+				rem = endsAt - now
+			else
+				local fallback = JumbotronConfig.getWeekendEventState(math.floor(now))
+				isActive = fallback.active
+				rem = fallback.remainingSec
+			end
+
 			local eventName = tostring(configFolder:GetAttribute("EventName") or "2X WINS WEEKEND")
-			local eventSub = tostring(configFolder:GetAttribute("EventSubtitle") or "Double wins on all tables this weekend!")
+			local eventSub = tostring(configFolder:GetAttribute("EventSubtitle") or (if isActive then "Double wins on all tables this weekend!" else "Double wins on all tables every weekend!"))
 
 			if slideTitle then slideTitle.Text = eventName end
 			if slideSub then slideSub.Text = eventSub end
 
-			local rem = endsAt - now
-			if rem > 0 and isActive then
+			if isActive and rem > 0 then
 				if activeBadge then activeBadge.BackgroundColor3 = Color3.fromHex("#22C55E") end
 				if activeLbl then activeLbl.Text = "ACTIVE" end
 				eventTimerLbl.Text = `ENDS IN {formatTime(rem)}`
 				eventTimerLbl.TextColor3 = Color3.fromHex("#38BDF8")
 			else
 				if activeBadge then activeBadge.BackgroundColor3 = Color3.fromHex("#64748B") end
-				if activeLbl then activeLbl.Text = "UPCOMING" end
-				eventTimerLbl.Text = `NEXT: SOON`
+				if activeLbl then activeLbl.Text = "INACTIVE" end
+				eventTimerLbl.Text = `STARTS IN {formatTime(math.max(0, rem))}`
 				eventTimerLbl.TextColor3 = Color3.fromHex("#94A3B8")
 			end
 

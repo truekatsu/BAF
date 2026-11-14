@@ -23,6 +23,7 @@ export type BoardState = {
 	infRerolls: boolean,
 	revealedAll: boolean,
 	bestHint: AttributeKey?,
+	usedIds: { [string]: boolean }?,
 }
 
 export type BoardEvaluation = {
@@ -45,54 +46,114 @@ local function isValidAttribute(attr: string): boolean
 	return table.find(GameConfig.ATTRIBUTES, attr :: AttributeKey) ~= nil
 end
 
-function MatchLogic.rollRarity(luck: number, rng: Random?): Rarity
+function MatchLogic.rollRarity(luck: number, rng: Random?, allowedRarities: { [Rarity]: boolean }?): Rarity
 	local randomGen = rng or Random.new()
 	local clampedLuck = math.clamp(luck, 1, 10)
 	local weights: { [Rarity]: number } = {
 		Common = GameConfig.RARITY_WEIGHTS.Common,
+		Uncommon = GameConfig.RARITY_WEIGHTS.Uncommon,
 		Rare = GameConfig.RARITY_WEIGHTS.Rare,
 		Epic = GameConfig.RARITY_WEIGHTS.Epic * clampedLuck,
-		Legendary = GameConfig.RARITY_WEIGHTS.Legendary * clampedLuck,
+		Legend = GameConfig.RARITY_WEIGHTS.Legend * clampedLuck,
 		Mythic = GameConfig.RARITY_WEIGHTS.Mythic * clampedLuck,
 	}
 
 	local total = 0
+	local firstAllowed: Rarity? = nil
 	for _, r in GameConfig.RARITY_ORDER do
-		total += weights[r]
+		if not allowedRarities or allowedRarities[r] then
+			total += weights[r]
+			if not firstAllowed then
+				firstAllowed = r
+			end
+		end
+	end
+	if total <= 0 then
+		return firstAllowed or "Common"
 	end
 
 	local pick = randomGen:NextNumber(0, total)
 	local acc = 0
 	for _, r in GameConfig.RARITY_ORDER do
-		acc += weights[r]
-		if pick <= acc then
-			return r
+		if not allowedRarities or allowedRarities[r] then
+			acc += weights[r]
+			if pick <= acc then
+				return r
+			end
 		end
 	end
-	return "Common"
+	return firstAllowed or "Common"
 end
 
-function MatchLogic.rollFootballer(luck: number, rng: Random?): Footballer
-	local randomGen = rng or Random.new()
-	local rarity = MatchLogic.rollRarity(luck, randomGen)
-	local bucket = Footballers.ByRarity[rarity]
-	if not bucket or #bucket == 0 then
-		bucket = Footballers.All
+local function getUnusedCards(bucket: { Footballer }, usedIds: { [string]: boolean }): { Footballer }
+	local unused: { Footballer } = {}
+	for _, card in bucket do
+		if not usedIds[card.id] then
+			table.insert(unused, card)
+		end
 	end
-	return bucket[randomGen:NextInteger(1, #bucket)]
+	return unused
 end
 
-function MatchLogic.createBoard(rerolls: number, steals: number, luck: number, infRerolls: boolean, rng: Random?): BoardState
+function MatchLogic.rollFootballer(luck: number, rng: Random?, usedIds: { [string]: boolean }?): Footballer
 	local randomGen = rng or Random.new()
+	if not usedIds then
+		local rarity = MatchLogic.rollRarity(luck, randomGen)
+		local bucket = Footballers.ByRarity[rarity]
+		if not bucket or #bucket == 0 then
+			bucket = Footballers.All
+		end
+		return bucket[randomGen:NextInteger(1, #bucket)]
+	end
+
+	local allowedRarities: { [Rarity]: boolean } = {}
+	local unusedByRarity: { [Rarity]: { Footballer } } = {}
+	local hasAnyUnused = false
+	for _, r in GameConfig.RARITY_ORDER do
+		local bucket = Footballers.ByRarity[r]
+		if bucket then
+			local unused = getUnusedCards(bucket, usedIds)
+			if #unused > 0 then
+				allowedRarities[r] = true
+				unusedByRarity[r] = unused
+				hasAnyUnused = true
+			end
+		end
+	end
+
+	if not hasAnyUnused then
+		-- All 150 footballers have appeared in this session; reset session pool so rolls never fail
+		table.clear(usedIds)
+		local rarity = MatchLogic.rollRarity(luck, randomGen)
+		local bucket = Footballers.ByRarity[rarity]
+		if not bucket or #bucket == 0 then
+			bucket = Footballers.All
+		end
+		local chosen = bucket[randomGen:NextInteger(1, #bucket)]
+		usedIds[chosen.id] = true
+		return chosen
+	end
+
+	local rarity = MatchLogic.rollRarity(luck, randomGen, allowedRarities)
+	local pool = unusedByRarity[rarity]
+	local chosen = pool[randomGen:NextInteger(1, #pool)]
+	usedIds[chosen.id] = true
+	return chosen
+end
+
+function MatchLogic.createBoard(rerolls: number, steals: number, luck: number, infRerolls: boolean, rng: Random?, usedIds: { [string]: boolean }?): BoardState
+	local randomGen = rng or Random.new()
+	local sharedUsed = usedIds or {}
 	return {
 		slots = {},
-		currentRoll = MatchLogic.rollFootballer(luck, randomGen),
+		currentRoll = MatchLogic.rollFootballer(luck, randomGen, sharedUsed),
 		rerollsLeft = rerolls,
 		stealsLeft = steals,
 		luck = luck,
 		infRerolls = infRerolls,
 		revealedAll = false,
 		bestHint = nil,
+		usedIds = sharedUsed,
 	}
 end
 
@@ -131,12 +192,15 @@ function MatchLogic.placeInSlot(board: BoardState, attr: AttributeKey, rng: Rand
 	if not isValidAttribute(attr) or board.slots[attr] ~= nil or board.currentRoll == nil then
 		return false
 	end
+	if board.usedIds then
+		board.usedIds[board.currentRoll.id] = true
+	end
 	board.slots[attr] = board.currentRoll
 	board.bestHint = nil
 	if MatchLogic.isBoardFull(board) then
 		board.currentRoll = nil
 	else
-		board.currentRoll = MatchLogic.rollFootballer(board.luck, rng)
+		board.currentRoll = MatchLogic.rollFootballer(board.luck, rng, board.usedIds)
 	end
 	return true
 end
@@ -151,8 +215,11 @@ function MatchLogic.reroll(board: BoardState, rng: Random?): boolean
 	if not board.infRerolls then
 		board.rerollsLeft -= 1
 	end
+	if board.usedIds and board.currentRoll then
+		board.usedIds[board.currentRoll.id] = true
+	end
 	board.bestHint = nil
-	board.currentRoll = MatchLogic.rollFootballer(board.luck, rng)
+	board.currentRoll = MatchLogic.rollFootballer(board.luck, rng, board.usedIds)
 	return true
 end
 
@@ -172,7 +239,7 @@ function MatchLogic.stealSlot(thief: BoardState, victim: BoardState, targetAttr:
 	thief.stealsLeft -= 1
 	victim.slots[targetAttr] = nil
 	if victim.currentRoll == nil then
-		victim.currentRoll = MatchLogic.rollFootballer(victim.luck, rng)
+		victim.currentRoll = MatchLogic.rollFootballer(victim.luck, rng, victim.usedIds)
 	end
 
 	thief.slots[toAttr] = stolenCard
@@ -210,13 +277,16 @@ end
 function MatchLogic.autoFillRemaining(board: BoardState, rng: Random?)
 	local randomGen = rng or Random.new()
 	for _, attr in MatchLogic.getEmptySlots(board) do
-		local card = board.currentRoll or MatchLogic.rollFootballer(board.luck, randomGen)
+		local card = board.currentRoll or MatchLogic.rollFootballer(board.luck, randomGen, board.usedIds)
+		if board.usedIds then
+			board.usedIds[card.id] = true
+		end
 		board.slots[attr] = card
 		board.currentRoll = nil
 	end
 end
 
-function MatchLogic.stepBot(bot: BoardState, human: BoardState, rng: Random?)
+function MatchLogic.stepBot(bot: BoardState, human: BoardState, rng: Random?, optimalChance: number?)
 	if MatchLogic.isBoardFull(bot) then
 		return
 	end
@@ -238,7 +308,8 @@ function MatchLogic.stepBot(bot: BoardState, human: BoardState, rng: Random?)
 		return
 	end
 	local chosenAttr: AttributeKey
-	if randomGen:NextNumber() < GameConfig.BOT_OPTIMAL_CHANCE then
+	local optChance = optimalChance or GameConfig.BOT_OPTIMAL_CHANCE
+	if randomGen:NextNumber() < optChance then
 		chosenAttr = MatchLogic.getBestSlot(bot, bot.currentRoll) or empty[1]
 	else
 		chosenAttr = empty[randomGen:NextInteger(1, #empty)]
@@ -278,8 +349,9 @@ function MatchLogic.resolveShowdown(boardA: BoardState, boardB: BoardState, rng:
 		return { evalA = evalA, evalB = evalB, winner = "B", tiebreaker = nil }
 	end
 
-	local cardA = MatchLogic.rollFootballer(boardA.luck, randomGen)
-	local cardB = MatchLogic.rollFootballer(boardB.luck, randomGen)
+	local tieUsed = boardA.usedIds or boardB.usedIds
+	local cardA = MatchLogic.rollFootballer(boardA.luck, randomGen, tieUsed)
+	local cardB = MatchLogic.rollFootballer(boardB.luck, randomGen, tieUsed)
 	local winner: "A" | "B" = if cardA.ovr >= cardB.ovr then "A" else "B"
 	return {
 		evalA = evalA,

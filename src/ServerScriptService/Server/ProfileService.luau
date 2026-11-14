@@ -16,6 +16,7 @@ local Workspace = game:GetService("Workspace")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local GameConfig = require(Shared:WaitForChild("GameConfig"))
+local JumbotronConfig = require(Shared:WaitForChild("JumbotronConfig"))
 local Footballers = require(Shared:WaitForChild("Footballers"))
 local Remotes = require(Shared:WaitForChild("Remotes"))
 local LeaderboardService = require(script.Parent:WaitForChild("LeaderboardService"))
@@ -37,6 +38,7 @@ export type Profile = {
 	VIP: boolean?,
 	StarterPackOwned: boolean?,
 	EquippedTitle: string,
+	UnlockedTitles: { [string]: boolean },
 	EquippedChair: string,
 	OwnedChairs: { [string]: boolean },
 	DailyDay: number,
@@ -86,10 +88,11 @@ local feedbackEntries: { string } = {}
 
 local RARITY_RANK: { [string]: number } = {
 	Common = 1,
-	Rare = 2,
-	Epic = 3,
-	Legendary = 4,
-	Mythic = 5,
+	Uncommon = 2,
+	Rare = 3,
+	Epic = 4,
+	Legend = 5,
+	Mythic = 6,
 }
 
 local function isRarerCard(cand: Footballers.Footballer, cur: Footballers.Footballer?): boolean
@@ -217,6 +220,7 @@ local function defaultProfile(): Profile
 		VIP = false,
 		StarterPackOwned = false,
 		EquippedTitle = "Benchwarmer",
+		UnlockedTitles = { Benchwarmer = true },
 		EquippedChair = "wood",
 		OwnedChairs = { wood = true },
 		DailyDay = 1,
@@ -250,9 +254,33 @@ local function defaultProfile(): Profile
 	}
 end
 
+local function isTitleUnlocked(profile: Profile, entry: { name: string, minWins: number }): boolean
+	return (profile.UnlockedTitles ~= nil and profile.UnlockedTitles[entry.name] == true) or profile.Wins >= entry.minWins
+end
+
+local function syncUnlockedTitles(profile: Profile): string?
+	if not profile.UnlockedTitles then
+		profile.UnlockedTitles = { Benchwarmer = true }
+	end
+	profile.UnlockedTitles["Benchwarmer"] = true
+	local newlyUnlocked: string? = nil
+	local bestNewMinWins = -1
+	for _, entry in GameConfig.TITLES do
+		if profile.Wins >= entry.minWins then
+			local wasUnlocked = profile.UnlockedTitles[entry.name] == true
+			profile.UnlockedTitles[entry.name] = true
+			if not wasUnlocked and entry.minWins > bestNewMinWins then
+				bestNewMinWins = entry.minWins
+				newlyUnlocked = entry.name
+			end
+		end
+	end
+	return newlyUnlocked
+end
+
 local function resolveActiveTitle(profile: Profile): string
 	for _, entry in GameConfig.TITLES do
-		if entry.name == profile.EquippedTitle and profile.Wins >= entry.minWins then
+		if entry.name == profile.EquippedTitle and isTitleUnlocked(profile, entry) then
 			return entry.name
 		end
 	end
@@ -401,7 +429,7 @@ function ProfileService.discoverCard(player: Player, cardId: string): boolean
 	end
 	local bonus = if card.rarity == "Mythic"
 		then 250
-		elseif card.rarity == "Legendary" then 100
+		elseif card.rarity == "Legend" then 100
 		elseif card.rarity == "Epic" then 50
 		else 25
 	grantBux(player, profile, bonus)
@@ -473,7 +501,9 @@ function ProfileService.awardMatchResult(player: Player, won: boolean): MatchRew
 	refreshWinBuckets(profile)
 	local winsEarned = 0
 	if won then
-		winsEarned = if profile.DoubleWins then 2 else 1
+		local eventMult = if JumbotronConfig.isWeekendEventActive() then 2 else 1
+		local passMult = if profile.DoubleWins then 2 else 1
+		winsEarned = eventMult * passMult
 		local streakGain = if profile.DoubleStreak then 2 else 1
 		profile.Wins += winsEarned
 		profile.WinsToday = (profile.WinsToday or 0) + winsEarned
@@ -489,11 +519,14 @@ function ProfileService.awardMatchResult(player: Player, won: boolean): MatchRew
 		LeaderboardService.SetMax(player, "Streak", profile.BestStreak or 0)
 	end
 
-	-- Auto-promote title when reaching a new milestone
-	local highestTitle = GameConfig.getTitleForWins(profile.Wins)
-	profile.EquippedTitle = highestTitle
+	-- Unlock and auto-equip new title milestone (10 Rookie, 15 Starter, 50 Captain, 100 Legend)
+	local newlyUnlockedTitle = syncUnlockedTitles(profile)
+	if newlyUnlockedTitle then
+		profile.EquippedTitle = newlyUnlockedTitle
+	end
 
-	syncLeaderstats(player, profile)
+	local unlockToast = if newlyUnlockedTitle then `🏷️ Title Unlocked: {newlyUnlockedTitle}!` else nil
+	syncLeaderstats(player, profile, unlockToast)
 	return {
 		buxEarned = buxEarned,
 		winsEarned = winsEarned,
@@ -612,6 +645,12 @@ end
 
 ProfileService.grantShopItem = grantShopItem
 
+local matchProductHandler: ((player: Player, itemKey: string) -> boolean)? = nil
+
+function ProfileService.setMatchProductHandler(handler: (player: Player, itemKey: string) -> boolean)
+	matchProductHandler = handler
+end
+
 function ProfileService.upgradeLuck(player: Player): boolean
 	local profile = profiles[player]
 	if not profile then
@@ -713,9 +752,15 @@ function ProfileService.handleMetaAction(player: Player, action: unknown, arg: u
 
 	if action == "EquipTitle" and typeof(arg) == "string" then
 		for _, entry in GameConfig.TITLES do
-			if entry.name == arg and profile.Wins >= entry.minWins then
-				profile.EquippedTitle = entry.name
-				syncLeaderstats(player, profile, `Equipped Title: {entry.name}`)
+			if entry.name == arg then
+				if isTitleUnlocked(profile, entry) then
+					profile.UnlockedTitles[entry.name] = true
+					profile.EquippedTitle = entry.name
+					dirtyProfiles[player] = true
+					syncLeaderstats(player, profile, `Equipped Title: {entry.name}`)
+				else
+					syncLeaderstats(player, profile, `🔒 Need {entry.minWins} Wins to unlock {entry.name}!`)
+				end
 				return
 			end
 		end
@@ -725,10 +770,12 @@ function ProfileService.handleMetaAction(player: Player, action: unknown, arg: u
 	if action == "BuyOrEquipChair" and typeof(arg) == "string" then
 		for _, skin in GameConfig.CHAIR_SKINS do
 			if skin.id == arg then
-				if profile.OwnedChairs[skin.id] then
+				local owned = profile.OwnedChairs[skin.id] or (skin.unlockSource == "VIP" and profile.VIP == true)
+				if owned then
+					profile.OwnedChairs[skin.id] = true
 					profile.EquippedChair = skin.id
 					syncLeaderstats(player, profile, `Equipped {skin.name} Chair!`)
-				elseif profile.Bux >= skin.cost then
+				elseif not skin.unlockSource and profile.Bux >= skin.cost then
 					profile.Bux -= skin.cost
 					profile.OwnedChairs[skin.id] = true
 					profile.EquippedChair = skin.id
@@ -942,7 +989,11 @@ local function loadPlayer(player: Player)
 	data.BestStreak = math.max(data.BestStreak or 0, data.Streak or 0)
 	data.TotalCashEarned = math.max(data.TotalCashEarned or 0, data.Bux or 0)
 	refreshWinBuckets(data)
-	if data.RarestCardId == "" then
+	if data.LatestCardId ~= "" and not Footballers.ById[data.LatestCardId] then
+		data.LatestCardId = ""
+	end
+	if data.RarestCardId == "" or not Footballers.ById[data.RarestCardId] then
+		data.RarestCardId = ""
 		local bestCard: Footballers.Footballer? = nil
 		for cardId, owned in data.DiscoveredCards do
 			local c = if owned then Footballers.ById[cardId] else nil
@@ -956,6 +1007,7 @@ local function loadPlayer(player: Player)
 	end
 	data.SessionJoinTime = Workspace:GetServerTimeNow()
 	data.PlaytimeClaimed = {}
+	syncUnlockedTitles(data)
 	data.OwnedChairs["wood"] = true
 	if data.OwnedChairs["emerald"] and not data.OwnedChairs["crimson"] then
 		data.OwnedChairs["crimson"] = true
@@ -963,16 +1015,22 @@ local function loadPlayer(player: Player)
 	if data.EquippedChair == "emerald" then
 		data.EquippedChair = "crimson"
 	end
-	if (data.OwnedChairs["cyber"] or data.OwnedChairs["frostbite"]) and not data.OwnedChairs["lucky_clover"] then
+	if data.OwnedChairs["cyber"] and not data.OwnedChairs["frostbite"] then
+		data.OwnedChairs["frostbite"] = true
+	end
+	if data.EquippedChair == "cyber" then
+		data.EquippedChair = "frostbite"
+	end
+	if data.OwnedChairs["clover"] and not data.OwnedChairs["lucky_clover"] then
 		data.OwnedChairs["lucky_clover"] = true
 	end
-	if data.EquippedChair == "cyber" or data.EquippedChair == "frostbite" then
+	if data.EquippedChair == "clover" then
 		data.EquippedChair = "lucky_clover"
 	end
-	if data.VIP or data.OwnedChairs["golden"] or data.OwnedChairs["vip"] then
+	if data.VIP or data.OwnedChairs["vip"] then
 		data.OwnedChairs["vip_black_diamond"] = true
 	end
-	if data.EquippedChair == "golden" or data.EquippedChair == "vip" then
+	if data.EquippedChair == "vip" then
 		data.EquippedChair = "vip_black_diamond"
 	end
 	if not player:IsDescendantOf(Players) then
@@ -982,13 +1040,22 @@ local function loadPlayer(player: Player)
 	syncLeaderstats(player, data)
 	LeaderboardService.seedPlayerOnJoin(player, data.Wins, data.BestStreak, data.TotalCashEarned, data.PlaytimeSeconds)
 
-	-- Verify owned GamePasses asynchronously on join
+	-- Verify owned permanent GamePasses asynchronously on join (never auto-grant consumables on rejoin)
+	local permanentPassKeys = {
+		starter_pack = true,
+		vip = true,
+		["2x_bux"] = true,
+		["2x_wins"] = true,
+		["2x_streak"] = true,
+		["2x_luck"] = true,
+		inf_rerolls = true,
+	}
 	task.spawn(function()
 		if player.UserId <= 0 then
 			return
 		end
 		for key, item in GameConfig.MONETIZATION :: any do
-			if item.kind == "GamePass" and item.id and item.id > 0 then
+			if permanentPassKeys[key] and item.kind == "GamePass" and item.id and item.id > 0 then
 				local ok, owns = pcall(function()
 					return MarketplaceService:UserOwnsGamePassAsync(player.UserId, item.id)
 				end)
@@ -1033,7 +1100,13 @@ function ProfileService.init()
 		end
 		for key, item in GameConfig.MONETIZATION :: any do
 			if item.kind == "GamePass" and item.id == gamePassId then
-				grantShopItem(player, key)
+				if key == "match_reroll" or key == "match_reveal_all" or key == "match_see_best" or key == "match_steal" then
+					if matchProductHandler then
+						matchProductHandler(player, key)
+					end
+				else
+					grantShopItem(player, key)
+				end
 				break
 			end
 		end
@@ -1045,7 +1118,12 @@ function ProfileService.init()
 		end
 		for key, item in GameConfig.MONETIZATION :: any do
 			if item.kind == "Product" and item.id == receiptInfo.ProductId and item.id > 0 then
-				if grantShopItem(player, key) then
+				if key == "match_reroll" or key == "match_reveal_all" or key == "match_see_best" or key == "match_steal" then
+					if matchProductHandler and matchProductHandler(player, key) then
+						return Enum.ProductPurchaseDecision.PurchaseGranted
+					end
+					return Enum.ProductPurchaseDecision.NotProcessedYet
+				elseif grantShopItem(player, key) then
 					return Enum.ProductPurchaseDecision.PurchaseGranted
 				end
 			end

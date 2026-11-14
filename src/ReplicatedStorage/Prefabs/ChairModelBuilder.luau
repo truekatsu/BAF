@@ -12,6 +12,7 @@
 ]]
 
 local InsertService = game:GetService("InsertService")
+local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local ChairModelBuilder = {}
@@ -324,6 +325,51 @@ local MESH_CONFIGS: { [string]: MeshConfig } = {
 		end,
 	},
 
+	frostbite = {
+		name = "FrostbiteIceThrone",
+		meshId = "rbxassetid://76494472528484",
+		size = Vector3.new(2.09792, 2.4865, 1.350) * 3.4,
+		seatYOffset = 2.5,
+		seatSize = Vector3.new(2.8, 0.4, 2.6),
+		textures = {
+			color = "rbxassetid://111872608785953",
+			normal = "rbxassetid://114000707456459",
+			roughness = "rbxassetid://85147068810486",
+			metalness = "rbxassetid://118447872662274",
+		},
+		setupEffects = function(model: Model, mesh: MeshPart)
+			local pl = Instance.new("PointLight")
+			pl.Color = Color3.fromRGB(160, 240, 255)
+			pl.Brightness = 3.0
+			pl.Range = 16
+			pl.Parent = mesh
+
+			local att = Instance.new("Attachment")
+			att.Position = Vector3.new(0, mesh.Size.Y * 0.35, 0)
+			att.Parent = mesh
+
+			local mist = Instance.new("ParticleEmitter")
+			mist.Texture = "rbxasset://textures/particles/sparkles_main.dds"
+			mist.Color = ColorSequence.new(Color3.fromRGB(180, 240, 255), Color3.fromRGB(240, 250, 255))
+			mist.LightEmission = 0.8
+			mist.Size = NumberSequence.new(0.5, 0)
+			mist.Lifetime = NumberRange.new(1.2, 2.4)
+			mist.Rate = 20
+			mist.Speed = NumberRange.new(0.8, 2.0)
+			mist.SpreadAngle = Vector2.new(45, 45)
+			mist.Acceleration = Vector3.new(0, -1.0, 0)
+			mist.Parent = att
+
+			local hl = Instance.new("Highlight")
+			hl.OutlineColor = Color3.fromRGB(140, 230, 255)
+			hl.OutlineTransparency = 0.4
+			hl.FillColor = Color3.fromRGB(180, 240, 255)
+			hl.FillTransparency = 0.92
+			hl.Adornee = model
+			hl.Parent = model
+		end,
+	},
+
 	golden = {
 		name = "RoyalFootballThrone",
 		meshId = "rbxassetid://137497051752765",
@@ -408,7 +454,6 @@ local MESH_CONFIGS: { [string]: MeshConfig } = {
 		end,
 	},
 }
-MESH_CONFIGS.frostbite = MESH_CONFIGS.lucky_clover
 
 -- Builds a complete 3D Mesh chair with PBR SurfaceAppearance, effects, and optional Seat
 function ChairModelBuilder.buildMeshChair(skinKey: string, cfTarget: CFrame?, withSeat: boolean?): Model
@@ -422,6 +467,7 @@ function ChairModelBuilder.buildMeshChair(skinKey: string, cfTarget: CFrame?, wi
 
 	local mesh = getMeshPart(cfg.meshId)
 	mesh.Name = cfg.name .. "_Mesh"
+	mesh.PivotOffset = CFrame.identity
 	mesh.Size = cfg.size
 	mesh.TextureID = cfg.textures.color
 	mesh.Anchored = true
@@ -478,7 +524,7 @@ function ChairModelBuilder.buildLuckyCloverChair(cfOffset: CFrame?): Model
 end
 
 function ChairModelBuilder.buildFrostbiteThrone(cfOffset: CFrame?): Model
-	return ChairModelBuilder.buildLuckyCloverChair(cfOffset)
+	return ChairModelBuilder.buildMeshChair("frostbite", cfOffset, true)
 end
 
 function ChairModelBuilder.buildRoyalFootballThrone(cfOffset: CFrame?): Model
@@ -498,10 +544,12 @@ function ChairModelBuilder.buildChair(chairType: string, cfOffset: CFrame?): Mod
 		return ChairModelBuilder.buildMeshChair("crimson", cfOffset, true)
 	elseif key == "cyber_core" or key == "cybercore" or key == "cybercorechair" then
 		return ChairModelBuilder.buildMeshChair("cyber_core", cfOffset, true)
-	elseif key == "lucky_clover" or key == "clover" or key == "luckyclover" or key == "cloverchair" or key == "luckycloverchair" or key == "frostbite" or key == "frost" or key == "frostbitethrone" or key == "frostbitechair" or key == "frostchair" or key == "cyber" then
+	elseif key == "lucky_clover" or key == "clover" or key == "luckyclover" or key == "cloverchair" or key == "luckycloverchair" then
 		return ChairModelBuilder.buildLuckyCloverChair(cfOffset)
+	elseif key == "frostbite" or key == "frost" or key == "frostbitethrone" or key == "frostbitechair" or key == "frostchair" or key == "cyber" then
+		return ChairModelBuilder.buildFrostbiteThrone(cfOffset)
 	elseif key == "golden" or key == "football_throne" or key == "footballthrone" or key == "royal" or key == "royalthrone" or key == "royalfootballthrone" then
-		return ChairModelBuilder.buildBlackDiamondVIPChair(cfOffset)
+		return ChairModelBuilder.buildRoyalFootballThrone(cfOffset)
 	elseif key == "wood" or key == "woodchair" or key == "classic" or key == "classicwood" or key == "classic_wood" then
 		return ChairModelBuilder.buildWoodChair(cfOffset)
 	elseif key == "stadium" or key == "stadiumchair" then
@@ -513,10 +561,102 @@ end
 
 ChairModelBuilder.buildCrimsonChair = ChairModelBuilder.buildCrimsonFlameChair
 ChairModelBuilder.buildCyberChair = ChairModelBuilder.buildCyberCoreChair
-ChairModelBuilder.buildFrostThrone = ChairModelBuilder.buildLuckyCloverChair
+ChairModelBuilder.buildFrostThrone = ChairModelBuilder.buildFrostbiteThrone
 ChairModelBuilder.buildCloverChair = ChairModelBuilder.buildLuckyCloverChair
-ChairModelBuilder.buildRoyalThrone = ChairModelBuilder.buildBlackDiamondVIPChair
-ChairModelBuilder.buildGoldenChair = ChairModelBuilder.buildBlackDiamondVIPChair
-ChairModelBuilder.buildRoyalFootballThrone = ChairModelBuilder.buildBlackDiamondVIPChair
+ChairModelBuilder.buildRoyalThrone = ChairModelBuilder.buildRoyalFootballThrone
+ChairModelBuilder.buildGoldenChair = ChairModelBuilder.buildRoyalFootballThrone
+
+type SeatAlignment = {
+	rawBottomY: number,
+	rawSeatTopY: number,
+	backShift: number,
+	rawSideShift: number,
+	frontYaw: number,
+	widthMult: number?,
+}
+
+local SEAT_ALIGNMENTS: { [string]: SeatAlignment } = {
+	stadium = { rawBottomY = 0.10, rawSeatTopY = 1.26, backShift = 0.25, rawSideShift = 0, frontYaw = math.pi },
+	crimson = { rawBottomY = 0, rawSeatTopY = 2.38, backShift = 0.40, rawSideShift = 0, frontYaw = 0 },
+	cyber_core = { rawBottomY = 0, rawSeatTopY = 2.93, backShift = 0.45, rawSideShift = 0, frontYaw = 0 },
+	frostbite = { rawBottomY = 0, rawSeatTopY = 3.15, backShift = 0.45, rawSideShift = 0, frontYaw = 0 },
+	lucky_clover = { rawBottomY = 0, rawSeatTopY = 3.60, backShift = 0.40, rawSideShift = 0.405, frontYaw = 0, widthMult = 1.22 },
+	golden = { rawBottomY = 0, rawSeatTopY = 3.20, backShift = 0.75, rawSideShift = 0, frontYaw = 0 },
+	vip_black_diamond = { rawBottomY = 0, rawSeatTopY = 2.48, backShift = 0.45, rawSideShift = 0, frontYaw = 0 },
+}
+
+local function findGroundY(seat: Seat, tableModel: Model?): number
+	local exclude: { Instance } = { if tableModel then tableModel else seat }
+	for _, plr in Players:GetPlayers() do
+		if plr.Character then
+			table.insert(exclude, plr.Character)
+		end
+	end
+
+	local rp = RaycastParams.new()
+	rp.FilterType = Enum.RaycastFilterType.Exclude
+	rp.IgnoreWater = true
+
+	-- Skip seated/nearby characters, existing chair decor, and non-collidable zones so the chair scales to the real floor
+	local origin = seat.Position + Vector3.new(0, 1, 0)
+	for _ = 1, 16 do
+		rp.FilterDescendantsInstances = exclude
+		local hit = workspace:Raycast(origin, Vector3.new(0, -25, 0), rp)
+		if not hit then
+			return 0
+		end
+		local inst = hit.Instance
+		local model = inst:FindFirstAncestorOfClass("Model")
+		local isChar = model ~= nil and model:FindFirstChildOfClass("Humanoid") ~= nil
+		local isDecor = model ~= nil and string.match(model.Name, "_Decor$") ~= nil
+		if isChar or isDecor then
+			table.insert(exclude, model :: Instance)
+			origin = hit.Position - Vector3.new(0, 0.01, 0)
+		elseif not inst.CanCollide then
+			table.insert(exclude, inst)
+			origin = hit.Position - Vector3.new(0, 0.01, 0)
+		else
+			return hit.Position.Y
+		end
+	end
+	return 0
+end
+
+-- Builds and aligns a match-table chair decor so its base touches floorY, cushion matches Seat top, and front faces Seat.LookVector
+function ChairModelBuilder.buildChairForSeat(skinId: string, seat: Seat, tableModel: Model?): Model?
+	local align = SEAT_ALIGNMENTS[skinId]
+	if not align then
+		return nil
+	end
+
+	local groundY = findGroundY(seat, tableModel)
+	local seatTopY = seat.Position.Y + (seat.Size.Y * 0.5)
+	local height = seatTopY - groundY
+	if height < 0.5 then
+		groundY = 0
+		height = seatTopY - groundY
+	end
+	local scale = math.max(0.3, height / (align.rawSeatTopY - align.rawBottomY))
+
+	local decor = if skinId == "stadium"
+		then ChairModelBuilder.buildStadiumChair(CFrame.identity)
+		else ChairModelBuilder.buildMeshChair(skinId, CFrame.identity, false)
+
+	if align.widthMult and decor.PrimaryPart and decor.PrimaryPart:IsA("BasePart") then
+		decor.PrimaryPart.Size = Vector3.new(decor.PrimaryPart.Size.X * align.widthMult, decor.PrimaryPart.Size.Y, decor.PrimaryPart.Size.Z)
+	end
+	decor.PrimaryPart = nil
+	decor.WorldPivot = CFrame.new(0, align.rawBottomY, 0)
+	decor:ScaleTo(scale)
+
+	local flatLook = Vector3.new(seat.CFrame.LookVector.X, 0, seat.CFrame.LookVector.Z)
+	local look = if flatLook.Magnitude > 1e-3 then flatLook.Unit else seat.CFrame.LookVector
+	local right = look:Cross(Vector3.yAxis)
+	local basePos = Vector3.new(seat.Position.X, groundY, seat.Position.Z)
+		- (look * align.backShift)
+		+ (right * (align.rawSideShift * scale * (align.widthMult or 1)))
+	decor:PivotTo(CFrame.lookAt(basePos, basePos + look) * CFrame.Angles(0, align.frontYaw, 0))
+	return decor
+end
 
 return ChairModelBuilder

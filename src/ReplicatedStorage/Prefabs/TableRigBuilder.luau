@@ -148,6 +148,7 @@ function TableRigBuilder.buildPrefab(): Model
 		seat.Material = Enum.Material.Wood
 		seat.Anchored = true
 		seat.CanCollide = false
+		seat.CanTouch = false
 		seat.Disabled = false
 		seat:SetAttribute("SeatSide", side)
 		seat:SetAttribute("TableId", 0)

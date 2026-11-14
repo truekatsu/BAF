@@ -1841,131 +1841,66 @@ function UITheme.getModalScale(): number
 end
 
 function UITheme.openWindow(win: GuiObject)
-
-
-
+	local token = ((win:GetAttribute("WindowTweenToken") :: number?) or 0) + 1
+	win:SetAttribute("WindowTweenToken", token)
+	local now = os.clock()
+	win:SetAttribute("OpenedAt", now)
 	win.Visible = true
 
-
-
-	local uiScale = win:FindFirstChildOfClass("UIScale")
-
-
-
-	if not uiScale then
-
-
-
-		uiScale = Instance.new("UIScale")
-
-
-
-		uiScale.Parent = win
-
-
-
+	local backdrop = win.Parent and win.Parent:FindFirstChild("ModalBackdrop")
+	if backdrop and backdrop:IsA("GuiObject") then
+		backdrop:SetAttribute("OpenedAt", now)
+		backdrop:SetAttribute("OpenToken", ((backdrop:GetAttribute("OpenToken") :: number?) or 0) + 1)
 	end
 
-
+	local uiScale = win:FindFirstChildOfClass("UIScale")
+	if not uiScale then
+		uiScale = Instance.new("UIScale")
+		uiScale.Parent = win
+	end
 
 	local targetScale = UITheme.getModalScale()
 	uiScale.Scale = UITheme.CONFIG.WINDOW_OPEN_SCALE * targetScale
 
-
-
 	TweenService:Create(uiScale, TweenInfo.new(UITheme.CONFIG.WINDOW_OPEN_TWEEN_TIME, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
-
-
-
 		Scale = targetScale,
-
-
-
 	}):Play()
 
-
-
 	setGlobalBlur(true)
-
-
-
 end
 
-
-
 function UITheme.closeWindow(win: GuiObject, onComplete: (() -> ())?)
-
-
+	local token = ((win:GetAttribute("WindowTweenToken") :: number?) or 0) + 1
+	win:SetAttribute("WindowTweenToken", token)
+	local backdrop = win.Parent and win.Parent:FindFirstChild("ModalBackdrop")
+	local backdropOpenToken = if backdrop then backdrop:GetAttribute("OpenToken") else nil
 
 	local uiScale = win:FindFirstChildOfClass("UIScale")
-
-
-
 	if not uiScale then
-
-
-
 		win.Visible = false
-
-
-
-		setGlobalBlur(false)
-
-
-
-		if onComplete then onComplete() end
-
-
-
+		if not backdrop or backdrop:GetAttribute("OpenToken") == backdropOpenToken then
+			setGlobalBlur(false)
+			if onComplete then onComplete() end
+		end
 		return
-
-
-
 	end
-
-
 
 	local targetScale = UITheme.getModalScale()
 	local tw = TweenService:Create(uiScale, TweenInfo.new(0.12, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
-
-
-
 		Scale = UITheme.CONFIG.WINDOW_OPEN_SCALE * targetScale,
-
-
-
 	})
-
-
-
 	tw:Play()
-
-
-
-	tw.Completed:Connect(function()
-
-
-
+	tw.Completed:Connect(function(playbackState)
+		if playbackState ~= Enum.PlaybackState.Completed or win:GetAttribute("WindowTweenToken") ~= token then
+			return
+		end
 		win.Visible = false
-
-
-
 		uiScale.Scale = targetScale
-
-
-
-		setGlobalBlur(false)
-
-
-
-		if onComplete then onComplete() end
-
-
-
+		if not backdrop or backdrop:GetAttribute("OpenToken") == backdropOpenToken then
+			setGlobalBlur(false)
+			if onComplete then onComplete() end
+		end
 	end)
-
-
-
 end
 
 
@@ -1976,7 +1911,10 @@ end
 
 
 function UITheme.animateWindowOpen(modalWrap: GuiObject, modalBox: GuiObject, targetScaleOverride: number?)
-	modalWrap:SetAttribute("OpenedAt", os.clock())
+	local token = ((modalWrap:GetAttribute("WindowTweenToken") :: number?) or 0) + 1
+	modalWrap:SetAttribute("WindowTweenToken", token)
+	local now = os.clock()
+	modalWrap:SetAttribute("OpenedAt", now)
 	modalWrap.Visible = true
 	if modalBox then
 		modalBox.Visible = true
@@ -1984,6 +1922,8 @@ function UITheme.animateWindowOpen(modalWrap: GuiObject, modalBox: GuiObject, ta
 
 	local backdrop = modalWrap:FindFirstChild("ModalBackdrop") or (modalWrap.Parent and modalWrap.Parent:FindFirstChild("ModalBackdrop"))
 	if backdrop and backdrop:IsA("GuiObject") then
+		backdrop:SetAttribute("OpenedAt", now)
+		backdrop:SetAttribute("OpenToken", ((backdrop:GetAttribute("OpenToken") :: number?) or 0) + 1)
 		backdrop.Visible = true
 		backdrop.BackgroundTransparency = 1.0
 		TweenService:Create(backdrop, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
@@ -2005,8 +1945,11 @@ function UITheme.animateWindowOpen(modalWrap: GuiObject, modalBox: GuiObject, ta
 end
 
 function UITheme.animateWindowClose(modalWrap: GuiObject, modalBox: GuiObject, onComplete: (() -> ())?, targetScaleOverride: number?)
+	local token = ((modalWrap:GetAttribute("WindowTweenToken") :: number?) or 0) + 1
+	modalWrap:SetAttribute("WindowTweenToken", token)
 	local backdrop = modalWrap:FindFirstChild("ModalBackdrop") or (modalWrap.Parent and modalWrap.Parent:FindFirstChild("ModalBackdrop"))
-	if backdrop and backdrop:IsA("GuiObject") then
+	local backdropOpenToken = if backdrop then backdrop:GetAttribute("OpenToken") else nil
+	if backdrop and backdrop:IsA("GuiObject") and backdrop:GetAttribute("OpenToken") == backdropOpenToken then
 		TweenService:Create(backdrop, TweenInfo.new(0.20, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
 			BackgroundTransparency = 1.0,
 		}):Play()
@@ -2016,7 +1959,9 @@ function UITheme.animateWindowClose(modalWrap: GuiObject, modalBox: GuiObject, o
 	if not uiScale then
 		modalWrap.Visible = false
 		if modalBox then modalBox.Visible = false end
-		if backdrop and backdrop:IsA("GuiObject") then backdrop.Visible = false end
+		if backdrop and backdrop:IsA("GuiObject") and backdrop:GetAttribute("OpenToken") == backdropOpenToken then
+			backdrop.Visible = false
+		end
 		if onComplete then onComplete() end
 		return
 	end
@@ -2027,10 +1972,15 @@ function UITheme.animateWindowClose(modalWrap: GuiObject, modalBox: GuiObject, o
 		Scale = 0.45 * targetScale,
 	})
 	tw:Play()
-	tw.Completed:Connect(function()
+	tw.Completed:Connect(function(playbackState)
+		if playbackState ~= Enum.PlaybackState.Completed or modalWrap:GetAttribute("WindowTweenToken") ~= token then
+			return
+		end
 		modalWrap.Visible = false
 		if modalBox then modalBox.Visible = false end
-		if backdrop and backdrop:IsA("GuiObject") then backdrop.Visible = false end
+		if backdrop and backdrop:IsA("GuiObject") and backdrop:GetAttribute("OpenToken") == backdropOpenToken then
+			backdrop.Visible = false
+		end
 		uiScale.Scale = targetScale
 		if onComplete then onComplete() end
 	end)

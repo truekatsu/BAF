@@ -553,7 +553,7 @@ function ShopDailyUI.initShop(screenGui: ScreenGui, modalBackdrop: GuiObject, Re
 		ownedStarterBtn.Visible = starterOwned
 
 		if shopGamepassCards["vip"] then
-			shopGamepassCards["vip"].SetOwned(p.VIP == true or (p.DoubleBux == true and p.OwnedChairs ~= nil and p.OwnedChairs["golden"] == true))
+			shopGamepassCards["vip"].SetOwned(p.VIP == true or (p.DoubleBux == true and p.OwnedChairs ~= nil and p.OwnedChairs["vip_black_diamond"] == true))
 		end
 		if shopGamepassCards["2x_bux"] then
 			shopGamepassCards["2x_bux"].SetOwned(p.DoubleBux == true)
@@ -598,10 +598,11 @@ local CHAIR_DATA: { [string]: { name: string, color: Color3, legColor: Color3, m
 	emerald = { name = "Crimson Chair", color = Color3.fromRGB(150, 15, 25), legColor = Color3.fromRGB(110, 10, 20), mat = Enum.Material.WoodPlanks },
 	lucky_clover = { name = "Lucky Clover Chair", color = Color3.fromRGB(16, 160, 75), legColor = Color3.fromRGB(10, 80, 40), mat = Enum.Material.SmoothPlastic },
 	clover = { name = "Lucky Clover Chair", color = Color3.fromRGB(16, 160, 75), legColor = Color3.fromRGB(10, 80, 40), mat = Enum.Material.SmoothPlastic },
-	frostbite = { name = "Lucky Clover Chair", color = Color3.fromRGB(16, 160, 75), legColor = Color3.fromRGB(10, 80, 40), mat = Enum.Material.SmoothPlastic },
-	cyber = { name = "Lucky Clover Chair", color = Color3.fromRGB(16, 160, 75), legColor = Color3.fromRGB(10, 80, 40), mat = Enum.Material.SmoothPlastic },
+	frostbite = { name = "Frostbite Chair", color = Color3.fromRGB(120, 210, 255), legColor = Color3.fromRGB(60, 150, 230), mat = Enum.Material.Glass },
+	cyber = { name = "Frostbite Chair", color = Color3.fromRGB(120, 210, 255), legColor = Color3.fromRGB(60, 150, 230), mat = Enum.Material.Glass },
 	golden = { name = "Football Throne", color = Color3.fromRGB(255, 195, 30), legColor = Color3.fromRGB(205, 140, 10), mat = Enum.Material.SmoothPlastic },
 	football_throne = { name = "Football Throne", color = Color3.fromRGB(255, 195, 30), legColor = Color3.fromRGB(205, 140, 10), mat = Enum.Material.SmoothPlastic },
+	vip_black_diamond = { name = "Black Diamond VIP", color = Color3.fromRGB(30, 30, 35), legColor = Color3.fromRGB(15, 15, 18), mat = Enum.Material.DiamondPlate },
 }
 
 local function buildChairModel(skinId: string): Model
@@ -630,8 +631,8 @@ local function createChairViewport(skinId: string, parent: GuiObject): ViewportF
 	model.WorldPivot = CFrame.new(bbCF.Position)
 	local maxDim = math.max(bbSize.X, bbSize.Y, bbSize.Z)
 
-	-- Default orientation: Blender FBX chairs (VIP & Lucky Clover) have forward facing -Z, others face +Z
-	local baseAngle = if skinId == "vip" or skinId == "vip_black_diamond" or skinId == "golden" or skinId == "royal" or skinId == "football_throne" or skinId == "footballthrone" or skinId == "royalfootballthrone" or skinId == "lucky_clover" or skinId == "clover" or skinId == "luckyclover" or skinId == "cloverchair" or skinId == "luckycloverchair" or skinId == "frostbite" or skinId == "cyber" then math.pi else 0
+	-- Default orientation: Blender FBX chairs (VIP, Golden Throne & Lucky Clover) have forward facing -Z, others face +Z
+	local baseAngle = if skinId == "vip" or skinId == "vip_black_diamond" or skinId == "golden" or skinId == "royal" or skinId == "football_throne" or skinId == "footballthrone" or skinId == "royalfootballthrone" or skinId == "lucky_clover" or skinId == "clover" or skinId == "luckyclover" or skinId == "cloverchair" or skinId == "luckycloverchair" then math.pi else 0
 
 	local cam = Instance.new("Camera")
 	cam.FieldOfView = 24
@@ -1016,68 +1017,41 @@ function ShopDailyUI.initFreeRewards(
 	local cachedProfileRef: any = nil
 
 	local function createRobuxPillBadge(button: GuiObject, price: number): Frame
+		local textStr = tostring(price)
+		local isLarge = #textStr >= 3
+		local badgeW = if isLarge then 36 else 28
+
 		local badge = Instance.new("Frame")
 		badge.Name = "RobuxPillBadge"
-		badge.Size = UDim2.fromOffset(64, 26)
-		badge.Position = UDim2.new(1, 4, 0, -10)
-		badge.AnchorPoint = Vector2.new(1, 0)
+		badge.Size = UDim2.fromOffset(badgeW, 28)
+		badge.Position = UDim2.new(1, -6, 0.5, 0)
+		badge.AnchorPoint = Vector2.new(1, 0.5)
 		badge.BackgroundColor3 = Color3.fromHex("#48C90E")
-		badge.ClipsDescendants = true
+		badge.ClipsDescendants = false
 		UITheme.applyGradient(badge, Color3.fromHex("#68FF3B"), Color3.fromHex("#38B018"), 90)
+
 		local corner = Instance.new("UICorner")
-		corner.CornerRadius = UDim.new(0.5, 0)
+		corner.CornerRadius = UDim.new(1, 0)
 		corner.Parent = badge
+
 		UITheme.applyStroke(badge, 2, UITheme.CONFIG.Colors.Outline)
 		badge.ZIndex = button.ZIndex + 4
 		badge.Parent = button
 
-		local pad = Instance.new("UIPadding")
-		pad.PaddingLeft = UDim.new(0.08, 0)
-		pad.PaddingRight = UDim.new(0.08, 0)
-		pad.PaddingTop = UDim.new(0, 0)
-		pad.PaddingBottom = UDim.new(0, 0)
-		pad.Parent = badge
-
-		local list = Instance.new("UIListLayout")
-		list.FillDirection = Enum.FillDirection.Horizontal
-		list.HorizontalAlignment = Enum.HorizontalAlignment.Center
-		list.VerticalAlignment = Enum.VerticalAlignment.Center
-		list.Padding = UDim.new(0.06, 0)
-		list.SortOrder = Enum.SortOrder.LayoutOrder
-		list.Parent = badge
-
-		local icon = Instance.new("ImageLabel")
-		icon.Name = "RobuxHexagon"
-		icon.LayoutOrder = 1
-		icon.Size = UDim2.new(1, 0, 0.75, 0)
-		icon.BackgroundTransparency = 1
-		icon.Image = UITheme.Assets.RobuxHexagon
-		local aspect = Instance.new("UIAspectRatioConstraint")
-		aspect.AspectRatio = 1.0
-		aspect.DominantAxis = Enum.DominantAxis.Height
-		aspect.Parent = icon
-		icon.ScaleType = Enum.ScaleType.Fit
-		icon.ZIndex = badge.ZIndex + 1
-		icon.Parent = badge
-
 		local lbl = Instance.new("TextLabel")
 		lbl.Name = "PriceText"
-		lbl.LayoutOrder = 2
-		lbl.Size = UDim2.new(0.55, 0, 0.85, 0)
+		lbl.Size = UDim2.fromScale(1, 1)
+		lbl.Position = UDim2.fromScale(0, 0)
 		lbl.BackgroundTransparency = 1
-		lbl.Font = UITheme.CONFIG.Font
-		lbl.Text = tostring(price)
-		lbl.TextColor3 = UITheme.CONFIG.Colors.White
-		lbl.TextScaled = true
-		lbl.RichText = false
+		lbl.Font = Enum.Font.FredokaOne
+		lbl.Text = textStr
+		lbl.TextColor3 = Color3.fromRGB(255, 255, 255)
+		lbl.TextSize = 16
+		lbl.TextScaled = false
 		lbl.TextXAlignment = Enum.TextXAlignment.Center
 		lbl.TextYAlignment = Enum.TextYAlignment.Center
 		lbl.ZIndex = badge.ZIndex + 1
-		local tc = Instance.new("UITextSizeConstraint")
-		tc.MinTextSize = 10
-		tc.MaxTextSize = 26
-		tc.Parent = lbl
-		UITheme.applyTextStroke(lbl, 2, UITheme.CONFIG.Colors.Outline)
+		UITheme.applyTextStroke(lbl, 1.5, UITheme.CONFIG.Colors.Outline)
 		lbl.Parent = badge
 
 		return badge
@@ -1377,7 +1351,8 @@ function ShopDailyUI.initFreeRewards(
 
 		local skipDailyLbl = Instance.new("TextLabel")
 		skipDailyLbl.Name = "BtnLabel"
-		skipDailyLbl.Size = UDim2.fromScale(1, 1)
+		skipDailyLbl.Size = UDim2.new(1, -40, 1, 0)
+		skipDailyLbl.Position = UDim2.new(0, 8, 0, 0)
 		skipDailyLbl.BackgroundTransparency = 1
 		skipDailyLbl.Font = Enum.Font.FredokaOne
 		skipDailyLbl.Text = "SKIP DAY"
@@ -1458,12 +1433,13 @@ function ShopDailyUI.initFreeRewards(
 		UITheme.applyStroke(btnClaimAllDaily, 2.5, Color3.fromRGB(0, 0, 0))
 		UITheme.setupButtonHover(btnClaimAllDaily)
 		UITheme.applyButtonStuds(btnClaimAllDaily, "gold")
-		createRobuxPillBadge(btnClaimAllDaily, 18)
+		createRobuxPillBadge(btnClaimAllDaily, 29)
 		btnClaimAllDaily.Parent = pageDaily
 
 		local claimAllLbl = Instance.new("TextLabel")
 		claimAllLbl.Name = "BtnLabel"
-		claimAllLbl.Size = UDim2.fromScale(1, 1)
+		claimAllLbl.Size = UDim2.new(1, -40, 1, 0)
+		claimAllLbl.Position = UDim2.new(0, 8, 0, 0)
 		claimAllLbl.BackgroundTransparency = 1
 		claimAllLbl.Font = Enum.Font.FredokaOne
 		claimAllLbl.Text = "CLAIM ALL!"
@@ -2365,16 +2341,18 @@ function ShopDailyUI.initChairSkins(
 		Remotes.MetaAction:FireServer("UpgradeLuck")
 	end)
 
-	-- 2. Card Grid (6 Chairs: 3 columns x 2 rows, scrollable)
+	-- 2. Card Grid (3 columns, vertically scrollable)
 	local gridFrame = Instance.new("ScrollingFrame")
 	gridFrame.Name = "CardGrid"
 	gridFrame.Size = UDim2.new(0.95, 0, 1, -56)
 	gridFrame.Position = UDim2.new(0.025, 0, 0, 50)
 	gridFrame.BackgroundTransparency = 1
 	gridFrame.BorderSizePixel = 0
-	gridFrame.ScrollBarThickness = 5
-	gridFrame.ScrollBarImageColor3 = Color3.fromHex("#333D52")
+	gridFrame.ScrollBarThickness = 6
+	gridFrame.ScrollBarImageColor3 = Color3.fromHex("#94A3B8")
+	gridFrame.VerticalScrollBarInset = Enum.ScrollBarInset.ScrollBar
 	gridFrame.ScrollingDirection = Enum.ScrollingDirection.Y
+	gridFrame.ScrollingEnabled = true
 	gridFrame.ElasticBehavior = Enum.ElasticBehavior.Always
 	gridFrame.AutomaticCanvasSize = Enum.AutomaticSize.Y
 	gridFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
@@ -2389,7 +2367,7 @@ function ShopDailyUI.initChairSkins(
 	padding.Parent = gridFrame
 
 	local gridLayout = Instance.new("UIGridLayout")
-	gridLayout.CellSize = UDim2.new(0.315, 0, 0, 168)
+	gridLayout.CellSize = UDim2.new(0.314, 0, 0, 168)
 	gridLayout.CellPadding = UDim2.new(0.027, 0, 0, 10)
 	gridLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 	gridLayout.VerticalAlignment = Enum.VerticalAlignment.Top
@@ -2412,8 +2390,18 @@ function ShopDailyUI.initChairSkins(
 	end
 
 	local skinActionBtns: { [string]: TextButton } = {}
+	local lastProfile: any = nil
 
-	local function applySkinButton(btn: TextButton, state: "EQUIPPED" | "EQUIP" | "BUY", cost: number)
+	local function getLockedSkinState(skin: any): "JACKPOT" | "VIP" | "BUY"
+		if skin.unlockSource == "JACKPOT" then
+			return "JACKPOT"
+		elseif skin.unlockSource == "VIP" then
+			return "VIP"
+		end
+		return "BUY"
+	end
+
+	local function applySkinButton(btn: TextButton, state: "EQUIPPED" | "EQUIP" | "BUY" | "JACKPOT" | "VIP", cost: number)
 		local cashIcon = btn:FindFirstChild("CashIcon") :: ImageLabel?
 		if not cashIcon then
 			cashIcon = Instance.new("ImageLabel")
@@ -2442,6 +2430,18 @@ function ShopDailyUI.initChairSkins(
 			btn.AutoButtonColor = true
 			UITheme.applyGradient(btn, Color3.fromHex("#66D218"), Color3.fromHex("#48A80E"), 90)
 			UITheme.applyButtonStuds(btn, "lime")
+			cashIcon.Visible = false
+		elseif state == "JACKPOT" then
+			if btnLbl then btnLbl.Text = "SPIN WHEEL" end
+			btn.AutoButtonColor = true
+			UITheme.applyGradient(btn, Color3.fromHex("#9B30FF"), Color3.fromHex("#7B1FA2"), 90)
+			UITheme.applyButtonStuds(btn, "purple")
+			cashIcon.Visible = false
+		elseif state == "VIP" then
+			if btnLbl then btnLbl.Text = "VIP PASS" end
+			btn.AutoButtonColor = true
+			UITheme.applyGradient(btn, Color3.fromHex("#FFD21F"), Color3.fromHex("#D97706"), 90)
+			UITheme.applyButtonStuds(btn, "gold")
 			cashIcon.Visible = false
 		else
 			if btnLbl then btnLbl.Text = formatBux(cost) end
@@ -2506,9 +2506,20 @@ function ShopDailyUI.initChairSkins(
 		UITheme.applyTextStroke(sBtnLbl, 2, Color3.new(0, 0, 0))
 		sBtnLbl.Parent = sBtn
 
-		applySkinButton(sBtn, if skin.cost == 0 then "EQUIPPED" else "BUY", skin.cost)
+		applySkinButton(sBtn, if not skin.unlockSource and skin.cost == 0 then "EQUIPPED" else getLockedSkinState(skin), skin.cost)
 
 		sBtn.Activated:Connect(function()
+			local owned = lastProfile and ((lastProfile.OwnedChairs and lastProfile.OwnedChairs[skin.id]) or (skin.unlockSource == "VIP" and lastProfile.VIP == true))
+			if not owned and skin.unlockSource == "JACKPOT" then
+				UITheme.closeWindow(skinsWindow, function()
+					modalBackdrop.Visible = false
+					if openWheelFn then openWheelFn() end
+				end)
+				return
+			elseif not owned and skin.unlockSource == "VIP" then
+				Remotes.MetaAction:FireServer("BuyShopItem", "vip")
+				return
+			end
 			Remotes.MetaAction:FireServer("BuyOrEquipChair", skin.id)
 		end)
 
@@ -2532,6 +2543,7 @@ function ShopDailyUI.initChairSkins(
 
 	local function update(profile: any)
 		if not profile then return end
+		lastProfile = profile
 		-- Update Luck
 		local curLuck = profile.Luck or 1
 		local nextLuck = GameConfig.getNextLuckTier(curLuck)
@@ -2549,13 +2561,13 @@ function ShopDailyUI.initChairSkins(
 		for _, skin in GameConfig.CHAIR_SKINS do
 			local b = skinActionBtns[skin.id]
 			if b then
-				local owned = profile.OwnedChairs and profile.OwnedChairs[skin.id]
+				local owned = (profile.OwnedChairs and profile.OwnedChairs[skin.id]) or (skin.unlockSource == "VIP" and profile.VIP == true)
 				if profile.EquippedChair == skin.id then
 					applySkinButton(b, "EQUIPPED", skin.cost)
 				elseif owned then
 					applySkinButton(b, "EQUIP", skin.cost)
 				else
-					applySkinButton(b, "BUY", skin.cost)
+					applySkinButton(b, getLockedSkinState(skin), skin.cost)
 				end
 			end
 		end
@@ -2794,6 +2806,7 @@ function ShopDailyUI.initTitles(
 			local rBtn = titleRobuxBtns[entry.name]
 			if b then
 				local bLbl = b:FindFirstChild("BtnLabel") :: TextLabel?
+				local isUnlocked = (profile.UnlockedTitles and profile.UnlockedTitles[entry.name] == true) or (profile.Wins or 0) >= entry.minWins
 				b.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 				if profile.EquippedTitle == entry.name then
 					if bLbl then bLbl.Text = "EQUIPPED" end
@@ -2803,7 +2816,7 @@ function ShopDailyUI.initTitles(
 					UITheme.applyGradient(b, Color3.fromHex("#79BE13"), Color3.fromHex("#578C0E"), 90)
 					UITheme.applyButtonStuds(b, "lime")
 					if rBtn then rBtn.Visible = false end
-				elseif (profile.Wins or 0) >= entry.minWins then
+				elseif isUnlocked then
 					if bLbl then bLbl.Text = "EQUIP" end
 					b.Size = UDim2.new(0.40, 0, 0.68, 0)
 					b.Position = UDim2.new(1, -12, 0.5, 0)
@@ -3216,12 +3229,13 @@ function ShopDailyUI.initCardIndex(
 		CARD_ASPECT = 1.0,
 		HOOK_FILTERS = false,
 		SHOW_LOCKED_TEXT = false,
-		SHIMMER_RARITIES = { Mythic = true, Legendary = true },
+		SHIMMER_RARITIES = { Mythic = true, Legend = true },
 		RARITY_COLORS = {
 			Mythic = Color3.fromHex("#F0408C"),
-			Legendary = Color3.fromHex("#FFD21F"),
+			Legend = Color3.fromHex("#FFD21F"),
 			Epic = Color3.fromHex("#A855F7"),
 			Rare = Color3.fromHex("#34B6FF"),
+			Uncommon = Color3.fromHex("#22C55E"),
 			Common = Color3.fromHex("#A0A8B8"),
 			Fallback = Color3.fromHex("#6B7A99"),
 		},
@@ -3922,9 +3936,10 @@ local STRINGS_PROFILE = {
 		WINS_THIS_WEEK = "WINS THIS WEEK",
 		CARD_PROGRESS = "CARD INDEX PROGRESS: %d/%d (%d%%)",
 		COMMON = "COMMON",
+		UNCOMMON = "UNCOMMON",
 		RARE = "RARE",
 		EPIC = "EPIC",
-		LEGENDARY = "LEGENDARY",
+		LEGEND = "LEGEND",
 		MYTHIC = "MYTHIC",
 		TOTAL_SPINS_MYTHICS = "TOTAL SPINS & MYTHICS",
 		TOTAL_SPINS_MYTHICS_FMT = "%d SPINS • %d MYTHIC",
@@ -3953,9 +3968,10 @@ local STRINGS_PROFILE = {
 		WINS_THIS_WEEK = "WINS MINGGU INI",
 		CARD_PROGRESS = "PROGRES CARD INDEX: %d/%d (%d%%)",
 		COMMON = "COMMON",
+		UNCOMMON = "UNCOMMON",
 		RARE = "RARE",
 		EPIC = "EPIC",
-		LEGENDARY = "LEGENDARY",
+		LEGEND = "LEGEND",
 		MYTHIC = "MYTHIC",
 		TOTAL_SPINS_MYTHICS = "TOTAL SPIN & MYTHIC DIDAPAT",
 		TOTAL_SPINS_MYTHICS_FMT = "%d SPIN • %d MYTHIC",
@@ -4340,7 +4356,7 @@ function ShopDailyUI.initProfile(
 	progBarText.Font = UITheme.Fonts.Primary
 	progBarText.TextColor3 = UITheme.Colors.White
 	progBarText.TextScaled = true
-	progBarText.Text = string.format(S.CARD_PROGRESS, 0, 152, 0)
+	progBarText.Text = string.format(S.CARD_PROGRESS, 0, if Footballers and Footballers.All then #Footballers.All else 150, 0)
 	progBarText.ZIndex = 32
 	UITheme.addTextConstraint(progBarText, 11, 16)
 	UITheme.applyTextStroke(progBarText, 2, UITheme.Colors.Black)
@@ -4348,15 +4364,16 @@ function ShopDailyUI.initProfile(
 
 	local rarityOrder = {
 		{ name = "Common", label = S.COMMON, color = Color3.fromHex("#A0A8B8") },
+		{ name = "Uncommon", label = S.UNCOMMON, color = Color3.fromHex("#22C55E") },
 		{ name = "Rare", label = S.RARE, color = Color3.fromHex("#34B6FF") },
 		{ name = "Epic", label = S.EPIC, color = Color3.fromHex("#A855F7") },
-		{ name = "Legendary", label = S.LEGENDARY, color = Color3.fromHex("#FFD21F") },
+		{ name = "Legend", label = S.LEGEND, color = Color3.fromHex("#FFD21F") },
 		{ name = "Mythic", label = S.MYTHIC, color = Color3.fromHex("#F0408C") },
 	}
 	local rarityVals: { [string]: TextLabel } = {}
 	for idx, r in rarityOrder do
-		local xPos = (idx - 1) * 0.2
-		local _, _, rVal = makeStatTile(c3, UDim2.new(xPos, 2, 0, 36), UDim2.new(0.2, -4, 0, 48), r.label, r.color)
+		local xPos = (idx - 1) / #rarityOrder
+		local _, _, rVal = makeStatTile(c3, UDim2.new(xPos, 2, 0, 36), UDim2.new(1 / #rarityOrder, -4, 0, 48), r.label, r.color)
 		rarityVals[r.name] = rVal
 	end
 
@@ -4442,9 +4459,9 @@ function ShopDailyUI.initProfile(
 		progBarFill.Size = UDim2.fromScale(math.clamp(dCount / totalCardsCount, 0, 1), 1)
 		progBarText.Text = string.format(S.CARD_PROGRESS, dCount, totalCardsCount, pPct)
 
-		local rCounts: { [string]: number } = { Common = 0, Rare = 0, Epic = 0, Legendary = 0, Mythic = 0 }
-		local rTotal: { [string]: number } = { Common = 0, Rare = 0, Epic = 0, Legendary = 0, Mythic = 0 }
-		local rarityRankMap: { [string]: number } = { Common = 1, Rare = 2, Epic = 3, Legendary = 4, Mythic = 5 }
+		local rCounts: { [string]: number } = { Common = 0, Uncommon = 0, Rare = 0, Epic = 0, Legend = 0, Mythic = 0 }
+		local rTotal: { [string]: number } = { Common = 0, Uncommon = 0, Rare = 0, Epic = 0, Legend = 0, Mythic = 0 }
+		local rarityRankMap: { [string]: number } = { Common = 1, Uncommon = 2, Rare = 3, Epic = 4, Legend = 5, Mythic = 6 }
 		local fallbackRarest: any = nil
 
 		for _, card in allCards do

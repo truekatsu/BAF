@@ -1,7 +1,7 @@
 --!strict
 --[[
 	FootballerModelBuilder
-	Responsibility: Procedural 3D Roblox Model generator for all 152 real footballers (matching skin tone, hairstyle, hair color, beard/mask, club jersey shirt + pattern + sleeves + club shorts + socks). Populates ReplicatedStorage.FootballerModels and clones models for UI ViewportFrames.
+	Responsibility: Procedural 3D Roblox Model generator for all 150 real footballers (matching skin tone, hairstyle, hair color, beard/mask, club jersey shirt + pattern + sleeves + club shorts + socks). Populates ReplicatedStorage.FootballerModels and clones models for UI ViewportFrames.
 	Loop step: action | reward (visual presentation)
 	Location: ReplicatedStorage/Shared/FootballerModelBuilder (ModuleScript)
 ]]

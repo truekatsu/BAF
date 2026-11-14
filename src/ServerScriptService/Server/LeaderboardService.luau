@@ -298,15 +298,28 @@ local function flushPlayer(userId: number)
 		return
 	end
 
-	for boardType, conf in LeaderboardConfig.BOARDS do
+	for _, boardType in { "Wins", "Streak", "Cash", "Playtime" } do
 		local store = orderedStores[boardType]
 		if not store then
 			continue
 		end
 
-		local delta = adds and adds[boardType]
 		local targetMax = maxs and maxs[boardType]
+		if targetMax and targetMax > 0 then
+			maxs[boardType] = nil
+			local ok, err = safeCall(function()
+				store:UpdateAsync(tostring(userId), function(old: number?)
+					local current = math.max(0, tonumber(old) or 0)
+					return math.max(current, targetMax)
+				end)
+			end)
+			if not ok then
+				maxs[boardType] = math.max(maxs[boardType] or 0, targetMax)
+				warn(`[LeaderboardService] Failed to flush max {boardType} for {userId}: {tostring(err)}`)
+			end
+		end
 
+		local delta = adds and adds[boardType]
 		if delta and delta > 0 then
 			adds[boardType] = nil
 			local ok, err = safeCall(function()
@@ -320,20 +333,6 @@ local function flushPlayer(userId: number)
 				-- Re-queue failed delta
 				adds[boardType] = (adds[boardType] or 0) + delta
 				warn(`[LeaderboardService] Failed to flush {boardType} for {userId}: {tostring(err)}`)
-			end
-		end
-
-		if targetMax and targetMax > 0 then
-			maxs[boardType] = nil
-			local ok, err = safeCall(function()
-				store:UpdateAsync(tostring(userId), function(old: number?)
-					local current = math.max(0, tonumber(old) or 0)
-					return math.max(current, targetMax)
-				end)
-			end)
-			if not ok then
-				maxs[boardType] = math.max(maxs[boardType] or 0, targetMax)
-				warn(`[LeaderboardService] Failed to flush max {boardType} for {userId}: {tostring(err)}`)
 			end
 		end
 	end
@@ -595,13 +594,13 @@ function LeaderboardService.ForceRefresh(boardType: string?)
 	if boardType and LeaderboardConfig.BOARDS[boardType] then
 		refreshBoardSorted(boardType)
 	else
-		for key in LeaderboardConfig.BOARDS do
+		for _, key in { "Wins", "Streak", "Cash", "Playtime" } do
 			refreshBoardSorted(key)
 		end
 	end
 end
 
--- Seed existing player profile data on first join
+-- Seed existing player profile data on first join (SetMax avoids double-counting saved stats across rejoins)
 function LeaderboardService.seedPlayerOnJoin(player: Player, initialWins: number?, initialStreak: number?, initialCash: number?, initialPlaytime: number?)
 	local uid = player.UserId
 	if (uid <= 0 and not RunService:IsStudio()) or seededPlayers[uid] then
@@ -619,16 +618,16 @@ function LeaderboardService.seedPlayerOnJoin(player: Player, initialWins: number
 	nameCache[uid] = { name = player.DisplayName, username = player.Name, expires = os.time() + 86400 }
 
 	if initialWins and initialWins > 0 then
-		LeaderboardService.Add(player, "Wins", initialWins, true)
+		LeaderboardService.SetMax(player, "Wins", initialWins, true)
 	end
 	if initialStreak and initialStreak > 0 then
 		LeaderboardService.SetMax(player, "Streak", initialStreak, true)
 	end
 	if initialCash and initialCash > 0 then
-		LeaderboardService.Add(player, "Cash", initialCash, true)
+		LeaderboardService.SetMax(player, "Cash", initialCash, true)
 	end
 	if initialPlaytime and initialPlaytime > 0 then
-		LeaderboardService.Add(player, "Playtime", initialPlaytime, true)
+		LeaderboardService.SetMax(player, "Playtime", initialPlaytime, true)
 	end
 
 	task.defer(function()
